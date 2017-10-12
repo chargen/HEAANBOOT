@@ -40,6 +40,9 @@ void TestBoot::testBootstrap() {
 	SecKey secretKey(params);
 	PubKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
+	publicKey.addConjKey(params, secretKey);
+	publicKey.addLeftRotKeys(params, secretKey);
+	publicKey.addBootKeys(params, secretKey, lkey);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
@@ -148,6 +151,7 @@ void TestBoot::testBootstrapOneReal() {
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
+
 	timeutils.stop("scheme generation");
 	//----------------------------------------
 	timeutils.start("Boot Key generating");
@@ -213,6 +217,7 @@ void TestBoot::testBoundOfI() {
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
+
 	//----------------------------------------
 	timeutils.start("Boot Key generating");
 	Boot boot(scheme, secretKey);

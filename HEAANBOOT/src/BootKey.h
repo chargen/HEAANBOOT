@@ -8,9 +8,6 @@ class BootKey {
 public:
 	long pBits;
 
-	ZZX* axGiantRot; ///< auxiliary information for rotation
-	ZZX* bxGiantRot; ///< auxiliary information for rotation
-
 	ZZX* pvec;
 	ZZX* pvecInv;
 

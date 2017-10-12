@@ -26,9 +26,6 @@ public:
 	double cosDegree4[3] = {1,0.2166,-0.0077};
 	double cosDegree6[4] = {1,0.216884,-0.00819276,0.000165861};
 
-	ZZX* axBabyRot;
-	ZZX* bxBabyRot;
-
 	Boot(Scheme& scheme, SecKey& secretKey);
 
 	void generateKey(long l, long pBits);
@@ -39,9 +36,6 @@ public:
 
 	void linearTransform(Cipher& enclin, Cipher& encx, long size);
 	void linearTransformInv(Cipher& res, Cipher& enclin, long size);
-
-	Cipher leftBabyRotate(Cipher& cipher, long i);
-	void leftGiantRotateAndEqual(Cipher& cipher, long l, long k, long i);
 
 	Cipher evaluateEncSin2pix7(Cipher& enclinx, long precisionBits);
 	Cipher evaluateEncSin2pix3(Cipher& enclinx, long precisionBits);

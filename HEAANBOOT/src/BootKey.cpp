@@ -10,7 +10,6 @@
 BootKey::BootKey(Params& params, SchemeAux& aux, SecKey& secretKey, long pBits, long l) : pBits(pBits) {
 	ZZ pmod = power2_ZZ(pBits);
 
-
 	ZZX ex;
 	long lpow = 1 << l;
 	long lpow2 = lpow << 1;
@@ -18,19 +17,6 @@ BootKey::BootKey(Params& params, SchemeAux& aux, SecKey& secretKey, long pBits, 
 
 	long lk = (1 << (l/2));
 	long lm = lpow / lk;
-
-	axGiantRot = new ZZX[lm];
-	bxGiantRot = new ZZX[lm];
-	for (long i = 0; i < lm; ++i) {
-		ZZX spow;
-		Ring2Utils::inpower(spow, secretKey.sx, params.rotGroup[i * lk], params.q, params.N);
-		Ring2Utils::leftShiftAndEqual(spow, params.logq, params.qq, params.N);
-		NumUtils::sampleUniform2(axGiantRot[i], params.N, params.logqq);
-		NumUtils::sampleGauss(ex, params.N, params.sigma);
-		Ring2Utils::addAndEqual(ex, spow, params.qq, params.N);
-		Ring2Utils::mult(bxGiantRot[i], secretKey.sx, axGiantRot[i], params.qq, params.N);
-		Ring2Utils::sub(bxGiantRot[i], ex, bxGiantRot[i], params.qq, params.N);
-	}
 
 	pvec = new ZZX[lpow];
 	pvecInv = new ZZX[lpow];

@@ -11,21 +11,6 @@
 #include <utility>
 
 Boot::Boot(Scheme& scheme, SecKey& secretKey) : scheme(scheme), secretKey(secretKey) {
-	long k = 1 << ((scheme.params.logN - 1) / 2);
-	axBabyRot = new ZZX[k];
-	bxBabyRot = new ZZX[k];
-
-	ZZX ex;
-	for (long i = 0; i < k; ++i) {
-		ZZX spow;
-		Ring2Utils::inpower(spow, secretKey.sx, scheme.params.rotGroup[i], scheme.params.q, scheme.params.N);
-		Ring2Utils::leftShiftAndEqual(spow, scheme.params.logq, scheme.params.qq, scheme.params.N);
-		NumUtils::sampleUniform2(axBabyRot[i], scheme.params.N, scheme.params.logqq);
-		NumUtils::sampleGauss(ex, scheme.params.N, scheme.params.sigma);
-		Ring2Utils::addAndEqual(ex, spow, scheme.params.qq, scheme.params.N);
-		Ring2Utils::mult(bxBabyRot[i], secretKey.sx, axBabyRot[i], scheme.params.qq, scheme.params.N);
-		Ring2Utils::sub(bxBabyRot[i], ex, bxBabyRot[i], scheme.params.qq, scheme.params.N);
-	}
 }
 
 Boot::~Boot() {
@@ -44,44 +29,6 @@ void Boot::normalizeAndEqual(Cipher& cipher, long N) {
 	}
 }
 
-Cipher Boot::leftBabyRotate(Cipher& cipher, long i) {
-	ZZ Pmod = cipher.mod << scheme.params.logq;
-
-	ZZX bxrot, bxres, axres;
-
-	Ring2Utils::inpower(bxrot, cipher.bx, scheme.params.rotGroup[i], cipher.mod, scheme.params.N);
-	Ring2Utils::inpower(bxres, cipher.ax, scheme.params.rotGroup[i], cipher.mod, scheme.params.N);
-
-	Ring2Utils::mult(axres, bxres, axBabyRot[i], Pmod, scheme.params.N);
-	Ring2Utils::multAndEqual(bxres, bxBabyRot[i], Pmod, scheme.params.N);
-
-	Ring2Utils::rightShiftAndEqual(axres, scheme.params.logq, scheme.params.N);
-	Ring2Utils::rightShiftAndEqual(bxres, scheme.params.logq, scheme.params.N);
-
-	Ring2Utils::addAndEqual(bxres, bxrot, cipher.mod, scheme.params.N);
-	return Cipher(axres, bxres, cipher.mod, cipher.cbits, cipher.slots);
-}
-
-void Boot::leftGiantRotateAndEqual(Cipher& cipher, long l, long k, long i) {
-	ZZ Pmod = cipher.mod << scheme.params.logq;
-
-	ZZX bxrot, bxres, axres;
-
-	Ring2Utils::inpower(bxrot, cipher.bx, scheme.params.rotGroup[k * i], cipher.mod, scheme.params.N);
-	Ring2Utils::inpower(bxres, cipher.ax, scheme.params.rotGroup[k * i], cipher.mod, scheme.params.N);
-
-	Ring2Utils::mult(axres, bxres, bootKeyMap.at(l).axGiantRot[i], Pmod, scheme.params.N);
-	Ring2Utils::multAndEqual(bxres, bootKeyMap.at(l).bxGiantRot[i], Pmod, scheme.params.N);
-
-	Ring2Utils::rightShiftAndEqual(axres, scheme.params.logq, scheme.params.N);
-	Ring2Utils::rightShiftAndEqual(bxres, scheme.params.logq, scheme.params.N);
-
-	Ring2Utils::addAndEqual(bxres, bxrot, cipher.mod, scheme.params.N);
-
-	cipher.ax = axres;
-	cipher.bx = bxres;
-}
-
 void Boot::linearTransform(Cipher& enclin, Cipher& encx, long size) {
 	long logSize = log2(size);
 	long k = 1 << (logSize / 2);
@@ -91,7 +38,7 @@ void Boot::linearTransform(Cipher& enclin, Cipher& encx, long size) {
 	encxrotvec[0] = encx;
 
 	for (long i = 1; i < k; ++i) {
-		encxrotvec[i] = leftBabyRotate(encxrotvec[0], i);
+		encxrotvec[i] = scheme.leftRotateFast(encxrotvec[0], i);
 	}
 
 	enclin = scheme.multByPoly(encxrotvec[0], bootKeyMap.at(logSize).pvec[0]);
@@ -101,12 +48,13 @@ void Boot::linearTransform(Cipher& enclin, Cipher& encx, long size) {
 	}
 
 	for (long i = 1; i < m; ++i) {
-		Cipher ci0 = scheme.multByPoly(encxrotvec[0], bootKeyMap.at(logSize).pvec[k * i]);
+		long ki = k * i;
+		Cipher ci0 = scheme.multByPoly(encxrotvec[0], bootKeyMap.at(logSize).pvec[ki]);
 		for (long j = 1; j < k; ++j) {
-			Cipher cij = scheme.multByPoly(encxrotvec[j], bootKeyMap.at(logSize).pvec[j + k * i]);
+			Cipher cij = scheme.multByPoly(encxrotvec[j], bootKeyMap.at(logSize).pvec[j + ki]);
 			scheme.addAndEqual(ci0, cij);
 		}
-		leftGiantRotateAndEqual(ci0, logSize, k, i);
+		scheme.leftRotateAndEqualFast(ci0, ki);
 		scheme.addAndEqual(enclin, ci0);
 	}
 	delete[] encxrotvec;
@@ -120,7 +68,7 @@ void Boot::linearTransformInv(Cipher& res, Cipher& enclin, long size) {
 	Cipher* enclinrotvec = new Cipher[k];
 	enclinrotvec[0] = enclin;
 	for (long i = 1; i < k; ++i) {
-		enclinrotvec[i] = leftBabyRotate(enclinrotvec[0], i);
+		enclinrotvec[i] = scheme.leftRotateFast(enclinrotvec[0], i);
 	}
 	res = scheme.multByPoly(enclinrotvec[0], bootKeyMap.at(logSize).pvecInv[0]);
 
@@ -129,12 +77,13 @@ void Boot::linearTransformInv(Cipher& res, Cipher& enclin, long size) {
 		scheme.addAndEqual(res, c0j);
 	}
 	for (long i = 1; i < m; ++i) {
-		Cipher ci0 = scheme.multByPoly(enclinrotvec[0], bootKeyMap.at(logSize).pvecInv[k * i]);
+		long ki = k * i;
+		Cipher ci0 = scheme.multByPoly(enclinrotvec[0], bootKeyMap.at(logSize).pvecInv[ki]);
 		for (long j = 1; j < k; ++j) {
-			Cipher cij = scheme.multByPoly(enclinrotvec[j], bootKeyMap.at(logSize).pvecInv[j + k * i]);
+			Cipher cij = scheme.multByPoly(enclinrotvec[j], bootKeyMap.at(logSize).pvecInv[j + ki]);
 			scheme.addAndEqual(ci0, cij);
 		}
-		leftGiantRotateAndEqual(ci0, logSize, k, i);
+		scheme.leftRotateAndEqualFast(ci0, ki);
 		scheme.addAndEqual(res, ci0);
 	}
 	delete[] enclinrotvec;
