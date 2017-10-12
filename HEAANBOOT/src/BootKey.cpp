@@ -7,7 +7,7 @@
 #include <NumUtils.h>
 #include <EvaluatorUtils.h>
 
-BootKey::BootKey(Params& params, SchemeAux& aux, SecKey& secretKey, long pBits, long l) : pBits(pBits) {
+BootKey::BootKey(Params& params, SchemeAux& aux, long pBits, long l) : pBits(pBits) {
 	ZZ pmod = power2_ZZ(pBits);
 
 	ZZX ex;
@@ -81,9 +81,6 @@ BootKey::BootKey(Params& params, SchemeAux& aux, SecKey& secretKey, long pBits, 
 			pvec[j + lk * i] = Ring2Utils::inpower(pvec[j + lk * i], params.rotGroup[lpow - lk * i], pmod, params.N);
 			pvecInv[j + lk * i] = Ring2Utils::inpower(pvecInv[j + lk * i], params.rotGroup[lpow - lk * i], pmod, params.N);
 		}
-	}
-
-	for (long l = 0; l < params.logN; ++l) {
 	}
 }
 

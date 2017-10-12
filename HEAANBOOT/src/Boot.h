@@ -15,7 +15,6 @@ class Boot {
 public:
 
 	Scheme& scheme;
-	SecKey& secretKey;
 	map<long, BootKey> bootKeyMap;
 
 	double sinDegree3[2] = {0.99749,-0.15652};
@@ -26,7 +25,7 @@ public:
 	double cosDegree4[3] = {1,0.2166,-0.0077};
 	double cosDegree6[4] = {1,0.216884,-0.00819276,0.000165861};
 
-	Boot(Scheme& scheme, SecKey& secretKey);
+	Boot(Scheme& scheme);
 
 	void generateKey(long l, long pBits);
 

@@ -11,7 +11,7 @@ public:
 	ZZX* pvec;
 	ZZX* pvecInv;
 
-	BootKey(Params& params, SchemeAux& aux, SecKey& secretKey, long pBits, long l);
+	BootKey(Params& params, SchemeAux& aux, long pBits, long l);
 };
 
 #endif /* BOOTKEY_H_ */

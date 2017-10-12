@@ -10,7 +10,7 @@
 #include <initializer_list>
 #include <utility>
 
-Boot::Boot(Scheme& scheme, SecKey& secretKey) : scheme(scheme), secretKey(secretKey) {
+Boot::Boot(Scheme& scheme) : scheme(scheme) {
 }
 
 Boot::~Boot() {
@@ -18,7 +18,7 @@ Boot::~Boot() {
 
 void Boot::generateKey(long l, long pBits) {
 	if(bootKeyMap.find(l) == bootKeyMap.end()) {
-		bootKeyMap.insert(pair<long, BootKey>(l, BootKey(scheme.params, scheme.aux, secretKey, pBits, l)));
+		bootKeyMap.insert(pair<long, BootKey>(l, BootKey(scheme.params, scheme.aux, pBits, l)));
 	}
 }
 
