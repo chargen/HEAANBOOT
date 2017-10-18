@@ -219,7 +219,6 @@ Cipher SchemeAlgo::partialSlotsSum(Cipher& cipher, const long slots) {
 }
 
 void SchemeAlgo::partialSlotsSumAndEqual(Cipher& cipher, const long slots) {
-	long logslots = log2((double)slots);
 	for (long i = 1; i < slots; i <<= 1) {
 		Cipher rot = scheme.leftRotateFast(cipher, i);
 		scheme.addAndEqual(cipher, rot);
