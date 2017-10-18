@@ -2,21 +2,24 @@
 
 #include <NTL/ZZ.h>
 #include <NTL/ZZX.h>
-#include <Params.h>
-#include <Ring2Utils.h>
-#include <NumUtils.h>
-#include <EvaluatorUtils.h>
+
+#include "CZZ.h"
+#include "EvaluatorUtils.h"
+#include "NumUtils.h"
+#include "Params.h"
+#include "Ring2Utils.h"
 
 BootKey::BootKey(Params& params, SchemeAux& aux, long pBits, long l) : pBits(pBits) {
 	ZZ pmod = power2_ZZ(pBits);
 
 	ZZX ex;
+	long lh = l/2;
 	long lpow = 1 << l;
 	long lpow2 = lpow << 1;
-	long Mover2l = params.N >> l;
+	long Noverl = params.N >> l;
 
-	long lk = (1 << (l/2));
-	long lm = lpow / lk;
+	long lk = 1 << lh;
+	long lm = 1 << (l - lh);
 
 	pvec = new ZZX[lpow];
 	pvecInv = new ZZX[lpow];
@@ -24,14 +27,14 @@ BootKey::BootKey(Params& params, SchemeAux& aux, long pBits, long l) : pBits(pBi
 	CZZ* pdvals = new CZZ[lpow2];
 	for (long j = 0; j < lpow; ++j) {
 		for (long i = j; i < lpow; ++i) {
-			long deg =((2 * params.N - params.rotGroup[i]) * (i - j) * Mover2l) % (2 * params.N);
+			long deg =((2 * params.N - params.rotGroup[i]) * (i - j) * Noverl) % (2 * params.N);
 			CZZ tmp = EvaluatorUtils::evaluateVal(aux.ksiPowsr[deg], aux.ksiPowsi[deg], pBits);
 			long idx = (params.rotGroup[i-j] % (2 * lpow2)  - 1) / 2;
 					pdvals[idx] = tmp;
 					pdvals[lpow2 - idx - 1] = tmp.conjugate();
 		}
 		for (long i = 0; i < j; ++i) {
-			long deg =((2 * params.N - params.rotGroup[i]) * (lpow + i - j) * Mover2l) % (2 * params.N);
+			long deg =((2 * params.N - params.rotGroup[i]) * (lpow + i - j) * Noverl) % (2 * params.N);
 			CZZ tmp = EvaluatorUtils::evaluateVal(aux.ksiPowsr[deg], aux.ksiPowsi[deg], pBits);
 			long idx = (params.rotGroup[lpow + i - j] % (2 * lpow2) - 1) / 2;
 			pdvals[idx] = tmp;
@@ -51,14 +54,14 @@ BootKey::BootKey(Params& params, SchemeAux& aux, long pBits, long l) : pBits(pBi
 
 	for (long j = 0; j < lpow; ++j) {
 		for (long i = j; i < lpow; ++i) {
-			long deg =(params.rotGroup[i-j] * i * Mover2l) % (2 * params.N);
+			long deg =(params.rotGroup[i-j] * i * Noverl) % (2 * params.N);
 			CZZ tmp = EvaluatorUtils::evaluateVal(aux.ksiPowsr[deg], aux.ksiPowsi[deg], pBits);
 			long idx = (params.rotGroup[i-j] % (2 * lpow2) - 1) / 2;
 			pdvals[idx] = tmp;
 			pdvals[lpow2 - idx - 1] = tmp.conjugate();
 		}
 		for (long i = 0; i < j; ++i) {
-			long deg = (params.rotGroup[lpow + i - j] * i * Mover2l) % (2 * params.N);
+			long deg = (params.rotGroup[lpow + i - j] * i * Noverl) % (2 * params.N);
 			CZZ tmp = EvaluatorUtils::evaluateVal(aux.ksiPowsr[deg], aux.ksiPowsi[deg], pBits);
 			long idx = (params.rotGroup[lpow + i - j] % (2 * lpow2) - 1) / 2;
 			pdvals[idx] = tmp;
@@ -83,4 +86,3 @@ BootKey::BootKey(Params& params, SchemeAux& aux, long pBits, long l) : pBits(pBi
 		}
 	}
 }
-

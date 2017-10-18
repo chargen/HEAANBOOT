@@ -1,8 +1,7 @@
 #ifndef BOOTKEY_H_
 #define BOOTKEY_H_
 
-#include <SchemeAux.h>
-#include <SecKey.h>
+#include "SchemeAux.h"
 
 class BootKey {
 public:
