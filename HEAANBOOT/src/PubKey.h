@@ -30,7 +30,7 @@ public:
 	void addLeftRotKeys(Params& params, SecKey& secretKey);
 	void addRightRotKeys(Params& params, SecKey& secretKey);
 
-	void addBootKeys(Params& params, SecKey& secretKey, SchemeAux& aux, long size, long pBits);
+	void addBootKeys(Params& params, SecKey& secretKey, SchemeAux& aux, long logsize, long pBits);
 	void addSortKeys(Params& params, SecKey& secretKey, long size);
 };
 

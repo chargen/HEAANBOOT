@@ -77,15 +77,15 @@ void PubKey::addRightRotKeys(Params& params, SecKey& secretKey) {
 	}
 }
 
-void PubKey::addBootKeys(Params& params, SecKey& secretKey, SchemeAux& aux, long size, long pBits) {
+void PubKey::addBootKeys(Params& params, SecKey& secretKey, SchemeAux& aux, long lkey, long pBits) {
 
-	if(bootKeyMap.find(size) == bootKeyMap.end()) {
-		bootKeyMap.insert(pair<long, BootKey>(size, BootKey(params, aux, pBits, size)));
+	if(bootKeyMap.find(lkey) == bootKeyMap.end()) {
+		bootKeyMap.insert(pair<long, BootKey>(lkey, BootKey(params, aux, pBits, lkey)));
 	}
 
-	long sizeh = size/2;
-	long k = 1 << sizeh;
-	long m = 1 << (size - sizeh);
+	long lkeyh = lkey/2;
+	long k = 1 << lkeyh;
+	long m = 1 << (lkey - lkeyh);
 
 	for (long i = 1; i < k; ++i) {
 		if(leftRotKeyMap.find(i) == leftRotKeyMap.end()) {
