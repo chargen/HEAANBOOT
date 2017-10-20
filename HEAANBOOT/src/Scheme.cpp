@@ -1021,7 +1021,7 @@ void Scheme::removeIpartAndEqual(Cipher& cipher, long logq0, long logT, long log
 
 Cipher Scheme::bootstrap(Cipher& cipher, long logq0, long logq, long logT, long logI) {
 	long logSlots = log2(cipher.slots);
-	Cipher tmp = reScaleBy(cipher, cipher.cbits - logq0);
+	Cipher tmp = modDownTo(cipher, logq0);
 	normalizeAndEqual(tmp);
 	tmp.cbits = logq;
 	tmp.mod = power2_ZZ(logq);
@@ -1072,7 +1072,7 @@ Cipher Scheme::bootstrap(Cipher& cipher, long logq0, long logq, long logT, long 
 
 void Scheme::bootstrapAndEqual(Cipher& cipher, long logq0, long logq, long logT, long logI) {
 	long logSlots = log2(cipher.slots);
-	reScaleToAndEqual(cipher, logq0);
+	modDownToAndEqual(cipher, logq0);
 	normalizeAndEqual(cipher);
 	cipher.cbits = logq;
 	cipher.mod = power2_ZZ(logq);
