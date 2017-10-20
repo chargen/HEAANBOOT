@@ -310,52 +310,16 @@ void Scheme::conjugateAndEqual(Cipher& cipher) {
 }
 
 Cipher Scheme::imult(Cipher& cipher, const long precisionBits) {
-	ZZ tmp = EvaluatorUtils::evaluateVal(sqrt(to_RR(2.0)), precisionBits - 1);
-
-	ZZX bxres, axres, axtmp, bxtmp;
-
-	Ring2Utils::multByMonomial(axtmp, cipher.ax, params.N / 4, params.N);
-	Ring2Utils::multByConstAndEqual(axtmp, tmp, cipher.mod, params.N);
-
-	Ring2Utils::multByMonomial(bxtmp, cipher.bx, params.N / 4, params.N);
-	Ring2Utils::multByConstAndEqual(bxtmp, tmp, cipher.mod, params.N);
-
-	Ring2Utils::multByMonomial(axres, cipher.ax, 3 * params.N / 4, params.N);
-	Ring2Utils::multByConstAndEqual(axres, tmp, cipher.mod, params.N);
-
-	Ring2Utils::multByMonomial(bxres, cipher.bx, 3 * params.N / 4, params.N);
-	Ring2Utils::multByConstAndEqual(bxres, tmp, cipher.mod, params.N);
-
-	Ring2Utils::addAndEqual(axres, axtmp, cipher.mod, params.N);
-	Ring2Utils::addAndEqual(bxres, bxtmp, cipher.mod, params.N);
-
+	ZZX bxres, axres;
+	Ring2Utils::multByMonomial(axres, cipher.ax, params.N / 2, params.N);
+	Ring2Utils::multByMonomial(bxres, cipher.bx, params.N / 2, params.N);
 	Cipher res(axres, bxres, cipher.mod, cipher.cbits, cipher.slots);
-	reScaleByAndEqual(res, precisionBits);
 	return res;
 }
 
 void Scheme::imultAndEqual(Cipher& cipher, const long precisionBits) {
-
-	ZZ tmp = EvaluatorUtils::evaluateVal(sqrt(to_RR(2.0)), precisionBits - 1);
-
-	ZZX axtmp, bxtmp;
-
-	Ring2Utils::multByMonomial(axtmp, cipher.ax, params.N / 4, params.N);
-	Ring2Utils::multByConstAndEqual(axtmp, tmp, cipher.mod, params.N);
-
-	Ring2Utils::multByMonomial(bxtmp, cipher.bx, params.N / 4, params.N);
-	Ring2Utils::multByConstAndEqual(bxtmp, tmp, cipher.mod, params.N);
-
-	Ring2Utils::multByMonomialAndEqual(cipher.ax, 3 * params.N / 4, params.N);
-	Ring2Utils::multByConstAndEqual(cipher.ax, tmp, cipher.mod, params.N);
-
-	Ring2Utils::multByMonomialAndEqual(cipher.bx, 3 * params.N / 4, params.N);
-	Ring2Utils::multByConstAndEqual(cipher.bx, tmp, cipher.mod, params.N);
-
-	Ring2Utils::addAndEqual(cipher.ax, axtmp, cipher.mod, params.N);
-	Ring2Utils::addAndEqual(cipher.bx, bxtmp, cipher.mod, params.N);
-
-	reScaleByAndEqual(cipher, precisionBits);
+	Ring2Utils::multByMonomialAndEqual(cipher.ax, params.N / 2, params.N);
+	Ring2Utils::multByMonomialAndEqual(cipher.bx, params.N / 2, params.N);
 }
 
 Cipher Scheme::mult(Cipher& cipher1, Cipher& cipher2) {
