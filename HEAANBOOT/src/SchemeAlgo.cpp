@@ -23,10 +23,7 @@ Cipher* SchemeAlgo::encryptSingleArray(CZZ*& vals, long size) {
 CZZ* SchemeAlgo::decryptSingleArray(SecKey& secretKey, Cipher*& ciphers, long size) {
 	CZZ* res = new CZZ[size];
 	for (int i = 0; i < size; ++i) {
-		Message msg = scheme.decryptMsg(secretKey, ciphers[i]);
-		CZZ* vals = scheme.decode(msg);
-		res[i] = vals[0];
-		delete[] vals;
+		res[i] = scheme.decryptSingle(secretKey, ciphers[i]);
 	}
 	return res;
 }

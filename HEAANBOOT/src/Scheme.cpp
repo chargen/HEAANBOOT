@@ -14,32 +14,6 @@
 using namespace std;
 using namespace NTL;
 
-CZZ* Scheme::groupidx(CZZ*& vals, long slots) {
-	CZZ* res = new CZZ[slots * 2];
-	for (long i = 0; i < slots; ++i) {
-		long idx = (params.rotGroup[i] % (slots << 2) - 1) / 2;
-		res[idx] = vals[i];
-		res[2 * slots - idx - 1] = vals[i].conjugate();
-	}
-	return res;
-}
-
-CZZ* Scheme::groupidx(CZZ& val) {
-	CZZ* res = new CZZ[2];
-	res[0] = val;
-	res[1] = val.conjugate();
-	return res;
-}
-
-CZZ* Scheme::degroupidx(CZZ*& vals, long slots) {
-	CZZ* res = new CZZ[slots];
-	for (long i = 0; i < slots; ++i) {
-		long idx = (params.rotGroup[i] % (slots << 2) - 1) / 2;
-		res[i] = vals[idx];
-	}
-	return res;
-}
-
 //-----------------------------------------
 
 Message Scheme::encodeWithBits(CZZ*& vals, long cbits, long slots) {
@@ -47,8 +21,8 @@ Message Scheme::encodeWithBits(CZZ*& vals, long cbits, long slots) {
 	CZZ* gvals = new CZZ[doubleslots];
 	for (long i = 0; i < slots; ++i) {
 		long idx = (params.rotGroup[i] % (slots << 2) - 1) / 2;
-		gvals[idx] = vals[i];
-		gvals[doubleslots - idx - 1] = vals[i].conjugate();
+		gvals[idx] = vals[i] << params.logq;
+		gvals[doubleslots - idx - 1] = vals[i].conjugate() << params.logq;
 	}
 	ZZX mx;
 	mx.SetLength(params.N);
@@ -66,8 +40,8 @@ Message Scheme::encodeWithBits(CZZ*& vals, long cbits, long slots) {
 
 Message Scheme::encodeSingleWithBits(CZZ& val, long cbits) {
 	CZZ* gvals = new CZZ[2];
-	gvals[0] = val;
-	gvals[1] = val.conjugate();
+	gvals[0] = val << params.logq;
+	gvals[1] = val.conjugate() << params.logq;
 	ZZX mx;
 	mx.SetLength(params.N);
 	ZZ mod = power2_ZZ(cbits);
@@ -87,8 +61,8 @@ Message Scheme::encode(CZZ*& vals, long slots) {
 	CZZ* gvals = new CZZ[doubleslots];
 	for (long i = 0; i < slots; ++i) {
 		long idx = (params.rotGroup[i] % (slots << 2) - 1) / 2;
-		gvals[idx] = vals[i];
-		gvals[doubleslots - idx - 1] = vals[i].conjugate();
+		gvals[idx] = vals[i] << params.logq;;
+		gvals[doubleslots - idx - 1] = vals[i].conjugate() << params.logq;;
 	}
 
 	ZZX mx;
@@ -108,8 +82,8 @@ Message Scheme::encode(CZZ*& vals, long slots) {
 
 Message Scheme::encodeSingle(CZZ& val) {
 	CZZ* gvals = new CZZ[2];
-	gvals[0] = val;
-	gvals[1] = val.conjugate();
+	gvals[0] = val<< params.logq;;
+	gvals[1] = val.conjugate() << params.logq;;
 
 	ZZX mx;
 	mx.SetLength(params.N);
@@ -131,15 +105,20 @@ Cipher Scheme::encryptMsg(Message& msg) {
 	NumUtils::sampleZO(vx, params.N);
 	RLWE key = publicKey.keyMap.at(ENCRYPTION);
 
-	Ring2Utils::mult(ax, vx, key.ax, msg.mod, params.N);
+	ZZ Pmod = msg.mod << params.logq;
+
+	Ring2Utils::mult(ax, vx, key.ax, Pmod, params.N);
 	NumUtils::sampleGauss(eax, params.N, params.sigma);
-	Ring2Utils::addAndEqual(ax, eax, msg.mod, params.N);
+	Ring2Utils::addAndEqual(ax, eax, Pmod, params.N);
 
-	Ring2Utils::mult(bx, vx, key.bx, msg.mod, params.N);
+	Ring2Utils::mult(bx, vx, key.bx, Pmod, params.N);
 	NumUtils::sampleGauss(ebx, params.N, params.sigma);
-	Ring2Utils::addAndEqual(bx, ebx, msg.mod, params.N);
+	Ring2Utils::addAndEqual(bx, ebx, Pmod, params.N);
 
-	Ring2Utils::addAndEqual(bx, msg.mx, msg.mod, params.N);
+	Ring2Utils::addAndEqual(bx, msg.mx, Pmod, params.N);
+
+	Ring2Utils::rightShiftAndEqual(ax, params.logq, params.N);
+	Ring2Utils::rightShiftAndEqual(bx, params.logq, params.N);
 
 	return Cipher(ax, bx, msg.mod, msg.cbits, msg.slots);
 }
@@ -197,8 +176,7 @@ CZZ* Scheme::decode(Message& msg) {
 
 CZZ* Scheme::decrypt(SecKey& secretKey, Cipher& cipher) {
 	Message msg = decryptMsg(secretKey, cipher);
-	CZZ* res = decode(msg);
-	return res;
+	return decode(msg);
 }
 
 CZZ Scheme::decryptSingle(SecKey& secretKey, Cipher& cipher) {
@@ -444,22 +422,6 @@ Cipher Scheme::multByPoly(Cipher& cipher, ZZX& poly) {
 void Scheme::multByPolyAndEqual(Cipher& cipher, ZZX& poly) {
 	Ring2Utils::multAndEqual(cipher.ax, poly, cipher.mod, params.N);
 	Ring2Utils::multAndEqual(cipher.bx, poly, cipher.mod, params.N);
-}
-
-Cipher Scheme::multByConstBySlots(Cipher& cipher, CZZ*& cnstvec) {
-	Message msg = encode(cnstvec, cipher.slots);
-
-	ZZX axres, bxres;
-	Ring2Utils::mult(axres, cipher.ax, msg.mx, cipher.mod, params.N);
-	Ring2Utils::mult(bxres, cipher.bx, msg.mx, cipher.mod, params.N);
-	return Cipher(axres, bxres, cipher.mod, cipher.cbits, cipher.slots);
-}
-
-void Scheme::multByConstBySlotsAndEqual(Cipher& cipher, CZZ*& cnstvec) {
-	Message msg = encode(cnstvec, cipher.slots);
-
-	Ring2Utils::multAndEqual(cipher.ax, msg.mx, cipher.mod, params.N);
-	Ring2Utils::multAndEqual(cipher.bx, msg.mx, cipher.mod, params.N);
 }
 
 //-----------------------------------------

@@ -21,30 +21,6 @@ public:
 
 	Scheme(Params& params, PubKey& publicKey, SchemeAux& schemeaux) : params(params), publicKey(publicKey), aux(schemeaux) {};
 
-	/**
-	 * regroup vals indexes (i) -> (5^i mod slots) and add conjugates
-	 * @param[in] vals
-	 * @param[in] slots
-	 * @return regrouped vals with conjugates
-	 */
-	CZZ* groupidx(CZZ*& vals, long slots);
-
-	/**
-	 * groupidx with only one val
-	 * @param[in] val
-	 * @param[in] slots
-	 * @return regrouped vals
-	 */
-	CZZ* groupidx(CZZ& val);
-
-	/**
-	 * degroup vals indexes (5^i mod N) -> (i) and remove conjugates
-	 * @param[in] vals
-	 * @param[in] slots
-	 * @return degrouped vals without conjugates
-	 */
-	CZZ* degroupidx(CZZ*& vals, long dslots);
-
 	//-----------------------------------------
 
 	/**
@@ -296,23 +272,6 @@ public:
 	 * @param[in] polynomial
 	 */
 	void multByPolyAndEqual(Cipher& cipher, ZZX& poly);
-
-	/**
-	 * constant multiplication by slots
-	 * @param[in] cipher(m_1, ..., m_slots)
-	 * @param[in] constant array (c_1, ..., c_slots) size should be same as number of slots in cipher. Constants cannot be all too small
-	 * normally method is used as a fast version of mult method if array cnstvec is known
-	 * @return cipher(c_1 * m_1, ..., c_slots * m_slots)
-	 */
-	Cipher multByConstBySlots(Cipher& cipher, CZZ*& cnstvec);
-
-	/**
-	 * constant multiplication by slots
-	 * @param[in, out] cipher(m_1, ..., m_slots) -> cipher(c_1 * m_1, ..., c_slots * m_slots)
-	 * @param[in] constant array (c_1, ..., c_slots) size should be same as number of slots in cipher. Constants cannot be all too small
-	 * normally method is used as a fast version of mult method if array cnstvec is known
-	 */
-	void multByConstBySlotsAndEqual(Cipher& cipher, CZZ*& cnstvec);
 
 	/**
 	 * X^degree multiplication

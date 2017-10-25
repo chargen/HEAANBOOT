@@ -12,10 +12,10 @@ PubKey::PubKey(Params& params, SecKey& secretKey) {
 void PubKey::addEncKey(Params& params, SecKey& secretKey) {
 	ZZX ex, ax, bx;
 
-	NumUtils::sampleUniform2(ax, params.N, params.logq);
+	NumUtils::sampleUniform2(ax, params.N, params.logqq);
 	NumUtils::sampleGauss(ex, params.N, params.sigma);
-	Ring2Utils::mult(bx, secretKey.sx, ax, params.q, params.N);
-	Ring2Utils::sub(bx, ex, bx, params.q, params.N);
+	Ring2Utils::mult(bx, secretKey.sx, ax, params.qq, params.N);
+	Ring2Utils::sub(bx, ex, bx, params.qq, params.N);
 
 	keyMap.insert(pair<long, RLWE>(ENCRYPTION, RLWE(ax, bx)));
 }
