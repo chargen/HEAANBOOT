@@ -45,13 +45,9 @@ Message Scheme::encodeSingleWithBits(CZZ& val, long cbits) {
 	ZZX mx;
 	mx.SetLength(params.N);
 	ZZ mod = power2_ZZ(cbits);
-	long idx = 0;
-	long gap = params.N / 2;
 	NumUtils::fftSpecialInv(gvals, 2, aux);
-	for (long i = 0; i < 2; ++i) {
-		mx.rep[idx] = gvals[i].r;
-		idx += gap;
-	}
+	mx.rep[0] = gvals[0].r;
+	mx.rep[params.N / 2] = gvals[1].r;
 	delete[] gvals;
 	return Message(mx, mod, cbits, 1);
 }
@@ -62,7 +58,7 @@ Message Scheme::encode(CZZ*& vals, long slots) {
 	for (long i = 0; i < slots; ++i) {
 		long idx = (params.rotGroup[i] % (slots << 2) - 1) / 2;
 		gvals[idx] = vals[i] << params.logq;;
-		gvals[doubleslots - idx - 1] = vals[i].conjugate() << params.logq;;
+		gvals[doubleslots - idx - 1] = vals[i].conjugate() << params.logq;
 	}
 
 	ZZX mx;
@@ -82,20 +78,13 @@ Message Scheme::encode(CZZ*& vals, long slots) {
 
 Message Scheme::encodeSingle(CZZ& val) {
 	CZZ* gvals = new CZZ[2];
-	gvals[0] = val<< params.logq;;
-	gvals[1] = val.conjugate() << params.logq;;
-
+	gvals[0] = val << params.logq;
+	gvals[1] = val.conjugate() << params.logq;
 	ZZX mx;
 	mx.SetLength(params.N);
-	long idx = 0;
-	long gap = params.N / 2;
-
 	NumUtils::fftSpecialInv(gvals, 2, aux);
-
-	for (long i = 0; i < 2; ++i) {
-		mx.rep[idx] = gvals[i].r;
-		idx += gap;
-	}
+	mx.rep[0] = gvals[0].r;
+	mx.rep[params.N / 2] = gvals[1].r;
 	delete[] gvals;
 	return Message(mx, params.q, params.logq, 1);
 }
@@ -946,54 +935,9 @@ void Scheme::removeIpartAndEqual(Cipher& cipher, long logq0, long logT, long log
 }
 
 Cipher Scheme::bootstrap(Cipher& cipher, long logq0, long logq, long logT, long logI) {
-	long logSlots = log2(cipher.slots);
-	Cipher tmp = modDownTo(cipher, logq0);
-	normalizeAndEqual(tmp);
-	tmp.cbits = logq;
-	tmp.mod = power2_ZZ(logq);
-
-	if(logSlots == params.logN - 1) {
-		Cipher cshift1 = multByMonomial(tmp, 2 * params.N - 1);
-		Cipher clinEven = linearTransform(cipher, params.N / 2);
-		Cipher clinOdd = linearTransform(cshift1, params.N / 2);
-
-		Cipher clinEvenConj = conjugate(clinEven);
-		addAndEqual(clinEven, clinEvenConj);
-		reScaleByAndEqual(clinEven, logq0 + logI + logSlots);
-
-		Cipher clinOddConj = conjugate(clinOdd);
-		addAndEqual(clinOdd, clinOddConj);
-		reScaleByAndEqual(clinOdd, logq0 + logI + logSlots);
-
-		Cipher csinEven = removeIpart(clinEven, logq0, logT, logI);
-		Cipher csinOdd = removeIpart(clinOdd, logq0, logT, logI);
-
-		Cipher cresEven = linearTransformInv(csinEven, params.N / 2);
-		Cipher cresOdd = linearTransformInv(csinOdd, params.N / 2);
-
-		multByMonomialAndEqual(cresOdd, 1);
-		addAndEqual(cresEven, cresOdd);
-		reScaleByAndEqual(cresEven, logq0 + logI);
-
-		return cresEven;
-	} else {
-		Cipher rotated = tmp;
-		for (long i = logSlots; i < params.logN - 1; ++i) {
-			Cipher rot = leftRotateByPo2(rotated, i);
-			addAndEqual(rotated, rot);
-		}
-		reScaleByAndEqual(rotated, params.logN - 1 - logSlots);
-		Cipher clinEven = linearTransform(rotated, cipher.slots * 2);
-
-		Cipher clinEvenConj = conjugate(clinEven);
-		addAndEqual(clinEven, clinEvenConj);
-		reScaleByAndEqual(clinEven, logq0 + logI + logSlots + 2);
-
-		Cipher csinEven = removeIpart(clinEven, logq0, logT, logI);
-		Cipher cresEven = linearTransformInv(csinEven, cipher.slots * 2);
-		reScaleByAndEqual(cresEven, logq0 + logI);
-		return cresEven;
-	}
+	Cipher tmp = cipher;
+	bootstrapAndEqual(tmp, logq0, logq, logT, logI);
+	return tmp;
 }
 
 void Scheme::bootstrapAndEqual(Cipher& cipher, long logq0, long logq, long logT, long logI) {

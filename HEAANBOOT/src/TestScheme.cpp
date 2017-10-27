@@ -854,12 +854,12 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logq, long pre
 
 void TestScheme::testBootstrap() {
 	cout << "!!! START TEST BOOTSTRAP ALL !!!" << endl;
-	long logq = 1240;
-	long nu = 15;
-	long msgBits = 39;
+	long logq = 620;
+	long nu = 6;
+	long msgBits = 29;
 	long logq0 = msgBits + nu;
 	long logN = 15;
-	long logT = 5;
+	long logT = 2;
 	long logI = 4;
 	long logSlots = 0;
 	long slots = (1 << logSlots);
@@ -920,7 +920,6 @@ void TestScheme::testBootstrap() {
 		scheme.addAndEqual(cboot, cresOdd);
 		scheme.reScaleByAndEqual(cboot, logq0 + logI);
 		timeutils.stop("Linear Transformation Inv");
-
 	} else {
 		Cipher rotated = cipher;
 		timeutils.start("Rotation");
