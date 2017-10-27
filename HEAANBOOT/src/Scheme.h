@@ -8,6 +8,8 @@
 #include "PubKey.h"
 #include "SchemeAux.h"
 
+#include <stdexcept>
+
 using namespace std;
 using namespace NTL;
 

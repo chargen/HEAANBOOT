@@ -514,6 +514,12 @@ void Scheme::modDownByAndEqual(Cipher& cipher, long bitsDown) {
 }
 
 void Scheme::modDownToAndEqual(Cipher& cipher, long newcbits) {
+	if(cipher.cbits < newcbits) {
+		invalid_argument("cbits of cipher should be larger than newcbits");
+	}
+	if(cipher.cbits == newcbits) {
+		return;
+	}
 	cipher.mod = power2_ZZ(newcbits);
 	cipher.cbits = newcbits;
 	Ring2Utils::modAndEqual(cipher.ax, cipher.mod, params.N);
