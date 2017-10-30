@@ -21,6 +21,7 @@ public:
 	long cbits; ///< bits in cipher
 	long slots; ///< number of slots
 
+	bool isComplex;
 	//-----------------------------------------
 
 	/**
@@ -28,9 +29,9 @@ public:
 	 * @param[in] bits: bits in cipher
 	 * @param[in] slots: number of slots
 	 */
-	Cipher(ZZX ax = ZZX::zero(), ZZX bx = ZZX::zero(), ZZ mod = ZZ::zero(), long cbits = 0, long slots = 1) : ax(ax), bx(bx), mod(mod), cbits(cbits), slots(slots) {}
+	Cipher(ZZX ax = ZZX::zero(), ZZX bx = ZZX::zero(), ZZ mod = ZZ::zero(), long cbits = 0, long slots = 1, bool isComplex = true) : ax(ax), bx(bx), mod(mod), cbits(cbits), slots(slots), isComplex(isComplex) {}
 
-	Cipher(const Cipher& o) : ax(o.ax), bx(o.bx), mod(o.mod), cbits(o.cbits), slots(o.slots) {}
+	Cipher(const Cipher& o) : ax(o.ax), bx(o.bx), mod(o.mod), cbits(o.cbits), slots(o.slots), isComplex(o.isComplex) {}
 
 };
 

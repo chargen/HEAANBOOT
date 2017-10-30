@@ -15,7 +15,7 @@
 Cipher* SchemeAlgo::encryptSingleArray(CZZ*& vals, long size) {
 	Cipher* res = new Cipher[size];
 	for (long i = 0; i < size; ++i) {
-		res[i] = scheme.encryptSingle(vals[i]);
+		res[i] = scheme.encryptSingle(vals[i], scheme.params.logq);
 	}
 	return res;
 }

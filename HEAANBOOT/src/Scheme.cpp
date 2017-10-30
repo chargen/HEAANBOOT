@@ -16,20 +16,23 @@ using namespace NTL;
 
 //-----------------------------------------
 
-Message Scheme::encodeWithBits(CZZ*& vals, long cbits, long slots) {
+Message Scheme::encode(CZZ*& vals, long slots, long cbits, bool isComplex) {
 	long doubleslots = slots << 1;
+	ZZ mod = power2_ZZ(cbits);
 	CZZ* gvals = new CZZ[doubleslots];
 	for (long i = 0; i < slots; ++i) {
 		long idx = (params.rotGroup[i] % (slots << 2) - 1) / 2;
 		gvals[idx] = vals[i] << params.logq;
 		gvals[doubleslots - idx - 1] = vals[i].conjugate() << params.logq;
 	}
+
 	ZZX mx;
 	mx.SetLength(params.N);
-	ZZ mod = power2_ZZ(cbits);
 	long idx = 0;
 	long gap = params.N / doubleslots;
+
 	NumUtils::fftSpecialInv(gvals, doubleslots, aux);
+
 	for (long i = 0; i < doubleslots; ++i) {
 		mx.rep[idx] = gvals[i].r;
 		idx += gap;
@@ -38,55 +41,48 @@ Message Scheme::encodeWithBits(CZZ*& vals, long cbits, long slots) {
 	return Message(mx, mod, cbits, slots);
 }
 
-Message Scheme::encodeSingleWithBits(CZZ& val, long cbits) {
-	CZZ* gvals = new CZZ[2];
-	gvals[0] = val << params.logq;
-	gvals[1] = val.conjugate() << params.logq;
+CZZ* Scheme::decode(Message& msg) {
+	long doubleslots = msg.slots * 2;
+	CZZ* fftinv = new CZZ[doubleslots];
+
+	long idx = 0;
+	long gap = params.N / doubleslots;
+	for (long i = 0; i < doubleslots; ++i) {
+		ZZ tmp = msg.mx.rep[idx] % msg.mod;
+		if(NumBits(tmp) == msg.cbits) tmp -= msg.mod;
+		fftinv[i] = CZZ(tmp, ZZ(0));
+		idx += gap;
+	}
+	NumUtils::fftSpecial(fftinv, doubleslots, aux);
+	CZZ* res = new CZZ[msg.slots];
+	for (long i = 0; i < msg.slots; ++i) {
+		long idx = (params.rotGroup[i] % (msg.slots << 2) - 1) / 2;
+		res[i] = fftinv[idx];
+	}
+	delete[] fftinv;
+	return res;
+}
+
+Message Scheme::encodeSingle(CZZ& val, long cbits, bool isComplex) {
 	ZZX mx;
 	mx.SetLength(params.N);
 	ZZ mod = power2_ZZ(cbits);
-	NumUtils::fftSpecialInv(gvals, 2, aux);
-	mx.rep[0] = gvals[0].r;
-	mx.rep[params.N / 2] = gvals[1].r;
-	delete[] gvals;
-	return Message(mx, mod, cbits, 1);
+	if(isComplex) {
+		CZZ gval = val << params.logq;
+		mx.rep[0] = gval.r;
+		mx.rep[params.N / 2] = gval.i;
+		return Message(mx, mod, cbits);
+	} else {
+		mx.rep[0] = val.r << params.logq;
+		return Message(mx, mod, cbits, 1, false);
+	}
 }
 
-Message Scheme::encode(CZZ*& vals, long slots) {
-	long doubleslots = slots << 1;
-	CZZ* gvals = new CZZ[doubleslots];
-	for (long i = 0; i < slots; ++i) {
-		long idx = (params.rotGroup[i] % (slots << 2) - 1) / 2;
-		gvals[idx] = vals[i] << params.logq;;
-		gvals[doubleslots - idx - 1] = vals[i].conjugate() << params.logq;
-	}
-
-	ZZX mx;
-	mx.SetLength(params.N);
-	long idx = 0;
-	long gap = params.N / doubleslots;
-
-	NumUtils::fftSpecialInv(gvals, doubleslots, aux);
-
-	for (long i = 0; i < doubleslots; ++i) {
-		mx.rep[idx] = gvals[i].r;
-		idx += gap;
-	}
-	delete[] gvals;
-	return Message(mx, params.q, params.logq, slots);
-}
-
-Message Scheme::encodeSingle(CZZ& val) {
-	CZZ* gvals = new CZZ[2];
-	gvals[0] = val << params.logq;
-	gvals[1] = val.conjugate() << params.logq;
-	ZZX mx;
-	mx.SetLength(params.N);
-	NumUtils::fftSpecialInv(gvals, 2, aux);
-	mx.rep[0] = gvals[0].r;
-	mx.rep[params.N / 2] = gvals[1].r;
-	delete[] gvals;
-	return Message(mx, params.q, params.logq, 1);
+CZZ Scheme::decodeSingle(Message& msg) {
+	CZZ res;
+	res.r = msg.mx.rep[0];
+	if(msg.isComplex) res.i = msg.mx.rep[params.N / 2];
+	return res;
 }
 
 Cipher Scheme::encryptMsg(Message& msg) {
@@ -112,55 +108,16 @@ Cipher Scheme::encryptMsg(Message& msg) {
 	return Cipher(ax, bx, msg.mod, msg.cbits, msg.slots);
 }
 
-Cipher Scheme::encryptWithBits(CZZ*& vals, long cbits, long slots) {
-	Message msg = encodeWithBits(vals, cbits, slots);
-	return encryptMsg(msg);
-}
-
-Cipher Scheme::encrypt(CZZ*& vals, long slots) {
-	Message msg = encode(vals, slots);
-	return encryptMsg(msg);
-}
-
-Cipher Scheme::encryptSingleWithBits(CZZ& val, long cbits) {
-	Message msg = encodeSingleWithBits(val, cbits);
-	return encryptMsg(msg);
-}
-
-Cipher Scheme::encryptSingle(CZZ& val) {
-	Message msg = encodeSingle(val);
-	return encryptMsg(msg);
-}
-
-//-----------------------------------------
-
 Message Scheme::decryptMsg(SecKey& secretKey, Cipher& cipher) {
 	ZZX mx;
 	Ring2Utils::mult(mx, cipher.ax, secretKey.sx, cipher.mod, params.N);
 	Ring2Utils::addAndEqual(mx, cipher.bx, cipher.mod, params.N);
-	return Message(mx, cipher.mod, cipher.cbits, cipher.slots);
+	return Message(mx, cipher.mod, cipher.cbits, cipher.slots, cipher.isComplex);
 }
 
-CZZ* Scheme::decode(Message& msg) {
-	long doubleslots = msg.slots * 2;
-	CZZ* fftinv = new CZZ[doubleslots];
-
-	long idx = 0;
-	long gap = params.N / doubleslots;
-	for (long i = 0; i < doubleslots; ++i) {
-		ZZ tmp = msg.mx.rep[idx] % msg.mod;
-		if(NumBits(tmp) == msg.cbits) tmp -= msg.mod;
-		fftinv[i] = CZZ(tmp, ZZ(0));
-		idx += gap;
-	}
-	NumUtils::fftSpecial(fftinv, doubleslots, aux);
-	CZZ* res = new CZZ[msg.slots];
-	for (long i = 0; i < msg.slots; ++i) {
-		long idx = (params.rotGroup[i] % (msg.slots << 2) - 1) / 2;
-		res[i] = fftinv[idx];
-	}
-	delete[] fftinv;
-	return res;
+Cipher Scheme::encrypt(CZZ*& vals, long slots, long cbits, bool isComplex) {
+	Message msg = encode(vals, slots, cbits, isComplex);
+	return encryptMsg(msg);
 }
 
 CZZ* Scheme::decrypt(SecKey& secretKey, Cipher& cipher) {
@@ -168,12 +125,14 @@ CZZ* Scheme::decrypt(SecKey& secretKey, Cipher& cipher) {
 	return decode(msg);
 }
 
+Cipher Scheme::encryptSingle(CZZ& val, long cbits, bool isComplex) {
+	Message msg = encodeSingle(val, cbits, isComplex);
+	return encryptMsg(msg);
+}
+
 CZZ Scheme::decryptSingle(SecKey& secretKey, Cipher& cipher) {
 	Message msg = decryptMsg(secretKey, cipher);
-	CZZ* vals = decode(msg);
-	CZZ res = vals[0];
-	delete[] vals;
-	return res;
+	return decodeSingle(msg);
 }
 
 //-----------------------------------------

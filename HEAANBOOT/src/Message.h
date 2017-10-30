@@ -16,6 +16,7 @@ public:
 	long cbits; ///< bits in cipher
 	long slots; ///< number of slots
 
+	bool isComplex;
 	//-----------------------------------------
 
 	/**
@@ -24,9 +25,9 @@ public:
 	 * @param[in] bits: bits in cipher
 	 * @param[in] slots: number of slots
 	 */
-	Message(ZZX mx = ZZX::zero(), ZZ mod = ZZ::zero(), long cbits = 0, long slots = 1) : mx(mx), mod(mod), cbits(cbits), slots(slots) {}
+	Message(ZZX mx = ZZX::zero(), ZZ mod = ZZ::zero(), long cbits = 0, long slots = 1, bool isComplex = true) : mx(mx), mod(mod), cbits(cbits), slots(slots), isComplex(isComplex) {}
 
-	Message(const Message& o) : mx(o.mx), mod(o.mod), cbits(o.cbits), slots(o.slots) {}
+	Message(const Message& o) : mx(o.mx), mod(o.mod), cbits(o.cbits), slots(o.slots), isComplex(o.isComplex) {}
 };
 
 #endif /* SCHEME_MESSAGE_H_ */

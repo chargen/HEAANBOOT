@@ -39,7 +39,7 @@ void TestScheme::testEncodeBatch(long logN, long logq, long precisionBits, long 
 	CZZ* mvec = EvaluatorUtils::evaluateRandomVals(slots, precisionBits);
 	//-----------------------------------------
 	timeutils.start("Encrypt batch");
-	Cipher cipher = scheme.encrypt(mvec, slots);
+	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	timeutils.stop("Encrypt batch");
 	//-----------------------------------------
 	timeutils.start("Decrypt batch");
@@ -71,7 +71,7 @@ void TestScheme::testConjugateBatch(long logN, long logq, long precisionBits, lo
 		mvecconj[i] = mvec[i].conjugate();
 	}
 
-	Cipher cipher = scheme.encrypt(mvec, slots);
+	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	timeutils.start("Conjugate batch");
 	Cipher cconj = scheme.conjugate(cipher);
 	timeutils.stop("Conjugate batch");
@@ -101,7 +101,7 @@ void TestScheme::testimultBatch(long logN, long logq, long precisionBits, long l
 		imvec[i].i = mvec[i].r;
 	}
 
-	Cipher cipher = scheme.encrypt(mvec, slots);
+	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	timeutils.start("Multiplication by i batch");
 	Cipher icipher = scheme.imult(cipher, precisionBits);
 	timeutils.stop("Multiplication by i batch");
@@ -128,7 +128,7 @@ void TestScheme::testRotateByPo2Batch(long logN, long logq, long precisionBits, 
 	long slots = (1 << logSlots);
 	long rotSlots = (1 << rotlogSlots);
 	CZZ* mvec = EvaluatorUtils::evaluateRandomVals(slots, precisionBits);
-	Cipher cipher = scheme.encrypt(mvec, slots);
+	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	if(isLeft) {
 		timeutils.start("Left Rotate by power of 2 batch");
@@ -166,7 +166,7 @@ void TestScheme::testRotateBatch(long logN, long logq, long precisionBits, long 
 	//-----------------------------------------
 	long slots = (1 << logSlots);
 	CZZ* mvec = EvaluatorUtils::evaluateRandomVals(slots, precisionBits);
-	Cipher cipher = scheme.encrypt(mvec, slots);
+	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	if(isLeft) {
 		timeutils.start("Left rotate batch");
@@ -203,7 +203,7 @@ void TestScheme::testSlotsSum(long logN, long logq, long precisionBits, long log
 	//-----------------------------------------
 	long slots = (1 << logSlots);
 	CZZ* mvec = EvaluatorUtils::evaluateRandomVals(slots, precisionBits);
-	Cipher cipher = scheme.encrypt(mvec, slots);
+	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start("slots sum");
 	algo.partialSlotsSumAndEqual(cipher, slots);
@@ -252,7 +252,7 @@ void TestScheme::testPowerOf2Batch(long logN, long logq, long precisionBits, lon
 			mpows[j][i] = EvaluatorUtils::evaluatePow2(mr, mi, j, precisionBits);
 		}
 	}
-	Cipher cipher = scheme.encrypt(mvec, slots);
+	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start("Power of 2 batch");
 	Cipher cpow = algo.powerOf2(cipher, precisionBits, logDegree);
@@ -288,7 +288,7 @@ void TestScheme::testPowerBatch(long logN, long logq, long precisionBits, long d
 		mvec[i] = EvaluatorUtils::evaluateVal(mr, mi, precisionBits);
 		mpow[i] = EvaluatorUtils::evaluatePow(mr, mi, degree, precisionBits);
 	}
-	Cipher cipher = scheme.encrypt(mvec, slots);
+	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start("Power batch");
 	Cipher cpow = algo.power(cipher, precisionBits, degree);
@@ -335,7 +335,7 @@ void TestScheme::testProdOfPo2Batch(long logN, long logq, long precisionBits, lo
 		}
 	}
 	for (long i = 0; i < degree; ++i) {
-		cvec[i] = scheme.encrypt(mvec[i], slots);
+		cvec[i] = scheme.encrypt(mvec[i], slots, logq);
 	}
 	//-----------------------------------------
 	timeutils.start("Product of power of 2 batch");
@@ -380,7 +380,7 @@ void TestScheme::testProdBatch(long logN, long logq, long precisionBits, long de
 		}
 	}
 	for (long i = 0; i < degree; ++i) {
-		cvec[i] = scheme.encrypt(mvec[i], slots);
+		cvec[i] = scheme.encrypt(mvec[i], slots, logq);
 	}
 	//-----------------------------------------
 	timeutils.start("Product batch");
@@ -416,7 +416,7 @@ void TestScheme::testInverseBatch(long logN, long logq, long precisionBits, long
 		mvec[i] = EvaluatorUtils::evaluateVal(1 - mr, -mi, precisionBits);
 		minv[i] = EvaluatorUtils::evaluateInverse(mr, mi, precisionBits);
 	}
-	Cipher cipher = scheme.encrypt(mvec, slots);
+	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start("Inverse batch");
 	Cipher cinv = algo.inverse(cipher, precisionBits, invSteps);
@@ -450,7 +450,7 @@ void TestScheme::testLogarithmBatch(long logN, long logq, long precisionBits, lo
 		mvec[i] = EvaluatorUtils::evaluateVal(mr, mi, precisionBits);
 		mlog[i] = EvaluatorUtils::evaluateLogarithm(1 + mr, mi, precisionBits);
 	}
-	Cipher cipher = scheme.encrypt(mvec, slots);
+	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start(LOGARITHM + " batch");
 	Cipher clog = algo.function(cipher, LOGARITHM, precisionBits, degree);
@@ -484,7 +484,7 @@ void TestScheme::testExponentBatch(long logN, long logq, long precisionBits, lon
 		mvec[i] = EvaluatorUtils::evaluateVal(mr, mi, precisionBits);
 		mexp[i] = EvaluatorUtils::evaluateExponent(mr, mi, precisionBits);
 	}
-	Cipher cipher = scheme.encrypt(mvec, slots);
+	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start(EXPONENT + " batch");
 	Cipher cexp = algo.function(cipher, EXPONENT, precisionBits, degree);
@@ -517,7 +517,7 @@ void TestScheme::testExponentBatchLazy(long logN, long logq, long precisionBits,
 		mexp[i] = EvaluatorUtils::evaluateExponent(mr, mi, precisionBits);
 	}
 	EvaluatorUtils::leftShiftAndEqual(mexp, slots, precisionBits);
-	Cipher cipher = scheme.encrypt(mvec, slots);
+	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start(EXPONENT + " lazy");
 	Cipher cexp = algo.functionLazy(cipher, EXPONENT, precisionBits, degree);
@@ -551,7 +551,7 @@ void TestScheme::testSigmoidBatch(long logN, long logq, long precisionBits, long
 		mvec[i] = EvaluatorUtils::evaluateVal(mr, mi, precisionBits);
 		msig[i] = EvaluatorUtils::evaluateSigmoid(mr, mi, precisionBits);
 	}
-	Cipher cipher = scheme.encrypt(mvec, slots);
+	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start(SIGMOID + " batch");
 	Cipher csig = algo.function(cipher, SIGMOID, precisionBits, degree);
@@ -584,7 +584,7 @@ void TestScheme::testSigmoidBatchLazy(long logN, long logq, long precisionBits, 
 		msig[i] = EvaluatorUtils::evaluateSigmoid(mr, mi, precisionBits);
 	}
 	EvaluatorUtils::leftShiftAndEqual(msig, slots, precisionBits);
-	Cipher cipher = scheme.encrypt(mvec, slots);
+	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start(SIGMOID + " lazy");
 	Cipher csig = algo.functionLazy(cipher, SIGMOID, precisionBits, degree);
@@ -630,8 +630,8 @@ void TestScheme::testFFTBatch(long logN, long logq, long precisionBits, long log
 			mvals1[i] = mvec1[i][j];
 			mvals2[i] = mvec2[i][j];
 		}
-		cvec1[j] = scheme.encrypt(mvals1, slots);
-		cvec2[j] = scheme.encrypt(mvals2, slots);
+		cvec1[j] = scheme.encrypt(mvals1, slots, logq);
+		cvec2[j] = scheme.encrypt(mvals2, slots, logq);
 		delete[] mvals1;
 		delete[] mvals2;
 	}
@@ -709,8 +709,8 @@ void TestScheme::testFFTBatchLazy(long logN, long logq, long precisionBits, long
 			mvals1[i] = mvec1[i][j];
 			mvals2[i] = mvec2[i][j];
 		}
-		cvec1[j] = scheme.encrypt(mvals1, slots);
-		cvec2[j] = scheme.encrypt(mvals2, slots);
+		cvec1[j] = scheme.encrypt(mvals1, slots, logq);
+		cvec2[j] = scheme.encrypt(mvals2, slots, logq);
 		delete[] mvals1;
 		delete[] mvals2;
 	}
@@ -788,7 +788,7 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logq, long pre
 			for (long i = 0; i < slots; ++i) {
 				mvals[i] = mvecs[h][i][j];
 			}
-			cvecs[h][j] = scheme.encrypt(mvals, slots);
+			cvecs[h][j] = scheme.encrypt(mvals, slots, logq);
 			delete[] mvals;
 		}
 		for (long i = 0; i < slots; ++i) {
@@ -886,7 +886,7 @@ void TestScheme::testBootstrap() {
 
 	//-----------------------------------------
 	timeutils.start("Encrypt batch");
-	Cipher cipher = scheme.encryptWithBits(mvec, logq0, slots);
+	Cipher cipher = scheme.encrypt(mvec, slots, logq0);
 	timeutils.stop("Encrypt batch");
 
 	scheme.normalizeAndEqual(cipher);
@@ -986,7 +986,7 @@ void TestScheme::testBootstrapOneReal() {
 
 	//-----------------------------------------
 	timeutils.start("Encrypt batch");
-	Cipher cipher = scheme.encryptWithBits(mvec, logq0, slots);
+	Cipher cipher = scheme.encrypt(mvec, slots, logq0);
 	timeutils.stop("Encrypt batch");
 
 	scheme.normalizeAndEqual(cipher);
@@ -1042,7 +1042,7 @@ void TestScheme::testBoundOfI() {
 
 	//-----------------------------------------
 	timeutils.start("Encrypt batch");
-	Cipher cipher = scheme.encryptWithBits(mvec, logq0, slots);
+	Cipher cipher = scheme.encrypt(mvec, slots, logq0);
 	timeutils.stop("Encrypt batch");
 
 	timeutils.start("Decrypt batch");

@@ -28,23 +28,10 @@ public:
 	/**
 	 * encodes vals into ZZX using fft inverse
 	 * @param[in] vals
-	 * @param[in] cbits of message
 	 * @param[in] slots
 	 * @return Message ZZX slots and level
 	 */
-	Message encodeWithBits(CZZ*& gvals, long cbits, long slots);
-
-	Message encodeSingleWithBits(CZZ& val, long cbits);
-
-	/**
-	 * encodes vals into ZZX using fft inverse
-	 * @param[in] vals
-	 * @param[in] slots
-	 * @return Message ZZX slots and level
-	 */
-	Message encode(CZZ*& gvals, long slots);
-
-	Message encodeSingle(CZZ& val);
+	Message encode(CZZ*& gvals, long slots, long cbits, bool isComplex = true);
 
 	/**
 	 * decodes ZZX into vals using fft
@@ -53,6 +40,9 @@ public:
 	 */
 	CZZ* decode(Message& msg);
 
+	Message encodeSingle(CZZ& val, long cbits, bool isComplex = true);
+
+	CZZ decodeSingle(Message& msg);
 	//-----------------------------------------
 
 	/**
@@ -76,19 +66,10 @@ public:
 	/**
 	 * All encryption process: regroup vals with adding conjugates, encode and encrypts
 	 * @param[in] vals
-	 * @param[in] cbits
 	 * @param[in] slots
 	 * @return cipher
 	 */
-	Cipher encryptWithBits(CZZ*& vals, long cbits, long slots);
-
-	/**
-	 * All encryption process: regroup vals with adding conjugates, encode and encrypts
-	 * @param[in] vals
-	 * @param[in] slots
-	 * @return cipher
-	 */
-	Cipher encrypt(CZZ*& vals, long slots);
+	Cipher encrypt(CZZ*& vals, long slots, long cbits, bool isComplex = true);
 
 	/**
 	 * All decryption process: decrypt, decode, and degroup vals with removing conjugates
@@ -102,17 +83,9 @@ public:
 	/**
 	 * encrypt with only one value
 	 * @param[in] val
-	 * @param[in] cbits
 	 * @return cipher
 	 */
-	Cipher encryptSingleWithBits(CZZ& val, long cbits);
-
-	/**
-	 * encrypt with only one value
-	 * @param[in] val
-	 * @return cipher
-	 */
-	Cipher encryptSingle(CZZ& val);
+	Cipher encryptSingle(CZZ& val, long cbits, bool isComplex = true);
 
 	/**
 	 * decrypt with advance knowledge that slots = 1;
