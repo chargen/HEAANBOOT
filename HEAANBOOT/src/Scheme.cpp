@@ -80,8 +80,15 @@ Message Scheme::encodeSingle(CZZ& val, long cbits, bool isComplex) {
 
 CZZ Scheme::decodeSingle(Message& msg) {
 	CZZ res;
-	res.r = msg.mx.rep[0];
-	if(msg.isComplex) res.i = msg.mx.rep[params.N / 2];
+	ZZ tmp = msg.mx.rep[0] % msg.mod;
+	if(NumBits(tmp) == msg.cbits) tmp -= msg.mod;
+	res.r = tmp;
+
+	if(msg.isComplex) {
+		ZZ tmp = msg.mx.rep[params.N / 2] % msg.mod;
+		if(NumBits(tmp) == msg.cbits) tmp -= msg.mod;
+		res.i = tmp;
+	}
 	return res;
 }
 
