@@ -105,7 +105,7 @@ Cipher Scheme::encryptMsg(Message& msg) {
 	Ring2Utils::rightShiftAndEqual(ax, params.logq, params.N);
 	Ring2Utils::rightShiftAndEqual(bx, params.logq, params.N);
 
-	return Cipher(ax, bx, msg.mod, msg.cbits, msg.slots);
+	return Cipher(ax, bx, msg.mod, msg.cbits, msg.slots, msg.isComplex);
 }
 
 Message Scheme::decryptMsg(SecKey& secretKey, Cipher& cipher) {
@@ -150,7 +150,7 @@ Cipher Scheme::add(Cipher& cipher1, Cipher& cipher2) {
 	Ring2Utils::add(ax, cipher1.ax, cipher2.ax, cipher1.mod, params.N);
 	Ring2Utils::add(bx, cipher1.bx, cipher2.bx, cipher1.mod, params.N);
 
-	return Cipher(ax, bx, cipher1.mod, cipher1.cbits, cipher1.slots);
+	return Cipher(ax, bx, cipher1.mod, cipher1.cbits, cipher1.slots, cipher1.isComplex);
 }
 
 void Scheme::addAndEqual(Cipher& cipher1, Cipher& cipher2) {
@@ -165,7 +165,7 @@ Cipher Scheme::addConst(Cipher& cipher, ZZ& cnst) {
 	ZZX bx = cipher.bx;
 
 	AddMod(bx.rep[0], cipher.bx.rep[0], cnst, cipher.mod);
-	return Cipher(ax, bx, cipher.mod, cipher.cbits, cipher.slots);
+	return Cipher(ax, bx, cipher.mod, cipher.cbits, cipher.slots, cipher.isComplex);
 }
 
 void Scheme::addConstAndEqual(Cipher& cipher, ZZ& cnst) {
@@ -181,7 +181,7 @@ Cipher Scheme::sub(Cipher& cipher1, Cipher& cipher2) {
 	Ring2Utils::sub(ax, cipher1.ax, cipher2.ax, cipher1.mod, params.N);
 	Ring2Utils::sub(bx, cipher1.bx, cipher2.bx, cipher1.mod, params.N);
 
-	return Cipher(ax, bx, cipher1.mod, cipher1.cbits, cipher1.slots);
+	return Cipher(ax, bx, cipher1.mod, cipher1.cbits, cipher1.slots, cipher1.isComplex);
 }
 
 void Scheme::subAndEqual(Cipher& cipher1, Cipher& cipher2) {
@@ -211,7 +211,7 @@ Cipher Scheme::conjugate(Cipher& cipher) {
 	Ring2Utils::rightShiftAndEqual(bxres, params.logq, params.N);
 
 	Ring2Utils::addAndEqual(bxres, bxconj, cipher.mod, params.N);
-	return Cipher(axres, bxres, cipher.mod, cipher.cbits, cipher.slots);
+	return Cipher(axres, bxres, cipher.mod, cipher.cbits, cipher.slots, cipher.isComplex);
 }
 
 void Scheme::conjugateAndEqual(Cipher& cipher) {
@@ -239,8 +239,7 @@ Cipher Scheme::imult(Cipher& cipher, const long precisionBits) {
 	ZZX bxres, axres;
 	Ring2Utils::multByMonomial(axres, cipher.ax, params.N / 2, params.N);
 	Ring2Utils::multByMonomial(bxres, cipher.bx, params.N / 2, params.N);
-	Cipher res(axres, bxres, cipher.mod, cipher.cbits, cipher.slots);
-	return res;
+	return Cipher(axres, bxres, cipher.mod, cipher.cbits, cipher.slots, cipher.isComplex);
 }
 
 void Scheme::imultAndEqual(Cipher& cipher, const long precisionBits) {
@@ -270,7 +269,7 @@ Cipher Scheme::mult(Cipher& cipher1, Cipher& cipher2) {
 	Ring2Utils::subAndEqual(axmult, axax, cipher1.mod, params.N);
 	Ring2Utils::addAndEqual(bxmult, bxbx, cipher1.mod, params.N);
 
-	return Cipher(axmult, bxmult, cipher1.mod, cipher1.cbits, cipher1.slots);
+	return Cipher(axmult, bxmult, cipher1.mod, cipher1.cbits, cipher1.slots, cipher1.isComplex);
 }
 
 void Scheme::multAndEqual(Cipher& cipher1, Cipher& cipher2) {
@@ -318,7 +317,7 @@ Cipher Scheme::square(Cipher& cipher) {
 	Ring2Utils::addAndEqual(axmult, axbx, cipher.mod, params.N);
 	Ring2Utils::addAndEqual(bxmult, bxbx, cipher.mod, params.N);
 
-	return Cipher(axmult, bxmult, cipher.mod, cipher.cbits, cipher.slots);
+	return Cipher(axmult, bxmult, cipher.mod, cipher.cbits, cipher.slots, cipher.isComplex);
 }
 
 void Scheme::squareAndEqual(Cipher& cipher) {
@@ -352,7 +351,7 @@ Cipher Scheme::multByConst(Cipher& cipher, ZZ& cnst) {
 	Ring2Utils::multByConst(ax, cipher.ax, cnst, cipher.mod, params.N);
 	Ring2Utils::multByConst(bx, cipher.bx, cnst, cipher.mod, params.N);
 
-	return Cipher(ax, bx, cipher.mod, cipher.cbits, cipher.slots);
+	return Cipher(ax, bx, cipher.mod, cipher.cbits, cipher.slots, cipher.isComplex);
 }
 
 void Scheme::multByConstAndEqual(Cipher& cipher, ZZ& cnst) {
@@ -364,7 +363,7 @@ Cipher Scheme::multByPoly(Cipher& cipher, ZZX& poly) {
 	ZZX axres, bxres;
 	Ring2Utils::mult(axres, cipher.ax, poly, cipher.mod, params.N);
 	Ring2Utils::mult(bxres, cipher.bx, poly, cipher.mod, params.N);
-	return Cipher(axres, bxres, cipher.mod, cipher.cbits, cipher.slots);
+	return Cipher(axres, bxres, cipher.mod, cipher.cbits, cipher.slots, cipher.isComplex);
 }
 
 void Scheme::multByPolyAndEqual(Cipher& cipher, ZZX& poly) {
@@ -380,7 +379,7 @@ Cipher Scheme::multByMonomial(Cipher& cipher, const long degree) {
 	Ring2Utils::multByMonomial(ax, cipher.ax, degree, params.N);
 	Ring2Utils::multByMonomial(bx, cipher.bx, degree, params.N);
 
-	return Cipher(ax, bx, cipher.mod, cipher.cbits, cipher.slots);
+	return Cipher(ax, bx, cipher.mod, cipher.cbits, cipher.slots, cipher.isComplex);
 }
 
 void Scheme::multByMonomialAndEqual(Cipher& cipher, const long degree) {
@@ -396,7 +395,7 @@ Cipher Scheme::leftShift(Cipher& cipher, long bits) {
 	Ring2Utils::leftShift(ax, cipher.ax, bits, cipher.mod, params.N);
 	Ring2Utils::leftShift(bx, cipher.bx, bits, cipher.mod, params.N);
 
-	return Cipher(ax, bx, cipher.mod, cipher.cbits, cipher.slots);
+	return Cipher(ax, bx, cipher.mod, cipher.cbits, cipher.slots, cipher.isComplex);
 }
 
 void Scheme::leftShiftAndEqual(Cipher& cipher, long bits) {
@@ -419,7 +418,7 @@ Cipher Scheme::reScaleBy(Cipher& cipher, long bitsDown) {
 
 	long newcbits = cipher.cbits - bitsDown;
 	ZZ newmod = cipher.mod >> bitsDown;
-	return Cipher(ax, bx, newmod, newcbits, cipher.slots);
+	return Cipher(ax, bx, newmod, newcbits, cipher.slots, cipher.isComplex);
 }
 
 Cipher Scheme::reScaleTo(Cipher& cipher, long newcbits) {
@@ -430,7 +429,7 @@ Cipher Scheme::reScaleTo(Cipher& cipher, long newcbits) {
 	Ring2Utils::rightShift(bx, cipher.bx, bitsDown, params.N);
 
 	ZZ newmod = power2_ZZ(newcbits);
-	return Cipher(ax, bx, newmod, newcbits, cipher.slots);
+	return Cipher(ax, bx, newmod, newcbits, cipher.slots, cipher.isComplex);
 }
 
 void Scheme::reScaleByAndEqual(Cipher& cipher, long bitsDown) {
@@ -454,7 +453,7 @@ Cipher Scheme::modDownBy(Cipher& cipher, long bitsDown) {
 	ZZX bx, ax;
 	Ring2Utils::mod(ax, cipher.ax, newmod, params.N);
 	Ring2Utils::mod(bx, cipher.bx, newmod, params.N);
-	return Cipher(ax, bx, newmod, newcbits, cipher.slots);
+	return Cipher(ax, bx, newmod, newcbits, cipher.slots, cipher.isComplex);
 }
 
 Cipher Scheme::modDownTo(Cipher& cipher, long newcbits) {
@@ -502,7 +501,7 @@ Cipher Scheme::leftRotateFast(Cipher& cipher, long rotSlots) {
 	Ring2Utils::rightShiftAndEqual(bxres, params.logq, params.N);
 
 	Ring2Utils::addAndEqual(bxres, bxrot, cipher.mod, params.N);
-	return Cipher(axres, bxres, cipher.mod, cipher.cbits, cipher.slots);
+	return Cipher(axres, bxres, cipher.mod, cipher.cbits, cipher.slots, cipher.isComplex);
 }
 
 void Scheme::leftRotateAndEqualFast(Cipher& cipher, long rotSlots) {
