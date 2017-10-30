@@ -38,7 +38,7 @@ Message Scheme::encode(CZZ*& vals, long slots, long cbits, bool isComplex) {
 		idx += gap;
 	}
 	delete[] gvals;
-	return Message(mx, mod, cbits, slots);
+	return Message(mx, mod, cbits, slots, isComplex);
 }
 
 CZZ* Scheme::decode(Message& msg) {
@@ -67,15 +67,11 @@ Message Scheme::encodeSingle(CZZ& val, long cbits, bool isComplex) {
 	ZZX mx;
 	mx.SetLength(params.N);
 	ZZ mod = power2_ZZ(cbits);
+	mx.rep[0] = val.r << params.logq;
 	if(isComplex) {
-		CZZ gval = val << params.logq;
-		mx.rep[0] = gval.r;
-		mx.rep[params.N / 2] = gval.i;
-		return Message(mx, mod, cbits);
-	} else {
-		mx.rep[0] = val.r << params.logq;
-		return Message(mx, mod, cbits, 1, false);
+		mx.rep[params.N / 2] = val.i << params.logq;
 	}
+	return Message(mx, mod, cbits, 1, isComplex);
 }
 
 CZZ Scheme::decodeSingle(Message& msg) {
