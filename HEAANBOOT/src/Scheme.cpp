@@ -720,23 +720,23 @@ Cipher Scheme::evaluateSin2pix7(Cipher& cipher, long pBits) {
 	Cipher cipher4 = square(cipher2); //depth 2
 	reScaleByAndEqual(cipher4, pBits);
 	RR c = -4*Pi*Pi*Pi/3;
-	ZZ pc = EvaluatorUtils::evaluateVal(c, pBits);
+	ZZ pc = EvaluatorUtils::evalZZ(c, pBits);
 	Cipher tmp = multByConst(cipher, pc);
 	reScaleByAndEqual(tmp, pBits); // depth 1
 
 	c = -3/(2*Pi*Pi);
-	pc = EvaluatorUtils::evaluateVal(c, pBits);
+	pc = EvaluatorUtils::evalZZ(c, pBits);
 	Cipher cipher13 = addConst(cipher2, pc);
 	multAndEqual(cipher13, tmp);
 	reScaleByAndEqual(cipher13, pBits); // depth 2
 
 	c = -8*Pi*Pi*Pi*Pi*Pi*Pi*Pi/315;
-	pc = EvaluatorUtils::evaluateVal(c, pBits);
+	pc = EvaluatorUtils::evalZZ(c, pBits);
 	tmp = multByConst(cipher, pc);
 	reScaleByAndEqual(tmp, pBits); // depth 1
 
 	c = -21/(2*Pi*Pi);
-	pc = EvaluatorUtils::evaluateVal(c, pBits);
+	pc = EvaluatorUtils::evalZZ(c, pBits);
 	Cipher cipher57 = addConst(cipher2, pc);
 	multAndEqual(cipher57, tmp);
 	reScaleByAndEqual(cipher57, pBits); // depth 2
@@ -754,23 +754,23 @@ void Scheme::evaluateSin2pix7AndEqual(Cipher& cipher, long pBits) {
 	Cipher cipher4 = square(cipher2); //depth 2
 	reScaleByAndEqual(cipher4, pBits);
 	RR c = -4*Pi*Pi*Pi/3;
-	ZZ pc = EvaluatorUtils::evaluateVal(c, pBits);
+	ZZ pc = EvaluatorUtils::evalZZ(c, pBits);
 	Cipher tmp = multByConst(cipher, pc);
 	reScaleByAndEqual(tmp, pBits); // depth 1
 
 	c = -3/(2*Pi*Pi);
-	pc = EvaluatorUtils::evaluateVal(c, pBits);
+	pc = EvaluatorUtils::evalZZ(c, pBits);
 	Cipher cipher13 = addConst(cipher2, pc);
 	multAndEqual(cipher13, tmp);
 	reScaleByAndEqual(cipher13, pBits); // depth 2
 
 	c = -8*Pi*Pi*Pi*Pi*Pi*Pi*Pi/315;
-	pc = EvaluatorUtils::evaluateVal(c, pBits);
+	pc = EvaluatorUtils::evalZZ(c, pBits);
 	tmp = multByConst(cipher, pc);
 	reScaleByAndEqual(tmp, pBits); // depth 1
 
 	c = -21/(2*Pi*Pi);
-	pc = EvaluatorUtils::evaluateVal(c, pBits);
+	pc = EvaluatorUtils::evalZZ(c, pBits);
 	cipher = addConst(cipher2, pc);
 	multAndEqual(cipher, tmp);
 	reScaleByAndEqual(cipher, pBits); // depth 2
@@ -789,20 +789,20 @@ Cipher Scheme::evaluateCos2pix6(Cipher& cipher, long pBits) {
 	reScaleByAndEqual(cipher4, pBits);
 
 	RR c = -1/(2*Pi*Pi);
-	ZZ pc = EvaluatorUtils::evaluateVal(c, pBits);
+	ZZ pc = EvaluatorUtils::evalZZ(c, pBits);
 	Cipher cipher02 = addConst(cipher2, pc);
 
 	c = -2*Pi*Pi;
-	pc = EvaluatorUtils::evaluateVal(c, pBits);
+	pc = EvaluatorUtils::evalZZ(c, pBits);
 	multByConstAndEqual(cipher02, pc);
 	reScaleByAndEqual(cipher02, pBits); // depth 2
 
 	c = -15/(2*Pi*Pi);
-	pc = EvaluatorUtils::evaluateVal(c, pBits);
+	pc = EvaluatorUtils::evalZZ(c, pBits);
 	Cipher cipher46 = addConst(cipher2, pc);
 
 	c = -4*Pi*Pi*Pi*Pi*Pi*Pi/45;
-	pc = EvaluatorUtils::evaluateVal(c, pBits);
+	pc = EvaluatorUtils::evalZZ(c, pBits);
 	multByConstAndEqual(cipher46, pc);
 	reScaleByAndEqual(cipher46, pBits); // depth 2
 
@@ -822,20 +822,20 @@ void Scheme::evaluateCos2pix6AndEqual(Cipher& cipher, long pBits) {
 	reScaleByAndEqual(cipher4, pBits);
 
 	RR c = -1/(2*Pi*Pi);
-	ZZ pc = EvaluatorUtils::evaluateVal(c, pBits);
+	ZZ pc = EvaluatorUtils::evalZZ(c, pBits);
 	Cipher cipher02 = addConst(cipher2, pc);
 
 	c = -2*Pi*Pi;
-	pc = EvaluatorUtils::evaluateVal(c, pBits);
+	pc = EvaluatorUtils::evalZZ(c, pBits);
 	multByConstAndEqual(cipher02, pc);
 	reScaleByAndEqual(cipher02, pBits); // depth 2
 
 	c = -15/(2*Pi*Pi);
-	pc = EvaluatorUtils::evaluateVal(c, pBits);
+	pc = EvaluatorUtils::evalZZ(c, pBits);
 	cipher = addConst(cipher2, pc);
 
 	c = -4*Pi*Pi*Pi*Pi*Pi*Pi/45;
-	pc = EvaluatorUtils::evaluateVal(c, pBits);
+	pc = EvaluatorUtils::evalZZ(c, pBits);
 	multByConstAndEqual(cipher, pc);
 	reScaleByAndEqual(cipher, pBits); // depth 2
 
@@ -875,7 +875,7 @@ Cipher Scheme::removeIpart(Cipher& cipher, long logq0, long logT, long logI) {
 		cipherCosx = cipherCos2x;
 	}
 	cipherSinx = evaluateSin2x(cipherSinx, cipherCosx, logq0 + logI);
-	ZZ temp = EvaluatorUtils::evaluateVal(1/(2*Pi), logq0 + logI);
+	ZZ temp = EvaluatorUtils::evalZZ(1/(2*Pi), logq0 + logI);
 	multByConstAndEqual(cipherSinx, temp);
 	reScaleByAndEqual(cipherSinx, logq0 + 2 * logI);
 	return cipherSinx;
@@ -896,7 +896,7 @@ void Scheme::removeIpartAndEqual(Cipher& cipher, long logq0, long logT, long log
 	}
 	cipher = evaluateSin2x(cipherSinx, cipherCosx, logq0 + logI);
 
-	ZZ temp = EvaluatorUtils::evaluateVal(1/(2*Pi), logq0 + logI);
+	ZZ temp = EvaluatorUtils::evalZZ(1/(2*Pi), logq0 + logI);
 	multByConstAndEqual(cipher, temp);
 	reScaleByAndEqual(cipher, logq0 + 2 * logI);
 }

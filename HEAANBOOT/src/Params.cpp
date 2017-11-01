@@ -12,17 +12,17 @@ Params::Params(long logN, long logq, double sigma, long h) :
 
 	rotGroup = new long[N / 2];
 
-	long val = 1;
-	long N2 = N << 1;
+	long tmp = 1;
+	long M = N << 1;
 	for (long i = 0; i < N / 2; ++i) {
-		rotGroup[i] = val;
-		val *= 5;
-		val %= N2;
+		rotGroup[i] = tmp;
+		tmp *= 5;
+		tmp %= M;
 	}
 }
 
 long Params::suggestlogN(long lambda, long logq) {
-	long res = 2 * logq * (lambda + 110) / 7.2;
+	long res = ceil(logq * (lambda + 110) / 3.6);
 	double logres = log2((double)res);
 	return (long)ceil(logres);
 }

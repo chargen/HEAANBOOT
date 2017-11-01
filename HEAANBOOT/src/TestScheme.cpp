@@ -36,7 +36,7 @@ void TestScheme::testEncodeBatch(long logN, long logq, long precisionBits, long 
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
-	CZZ* mvec = EvaluatorUtils::evaluateRandomVals(slots, precisionBits);
+	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
 	//-----------------------------------------
 	timeutils.start("Encrypt batch");
 	Cipher cipher = scheme.encrypt(mvec, slots, logq);
@@ -65,7 +65,7 @@ void TestScheme::testConjugateBatch(long logN, long logq, long precisionBits, lo
 	publicKey.addConjKey(params, secretKey);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
-	CZZ* mvec = EvaluatorUtils::evaluateRandomVals(slots, precisionBits);
+	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
 	CZZ* mvecconj = new CZZ[slots];
 	for (long i = 0; i < slots; ++i) {
 		mvecconj[i] = mvec[i].conjugate();
@@ -94,7 +94,7 @@ void TestScheme::testimultBatch(long logN, long logq, long precisionBits, long l
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
-	CZZ* mvec = EvaluatorUtils::evaluateRandomVals(slots, precisionBits);
+	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
 	CZZ* imvec = new CZZ[slots];
 	for (long i = 0; i < slots; ++i) {
 		imvec[i].r = -mvec[i].i;
@@ -127,7 +127,7 @@ void TestScheme::testRotateByPo2Batch(long logN, long logq, long precisionBits, 
 	//-----------------------------------------
 	long slots = (1 << logSlots);
 	long rotSlots = (1 << rotlogSlots);
-	CZZ* mvec = EvaluatorUtils::evaluateRandomVals(slots, precisionBits);
+	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
 	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	if(isLeft) {
@@ -165,7 +165,7 @@ void TestScheme::testRotateBatch(long logN, long logq, long precisionBits, long 
 	publicKey.addRightRotKeys(params, secretKey);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
-	CZZ* mvec = EvaluatorUtils::evaluateRandomVals(slots, precisionBits);
+	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
 	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	if(isLeft) {
@@ -202,7 +202,7 @@ void TestScheme::testSlotsSum(long logN, long logq, long precisionBits, long log
 	publicKey.addLeftRotKeys(params, secretKey);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
-	CZZ* mvec = EvaluatorUtils::evaluateRandomVals(slots, precisionBits);
+	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
 	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start("slots sum");
@@ -246,10 +246,10 @@ void TestScheme::testPowerOf2Batch(long logN, long logq, long precisionBits, lon
 		RR angle = random_RR();
 		RR mr = cos(angle * 2 * Pi);
 		RR mi = sin(angle * 2 * Pi);
-		mvec[i] = EvaluatorUtils::evaluateVal(mr, mi, precisionBits);
-		mpow[i] = EvaluatorUtils::evaluatePow2(mr, mi, logDegree, precisionBits);
+		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
+		mpow[i] = EvaluatorUtils::evalCZZPow2(mr, mi, logDegree, precisionBits);
 		for (int j = 0; j < logDegree + 1; ++j) {
-			mpows[j][i] = EvaluatorUtils::evaluatePow2(mr, mi, j, precisionBits);
+			mpows[j][i] = EvaluatorUtils::evalCZZPow2(mr, mi, j, precisionBits);
 		}
 	}
 	Cipher cipher = scheme.encrypt(mvec, slots, logq);
@@ -285,8 +285,8 @@ void TestScheme::testPowerBatch(long logN, long logq, long precisionBits, long d
 		RR angle = random_RR();
 		RR mr = cos(angle * 2 * Pi);
 		RR mi = sin(angle * 2 * Pi);
-		mvec[i] = EvaluatorUtils::evaluateVal(mr, mi, precisionBits);
-		mpow[i] = EvaluatorUtils::evaluatePow(mr, mi, degree, precisionBits);
+		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
+		mpow[i] = EvaluatorUtils::evalCZZPow(mr, mi, degree, precisionBits);
 	}
 	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
@@ -324,7 +324,7 @@ void TestScheme::testProdOfPo2Batch(long logN, long logq, long precisionBits, lo
 	CZZ* pvec = new CZZ[slots];
 	for (long i = 0; i < degree; ++i) {
 		for (long j = 0; j < slots; ++j) {
-			mvec[i][j] = EvaluatorUtils::evaluateRandomCircleVal(precisionBits);
+			mvec[i][j] = EvaluatorUtils::evalRandCZZCircle(precisionBits);
 		}
 	}
 	for (long j = 0; j < slots; ++j) {
@@ -369,7 +369,7 @@ void TestScheme::testProdBatch(long logN, long logq, long precisionBits, long de
 	CZZ* pvec = new CZZ[slots];
 	for (long i = 0; i < degree; ++i) {
 		for (long j = 0; j < slots; ++j) {
-			mvec[i][j] = EvaluatorUtils::evaluateRandomCircleVal(precisionBits);
+			mvec[i][j] = EvaluatorUtils::evalRandCZZCircle(precisionBits);
 		}
 	}
 	for (long j = 0; j < slots; ++j) {
@@ -413,8 +413,8 @@ void TestScheme::testInverseBatch(long logN, long logq, long precisionBits, long
 		RR angle = random_RR() / 20;
 		RR mr = cos(angle * 2 * Pi);
 		RR mi = sin(angle * 2 * Pi);
-		mvec[i] = EvaluatorUtils::evaluateVal(1 - mr, -mi, precisionBits);
-		minv[i] = EvaluatorUtils::evaluateInverse(mr, mi, precisionBits);
+		mvec[i] = EvaluatorUtils::evalCZZ(1 - mr, -mi, precisionBits);
+		minv[i] = EvaluatorUtils::evalCZZInv(mr, mi, precisionBits);
 	}
 	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
@@ -447,8 +447,8 @@ void TestScheme::testLogarithmBatch(long logN, long logq, long precisionBits, lo
 	for (long i = 0; i < slots; ++i) {
 		double mr = (double)rand() / RAND_MAX / 20;
 		double mi = (double)rand() / RAND_MAX / 20;
-		mvec[i] = EvaluatorUtils::evaluateVal(mr, mi, precisionBits);
-		mlog[i] = EvaluatorUtils::evaluateLogarithm(1 + mr, mi, precisionBits);
+		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
+		mlog[i] = EvaluatorUtils::evalCZZLog(1 + mr, mi, precisionBits);
 	}
 	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
@@ -481,8 +481,8 @@ void TestScheme::testExponentBatch(long logN, long logq, long precisionBits, lon
 	for (long i = 0; i < slots; ++i) {
 		RR mr = random_RR();
 		RR mi = random_RR();
-		mvec[i] = EvaluatorUtils::evaluateVal(mr, mi, precisionBits);
-		mexp[i] = EvaluatorUtils::evaluateExponent(mr, mi, precisionBits);
+		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
+		mexp[i] = EvaluatorUtils::evalCZZExp(mr, mi, precisionBits);
 	}
 	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
@@ -513,8 +513,8 @@ void TestScheme::testExponentBatchLazy(long logN, long logq, long precisionBits,
 	for (long i = 0; i < slots; ++i) {
 		RR mr = random_RR();
 		RR mi = random_RR();
-		mvec[i] = EvaluatorUtils::evaluateVal(mr, mi, precisionBits);
-		mexp[i] = EvaluatorUtils::evaluateExponent(mr, mi, precisionBits);
+		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
+		mexp[i] = EvaluatorUtils::evalCZZExp(mr, mi, precisionBits);
 	}
 	EvaluatorUtils::leftShiftAndEqual(mexp, slots, precisionBits);
 	Cipher cipher = scheme.encrypt(mvec, slots, logq);
@@ -548,8 +548,8 @@ void TestScheme::testSigmoidBatch(long logN, long logq, long precisionBits, long
 	for (long i = 0; i < slots; ++i) {
 		RR mr = random_RR();
 		RR mi = random_RR();
-		mvec[i] = EvaluatorUtils::evaluateVal(mr, mi, precisionBits);
-		msig[i] = EvaluatorUtils::evaluateSigmoid(mr, mi, precisionBits);
+		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
+		msig[i] = EvaluatorUtils::evalCZZSigmoid(mr, mi, precisionBits);
 	}
 	Cipher cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
@@ -580,8 +580,8 @@ void TestScheme::testSigmoidBatchLazy(long logN, long logq, long precisionBits, 
 	for (long i = 0; i < slots; ++i) {
 		RR mr = random_RR();
 		RR mi = random_RR();
-		mvec[i] = EvaluatorUtils::evaluateVal(mr, mi, precisionBits);
-		msig[i] = EvaluatorUtils::evaluateSigmoid(mr, mi, precisionBits);
+		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
+		msig[i] = EvaluatorUtils::evalCZZSigmoid(mr, mi, precisionBits);
 	}
 	EvaluatorUtils::leftShiftAndEqual(msig, slots, precisionBits);
 	Cipher cipher = scheme.encrypt(mvec, slots, logq);
@@ -617,8 +617,8 @@ void TestScheme::testFFTBatch(long logN, long logq, long precisionBits, long log
 	CZZ** mvec2 = new CZZ*[slots];
 
 	for (long i = 0; i < slots; ++i) {
-		mvec1[i] = EvaluatorUtils::evaluateRandomVals(fftdim, precisionBits);
-		mvec2[i] = EvaluatorUtils::evaluateRandomVals(fftdim, precisionBits);
+		mvec1[i] = EvaluatorUtils::evalRandCZZArray(fftdim, precisionBits);
+		mvec2[i] = EvaluatorUtils::evalRandCZZArray(fftdim, precisionBits);
 	}
 
 	Cipher* cvec1 = new Cipher[fftdim];
@@ -696,8 +696,8 @@ void TestScheme::testFFTBatchLazy(long logN, long logq, long precisionBits, long
 	CZZ** mvec2 = new CZZ*[slots];
 
 	for (long i = 0; i < slots; ++i) {
-		mvec1[i] = EvaluatorUtils::evaluateRandomVals(fftdim, precisionBits);
-		mvec2[i] = EvaluatorUtils::evaluateRandomVals(fftdim, precisionBits);
+		mvec1[i] = EvaluatorUtils::evalRandCZZArray(fftdim, precisionBits);
+		mvec2[i] = EvaluatorUtils::evalRandCZZArray(fftdim, precisionBits);
 	}
 
 	Cipher* cvec1 = new Cipher[fftdim];
@@ -778,7 +778,7 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logq, long pre
 		mvecs[h] = new CZZ*[slots];
 
 		for (long i = 0; i < slots; ++i) {
-			mvecs[h][i] = EvaluatorUtils::evaluateRandomVals(fftdim, precisionBits);
+			mvecs[h][i] = EvaluatorUtils::evalRandCZZArray(fftdim, precisionBits);
 		}
 
 		cvecs[h] = new Cipher[fftdim];
@@ -882,7 +882,7 @@ void TestScheme::testBootstrap() {
 	SetNumThreads(1);
 
 
-	CZZ* mvec = EvaluatorUtils::evaluateRandomVals(slots, msgBits);
+	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, msgBits);
 
 	//-----------------------------------------
 	timeutils.start("Encrypt batch");
@@ -1038,7 +1038,7 @@ void TestScheme::testBoundOfI() {
 	//-----------------------------------------
 	SetNumThreads(1);
 
-	CZZ* mvec = EvaluatorUtils::evaluateRandomVals(slots, msgBits);
+	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, msgBits);
 
 	//-----------------------------------------
 	timeutils.start("Encrypt batch");

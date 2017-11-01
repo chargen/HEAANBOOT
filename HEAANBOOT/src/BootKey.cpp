@@ -28,14 +28,14 @@ BootKey::BootKey(Params& params, SchemeAux& aux, long pBits, long l) : pBits(pBi
 	for (long j = 0; j < lpow; ++j) {
 		for (long i = j; i < lpow; ++i) {
 			long deg =((2 * params.N - params.rotGroup[i]) * (i - j) * Noverl) % (2 * params.N);
-			CZZ tmp = EvaluatorUtils::evaluateVal(aux.ksiPowsr[deg], aux.ksiPowsi[deg], pBits);
+			CZZ tmp = EvaluatorUtils::evalCZZ(aux.ksiPowsr[deg], aux.ksiPowsi[deg], pBits);
 			long idx = (params.rotGroup[i-j] % (2 * lpow2)  - 1) / 2;
 					pdvals[idx] = tmp;
 					pdvals[lpow2 - idx - 1] = tmp.conjugate();
 		}
 		for (long i = 0; i < j; ++i) {
 			long deg =((2 * params.N - params.rotGroup[i]) * (lpow + i - j) * Noverl) % (2 * params.N);
-			CZZ tmp = EvaluatorUtils::evaluateVal(aux.ksiPowsr[deg], aux.ksiPowsi[deg], pBits);
+			CZZ tmp = EvaluatorUtils::evalCZZ(aux.ksiPowsr[deg], aux.ksiPowsi[deg], pBits);
 			long idx = (params.rotGroup[lpow + i - j] % (2 * lpow2) - 1) / 2;
 			pdvals[idx] = tmp;
 			pdvals[lpow2 - idx - 1] = tmp.conjugate();
@@ -55,14 +55,14 @@ BootKey::BootKey(Params& params, SchemeAux& aux, long pBits, long l) : pBits(pBi
 	for (long j = 0; j < lpow; ++j) {
 		for (long i = j; i < lpow; ++i) {
 			long deg =(params.rotGroup[i-j] * i * Noverl) % (2 * params.N);
-			CZZ tmp = EvaluatorUtils::evaluateVal(aux.ksiPowsr[deg], aux.ksiPowsi[deg], pBits);
+			CZZ tmp = EvaluatorUtils::evalCZZ(aux.ksiPowsr[deg], aux.ksiPowsi[deg], pBits);
 			long idx = (params.rotGroup[i-j] % (2 * lpow2) - 1) / 2;
 			pdvals[idx] = tmp;
 			pdvals[lpow2 - idx - 1] = tmp.conjugate();
 		}
 		for (long i = 0; i < j; ++i) {
 			long deg = (params.rotGroup[lpow + i - j] * i * Noverl) % (2 * params.N);
-			CZZ tmp = EvaluatorUtils::evaluateVal(aux.ksiPowsr[deg], aux.ksiPowsi[deg], pBits);
+			CZZ tmp = EvaluatorUtils::evalCZZ(aux.ksiPowsr[deg], aux.ksiPowsi[deg], pBits);
 			long idx = (params.rotGroup[lpow + i - j] % (2 * lpow2) - 1) / 2;
 			pdvals[idx] = tmp;
 			pdvals[lpow2 - idx - 1] = tmp.conjugate();

@@ -273,15 +273,15 @@ Cipher SchemeAlgo::function(Cipher& cipher, string& funcName, const long precisi
 
 	double* coeffs = scheme.aux.taylorCoeffsMap.at(funcName);
 
-	ZZ tmp = EvaluatorUtils::evaluateVal(coeffs[1], precisionBits);
+	ZZ tmp = EvaluatorUtils::evalZZ(coeffs[1], precisionBits);
 	Cipher res = scheme.multByConst(cpows[0], tmp);
 
-	tmp = EvaluatorUtils::evaluateVal(coeffs[0], dprecisionBits);
+	tmp = EvaluatorUtils::evalZZ(coeffs[0], dprecisionBits);
 	scheme.addConstAndEqual(res, tmp);
 
 	for (int i = 1; i < degree; ++i) {
 		if(abs(coeffs[i + 1]) > 1e-27) {
-			tmp = EvaluatorUtils::evaluateVal(coeffs[i + 1], precisionBits);
+			tmp = EvaluatorUtils::evalZZ(coeffs[i + 1], precisionBits);
 			Cipher aixi = scheme.multByConst(cpows[i], tmp);
 			long bitsDown = res.cbits - aixi.cbits;
 			scheme.modDownByAndEqual(res, bitsDown);
@@ -299,15 +299,15 @@ Cipher SchemeAlgo::functionLazy(Cipher& cipher, string& funcName, const long pre
 
 	double* coeffs = scheme.aux.taylorCoeffsMap.at(funcName);
 
-	ZZ tmp = EvaluatorUtils::evaluateVal(coeffs[1], precisionBits);
+	ZZ tmp = EvaluatorUtils::evalZZ(coeffs[1], precisionBits);
 	Cipher res = scheme.multByConst(cpows[0], tmp);
 
-	tmp = EvaluatorUtils::evaluateVal(coeffs[0], dprecisionBits);
+	tmp = EvaluatorUtils::evalZZ(coeffs[0], dprecisionBits);
 	scheme.addConstAndEqual(res, tmp);
 
 	for (int i = 1; i < degree; ++i) {
 		if(abs(coeffs[i + 1]) > 1e-27) {
-			tmp = EvaluatorUtils::evaluateVal(coeffs[i + 1], precisionBits);
+			tmp = EvaluatorUtils::evalZZ(coeffs[i + 1], precisionBits);
 			Cipher aixi = scheme.multByConst(cpows[i], tmp);
 			long bitsDown = res.cbits - aixi.cbits;
 			scheme.modDownByAndEqual(res, bitsDown);
@@ -323,17 +323,17 @@ Cipher* SchemeAlgo::functionExtended(Cipher& cipher, string& funcName, const lon
 	long dprecisionBits = 2 * precisionBits;
 	double* coeffs = scheme.aux.taylorCoeffsMap.at(funcName);
 
-	ZZ tmp = EvaluatorUtils::evaluateVal(coeffs[1], precisionBits);
+	ZZ tmp = EvaluatorUtils::evalZZ(coeffs[1], precisionBits);
 	Cipher aixi = scheme.multByConst(cpows[0], tmp);
 
-	tmp = EvaluatorUtils::evaluateVal(coeffs[0], dprecisionBits);
+	tmp = EvaluatorUtils::evalZZ(coeffs[0], dprecisionBits);
 	scheme.addConstAndEqual(aixi, tmp);
 
 	Cipher* res = new Cipher[degree];
 	res[0] = aixi;
 	for (long i = 1; i < degree; ++i) {
 		if(abs(coeffs[i + 1]) > 1e-27) {
-			tmp = EvaluatorUtils::evaluateVal(coeffs[i + 1], precisionBits);
+			tmp = EvaluatorUtils::evalZZ(coeffs[i + 1], precisionBits);
 			aixi = scheme.multByConst(cpows[i], tmp);
 			long bitsDown = res[i - 1].cbits - aixi.cbits;
 			Cipher ctmp = scheme.modDownBy(res[i - 1], bitsDown);
