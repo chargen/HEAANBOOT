@@ -944,12 +944,36 @@ void Scheme::bootstrapAndEqual(Cipher& cipher, long logq0, long logq, long logT,
 		reScaleByAndEqual(cipher, params.logN - 1 - logSlots);
 		linearTransformAndEqual(cipher, cipher.slots * 2);
 
-		Cipher cipherConj = conjugate(cipher);
-		addAndEqual(cipher, cipherConj);
+		Cipher cconj = conjugate(cipher);
+		addAndEqual(cipher, cconj);
 		reScaleByAndEqual(cipher, logq0 + logI + logSlots + 2);
 
 		removeIpartAndEqual(cipher, logq0, logT, logI);
 		linearTransformInvAndEqual(cipher, cipher.slots * 2);
 		reScaleByAndEqual(cipher, logq0 + logI);
 	}
+}
+
+Cipher Scheme::bootstrapOneReal(Cipher& cipher, long logq0, long logq, long logT, long logI = 4) {
+	Cipher boot = cipher;
+	bootstrapOneRealAndEqual(boot, logq0, logq, logT, logI);
+	return boot;
+}
+
+void Scheme::bootstrapOneRealAndEqual(Cipher& cipher, long logq0, long logq, long logT, long logI = 4) {
+	long logSlots = log2(cipher.slots);
+	modDownToAndEqual(cipher, logq0);
+	normalizeAndEqual(cipher);
+	cipher.cbits = logq;
+	cipher.mod = power2_ZZ(logq);
+
+	for (long i = logSlots; i < params.logN - 1; ++i) {
+		Cipher rot = leftRotateByPo2(cipher, i);
+		addAndEqual(cipher, rot);
+	}
+
+	Cipher cconj = conjugate(cipher);
+	addAndEqual(cipher, cconj);
+	reScaleByAndEqual(cipher, params.logN - logSlots);
+	removeIpartAndEqual(cipher, logq0, logT);
 }

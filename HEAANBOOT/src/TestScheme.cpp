@@ -890,64 +890,48 @@ void TestScheme::testBootstrap() {
 	timeutils.stop("Encrypt batch");
 
 	scheme.normalizeAndEqual(cipher);
-
 	cipher.cbits = logq;
 	cipher.mod = power2_ZZ(logq);
 
-	Cipher cboot;
-	if(logSlots == scheme.params.logN - 1) {
-		timeutils.start("Linear Transformation");
-		Cipher clinEven = scheme.linearTransform(cipher, slots);
-		Cipher cshift1 = scheme.multByMonomial(cipher, 2 * scheme.params.N - 1);
-		Cipher clinOdd = scheme.linearTransform(cshift1, slots);
-		Cipher clinEvenConj = scheme.conjugate(clinEven);
-		Cipher clinOddConj = scheme.conjugate(clinOdd);
-		scheme.addAndEqual(clinEven, clinEvenConj);
-		scheme.addAndEqual(clinOdd, clinOddConj);
-		scheme.reScaleByAndEqual(clinEven, logq0 + logI + logSlots + 1);
-		scheme.reScaleByAndEqual(clinOdd, logq0 + logI + logSlots + 1);
-		timeutils.stop("Linear Transformation");
+	if(logSlots == params.logN - 1) {
+		Cipher cshift1 = scheme.multByMonomial(cipher, 2 * params.N - 1);
+		scheme.linearTransformAndEqual(cipher, params.N / 2);
+		scheme.linearTransformAndEqual(cshift1, params.N / 2);
 
-		timeutils.start("Remove I Part");
-		Cipher csinEven = scheme.removeIpart(clinEven, logq0, logT, logI);
-		Cipher csinOdd = scheme.removeIpart(clinOdd, logq0, logT, logI);
-		timeutils.stop("Remove I Part");
+		Cipher clinEvenConj = scheme.conjugate(cipher);
+		scheme.addAndEqual(cipher, clinEvenConj);
+		scheme.reScaleByAndEqual(cipher, logq0 + logI + logSlots);
 
-		timeutils.start("Linear Transformation Inv");
-		cboot = scheme.linearTransformInv(csinEven, slots);
-		Cipher cresOdd = scheme.linearTransformInv(csinOdd, slots);
-		scheme.multByMonomialAndEqual(cresOdd, 1);
-		scheme.addAndEqual(cboot, cresOdd);
-		scheme.reScaleByAndEqual(cboot, logq0 + logI);
-		timeutils.stop("Linear Transformation Inv");
+		Cipher clinOddConj = scheme.conjugate(cshift1);
+		scheme.addAndEqual(cshift1, clinOddConj);
+		scheme.reScaleByAndEqual(cshift1, logq0 + logI + logSlots);
+
+		scheme.removeIpartAndEqual(cipher, logq0, logT, logI);
+		scheme.removeIpartAndEqual(cshift1, logq0, logT, logI);
+
+		scheme.linearTransformInvAndEqual(cipher, params.N / 2);
+		scheme.linearTransformInvAndEqual(cshift1, params.N / 2);
+
+		scheme.multByMonomialAndEqual(cshift1, 1);
+		scheme.addAndEqual(cipher, cshift1);
+		scheme.reScaleByAndEqual(cipher, logq0 + logI);
 	} else {
-		Cipher rotated = cipher;
-		timeutils.start("Rotation");
 		for (long i = logSlots; i < params.logN - 1; ++i) {
-			Cipher rot = scheme.leftRotateByPo2(rotated, i);
-			scheme.addAndEqual(rotated, rot);
+			Cipher rot = scheme.leftRotateByPo2(cipher, i);
+			scheme.addAndEqual(cipher, rot);
 		}
-		scheme.reScaleByAndEqual(rotated, params.logN - 1 - logSlots);
-		timeutils.stop("Rotation");
+		scheme.reScaleByAndEqual(cipher, params.logN - 1 - logSlots);
+		scheme.linearTransformAndEqual(cipher, cipher.slots * 2);
 
-		timeutils.start("Linear Transformation");
-		Cipher clinEven = scheme.linearTransform(rotated, slots * 2);
-		Cipher clinEvenConj = scheme.conjugate(clinEven);
-		scheme.addAndEqual(clinEven, clinEvenConj);
-		scheme.reScaleByAndEqual(clinEven, logq0 + logI + logSlots + 2);
-		timeutils.stop("Linear Transformation");
+		Cipher cipherConj = scheme.conjugate(cipher);
+		scheme.addAndEqual(cipher, cipherConj);
+		scheme.reScaleByAndEqual(cipher, logq0 + logI + logSlots + 2);
 
-		timeutils.start("Remove I Part");
-		Cipher csinEven = scheme.removeIpart(clinEven, logq0, logT, logI);
-		timeutils.stop("Remove I Part");
-
-		timeutils.start("Linear Transformation Inv");
-		cboot = scheme.linearTransformInv(csinEven, slots * 2);
-		scheme.reScaleByAndEqual(cboot, logq0 + logI);
-		timeutils.stop("Linear Transformation Inv");
+		scheme.removeIpartAndEqual(cipher, logq0, logT, logI);
+		scheme.linearTransformInvAndEqual(cipher, cipher.slots * 2);
+		scheme.reScaleByAndEqual(cipher, logq0 + logI);
 	}
-	timeutils.start("Decrypt batch");
-	CZZ* dvec = scheme.decrypt(secretKey, cboot);
+	CZZ* dvec = scheme.decrypt(secretKey, cipher);
 	timeutils.stop("Decrypt batch");
 
 	StringUtils::showcompare(mvec, dvec, slots, "m");
@@ -993,24 +977,20 @@ void TestScheme::testBootstrapOneReal() {
 
 	cipher.cbits = logq;
 	cipher.mod = power2_ZZ(logq);
-	timeutils.start("Linear Transform");
-	Cipher rotated = cipher;
-	for (long i = logSlots; i < scheme.params.logN - 1; ++i) {
-		Cipher rot = scheme.leftRotateByPo2(rotated, i);
-		scheme.addAndEqual(rotated, rot);
+
+	for (long i = logSlots; i < params.logN - 1; ++i) {
+		Cipher rot = scheme.leftRotateByPo2(cipher, i);
+		scheme.addAndEqual(cipher, rot);
 	}
-	Cipher cconj = scheme.conjugate(rotated);
-	scheme.addAndEqual(rotated, cconj);
-	scheme.reScaleByAndEqual(rotated, scheme.params.logN - logSlots);
-	timeutils.stop("Linear Transform");
+	Cipher cconj = scheme.conjugate(cipher);
+	scheme.addAndEqual(cipher, cconj);
+	scheme.reScaleByAndEqual(cipher, params.logN - logSlots);
 
-	timeutils.start("remove I part 1");
-	Cipher encsin1 = scheme.removeIpart(rotated, logq0, logT);
-	timeutils.stop("remove I part 1");
+	scheme.removeIpartAndEqual(cipher, logq0, logT);
 
-	cout << encsin1.cbits << endl;
+
 	timeutils.start("Decrypt batch");
-	CZZ* dvec = scheme.decrypt(secretKey, encsin1);
+	CZZ* dvec = scheme.decrypt(secretKey, cipher);
 	timeutils.stop("Decrypt batch");
 
 	StringUtils::showcompare(mvec, dvec, slots, "m");

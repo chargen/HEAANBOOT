@@ -413,6 +413,11 @@ public:
 	Cipher bootstrap(Cipher& cipher, long logq0, long logq, long logT, long logI = 4);
 
 	void bootstrapAndEqual(Cipher& cipher, long logq0, long logq, long logT, long logI = 4);
+
+	Cipher bootstrapOneReal(Cipher& cipher, long logq0, long logq, long logT, long logI = 4);
+
+	void bootstrapOneRealAndEqual(Cipher& cipher, long logq0, long logq, long logT, long logI = 4);
+
 };
 
 #endif /* SCHEME_SCHEME_H_ */
