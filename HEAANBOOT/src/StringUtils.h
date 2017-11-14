@@ -1,5 +1,5 @@
-#ifndef UTILS_STRINGUTILS_H_
-#define UTILS_STRINGUTILS_H_
+#ifndef HEAAN_STRINGUTILS_H_
+#define HEAAN_STRINGUTILS_H_
 
 #include <iostream>
 
@@ -62,4 +62,4 @@ public:
 
 };
 
-#endif /* UTILS_STRINGUTILS_H_ */
+#endif

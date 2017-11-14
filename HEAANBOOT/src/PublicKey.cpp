@@ -1,15 +1,15 @@
-#include "PubKey.h"
+#include "PublicKey.h"
 
 #include "NumUtils.h"
 #include "Params.h"
 #include "Ring2Utils.h"
 
-PubKey::PubKey(Params& params, SecKey& secretKey) {
+PublicKey::PublicKey(Params& params, SecretKey& secretKey) {
 	addEncKey(params, secretKey);
 	addMultKey(params, secretKey);
 }
 
-void PubKey::addEncKey(Params& params, SecKey& secretKey) {
+void PublicKey::addEncKey(Params& params, SecretKey& secretKey) {
 	ZZX ex, ax, bx;
 
 	NumUtils::sampleUniform2(ax, params.N, params.logqq);
@@ -20,7 +20,7 @@ void PubKey::addEncKey(Params& params, SecKey& secretKey) {
 	keyMap.insert(pair<long, RLWE>(ENCRYPTION, RLWE(ax, bx)));
 }
 
-void PubKey::addMultKey(Params& params, SecKey& secretKey) {
+void PublicKey::addMultKey(Params& params, SecretKey& secretKey) {
 	ZZX ex, ax, bx, sxsx;
 
 	Ring2Utils::mult(sxsx, secretKey.sx, secretKey.sx, params.q, params.N);
@@ -34,7 +34,7 @@ void PubKey::addMultKey(Params& params, SecKey& secretKey) {
 	keyMap.insert(pair<long, RLWE>(MULTIPLICATION, RLWE(ax, bx)));
 }
 
-void PubKey::addConjKey(Params& params, SecKey& secretKey) {
+void PublicKey::addConjKey(Params& params, SecretKey& secretKey) {
 	ZZX ex, ax, bx, sxconj;
 	Ring2Utils::conjugate(sxconj, secretKey.sx, params.N);
 	Ring2Utils::leftShiftAndEqual(sxconj, params.logq, params.qq, params.N);
@@ -47,7 +47,7 @@ void PubKey::addConjKey(Params& params, SecKey& secretKey) {
 	keyMap.insert(pair<long, RLWE>(CONJUGATION, RLWE(ax, bx)));
 }
 
-void PubKey::addLeftRotKey(Params& params, SecKey& secretKey, long rot) {
+void PublicKey::addLeftRotKey(Params& params, SecretKey& secretKey, long rot) {
 	ZZX ex, sxsx, ax, bx, spow;
 	Ring2Utils::inpower(spow, secretKey.sx, params.rotGroup[rot], params.q, params.N);
 	Ring2Utils::leftShiftAndEqual(spow, params.logq, params.qq, params.N);
@@ -59,7 +59,7 @@ void PubKey::addLeftRotKey(Params& params, SecKey& secretKey, long rot) {
 	leftRotKeyMap.insert(pair<long, RLWE>(rot, RLWE(ax, bx)));
 }
 
-void PubKey::addLeftRotKeys(Params& params, SecKey& secretKey) {
+void PublicKey::addLeftRotKeys(Params& params, SecretKey& secretKey) {
 	for (long i = 0; i < params.logN - 1; ++i) {
 		long idx = 1 << i;
 		if(leftRotKeyMap.find(idx) == leftRotKeyMap.end()) {
@@ -68,7 +68,7 @@ void PubKey::addLeftRotKeys(Params& params, SecKey& secretKey) {
 	}
 }
 
-void PubKey::addRightRotKeys(Params& params, SecKey& secretKey) {
+void PublicKey::addRightRotKeys(Params& params, SecretKey& secretKey) {
 	for (long i = 0; i < params.logN - 1; ++i) {
 		long idx = params.N/2 - (1 << i);
 		if(leftRotKeyMap.find(idx) == leftRotKeyMap.end()) {
@@ -77,7 +77,7 @@ void PubKey::addRightRotKeys(Params& params, SecKey& secretKey) {
 	}
 }
 
-void PubKey::addBootKeys(Params& params, SecKey& secretKey, SchemeAux& aux, long lkey, long pBits) {
+void PublicKey::addBootKeys(Params& params, SecretKey& secretKey, SchemeAux& aux, long lkey, long pBits) {
 
 	if(bootKeyMap.find(lkey) == bootKeyMap.end()) {
 		bootKeyMap.insert(pair<long, BootKey>(lkey, BootKey(params, aux, pBits, lkey)));
@@ -101,7 +101,7 @@ void PubKey::addBootKeys(Params& params, SecKey& secretKey, SchemeAux& aux, long
 	}
 }
 
-void PubKey::addSortKeys(Params& params, SecKey& secretKey, long size) {
+void PublicKey::addSortKeys(Params& params, SecretKey& secretKey, long size) {
 	for (long i = 1; i < size; ++i) {
 		if(leftRotKeyMap.find(i) == leftRotKeyMap.end()) {
 			addLeftRotKey(params, secretKey, i);

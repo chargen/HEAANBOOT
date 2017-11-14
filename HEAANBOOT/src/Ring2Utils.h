@@ -1,5 +1,5 @@
-#ifndef POLYSCHEME_ZRINGUTILS_H_
-#define POLYSCHEME_ZRINGUTILS_H_
+#ifndef HEAAN_RING2UTILS_H_
+#define HEAAN_RING2UTILS_H_
 
 #include <NTL/ZZ.h>
 #include <NTL/ZZX.h>
@@ -343,4 +343,4 @@ class Ring2Utils {
 
 };
 
-#endif /* POLYSCHEME_ZRINGUTILS_H_ */
+#endif

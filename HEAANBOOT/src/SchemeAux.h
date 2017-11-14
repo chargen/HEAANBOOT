@@ -1,5 +1,5 @@
-#ifndef SCHEME_SCHEMEAUX_H_
-#define SCHEME_SCHEMEAUX_H_
+#ifndef HEAAN_SCHEMEAUX_H_
+#define HEAAN_SCHEMEAUX_H_
 
 #include "CZZ.h"
 #include "Params.h"
@@ -33,4 +33,4 @@ static string LOGARITHM = "Logarithm"; ///< log(x)
 static string EXPONENT  = "Exponent"; ///< exp(x)
 static string SIGMOID   = "Sigmoid"; ///< sigmoid(x) = exp(x) / (1 + exp(x))
 
-#endif /* SCHEME_SCHEMEAUX_H_ */
+#endif

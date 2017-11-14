@@ -1,5 +1,5 @@
-#ifndef UTILS_CZZ_H_
-#define UTILS_CZZ_H_
+#ifndef HEAAN_CZZ_H_
+#define HEAAN_CZZ_H_
 
 #include <NTL/ZZ.h>
 #include <iostream>
@@ -52,4 +52,4 @@ public:
 	string toString();
 };
 
-#endif /* UTILS_CZZ_H_ */
+#endif

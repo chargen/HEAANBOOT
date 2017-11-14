@@ -1,5 +1,5 @@
-#ifndef SCHEME_PARAMS_H_
-#define SCHEME_PARAMS_H_
+#ifndef HEAAN_PARAMS_H_
+#define HEAAN_PARAMS_H_
 
 #include <NTL/ZZ.h>
 
@@ -41,4 +41,4 @@ public:
 
 };
 
-#endif /* SCHEME_PARAMS_H_ */
+#endif

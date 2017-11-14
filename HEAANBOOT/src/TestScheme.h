@@ -1,5 +1,5 @@
-#ifndef TEST_TESTSCHEME_H_
-#define TEST_TESTSCHEME_H_
+#ifndef HEAAN_TESTSCHEME_H_
+#define HEAAN_TESTSCHEME_H_
 
 class TestScheme {
 public:
@@ -239,4 +239,4 @@ public:
 	static void testBoundOfI();
 };
 
-#endif /* TEST_TESTSCHEME_H_ */
+#endif

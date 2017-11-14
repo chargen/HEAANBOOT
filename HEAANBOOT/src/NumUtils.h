@@ -1,5 +1,5 @@
-#ifndef UTILS_NUMUTILS_H_
-#define UTILS_NUMUTILS_H_
+#ifndef HEAAN_NUMUTILS_H_
+#define HEAAN_NUMUTILS_H_
 
 #include <NTL/ZZX.h>
 #include <NTL/RR.h>
@@ -121,4 +121,4 @@ public:
 	//-----------------------------------------
 };
 
-#endif /* UTILS_NUMUTILS_H_ */
+#endif

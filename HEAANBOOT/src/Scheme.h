@@ -1,14 +1,14 @@
-#ifndef SCHEME_SCHEME_H_
-#define SCHEME_SCHEME_H_
-
-#include "CZZ.h"
-#include "SecKey.h"
-#include "Cipher.h"
-#include "Message.h"
-#include "PubKey.h"
-#include "SchemeAux.h"
+#ifndef HEAAN_SCHEME_H_
+#define HEAAN_SCHEME_H_
 
 #include <stdexcept>
+
+#include "CZZ.h"
+#include "SecretKey.h"
+#include "SchemeAux.h"
+#include "Ciphertext.h"
+#include "Plaintext.h"
+#include "PublicKey.h"
 
 using namespace std;
 using namespace NTL;
@@ -17,11 +17,11 @@ class Scheme {
 private:
 public:
 	Params& params;
-	PubKey& publicKey;
+	PublicKey& publicKey;
 	SchemeAux& aux;
 
 
-	Scheme(Params& params, PubKey& publicKey, SchemeAux& schemeaux) : params(params), publicKey(publicKey), aux(schemeaux) {};
+	Scheme(Params& params, PublicKey& publicKey, SchemeAux& schemeaux) : params(params), publicKey(publicKey), aux(schemeaux) {};
 
 	//-----------------------------------------
 
@@ -31,18 +31,18 @@ public:
 	 * @param[in] slots
 	 * @return Message ZZX slots and level
 	 */
-	Message encode(CZZ*& gvals, long slots, long cbits, bool isComplex = true);
+	Plaintext encode(CZZ*& gvals, long slots, long cbits, bool isComplex = true);
 
 	/**
 	 * decodes ZZX into vals using fft
 	 * @param[in] message
 	 * @return array of CZZ values
 	 */
-	CZZ* decode(Message& msg);
+	CZZ* decode(Plaintext& msg);
 
-	Message encodeSingle(CZZ& val, long cbits, bool isComplex = true);
+	Plaintext encodeSingle(CZZ& val, long cbits, bool isComplex = true);
 
-	CZZ decodeSingle(Message& msg);
+	CZZ decodeSingle(Plaintext& msg);
 	//-----------------------------------------
 
 	/**
@@ -51,7 +51,7 @@ public:
 	 * @param[in] bits
 	 * @return cipher
 	 */
-	Cipher encryptMsg(Message& msg);
+	Ciphertext encryptMsg(Plaintext& msg);
 
 	/**
 	 * decrypts cipher
@@ -59,7 +59,7 @@ public:
 	 * @param[in] cipher
 	 * @return message
 	 */
-	Message decryptMsg(SecKey& secretKey, Cipher& cipher);
+	Plaintext decryptMsg(SecretKey& secretKey, Ciphertext& cipher);
 
 	//-----------------------------------------
 
@@ -69,14 +69,14 @@ public:
 	 * @param[in] slots
 	 * @return cipher
 	 */
-	Cipher encrypt(CZZ*& vals, long slots, long cbits, bool isComplex = true);
+	Ciphertext encrypt(CZZ*& vals, long slots, long cbits, bool isComplex = true);
 
 	/**
 	 * All decryption process: decrypt, decode, and degroup vals with removing conjugates
 	 * @param[in] cipher
 	 * @return vals
 	 */
-	CZZ* decrypt(SecKey& secretKey, Cipher& cipher);
+	CZZ* decrypt(SecretKey& secretKey, Ciphertext& cipher);
 
 	//-----------------------------------------
 
@@ -85,18 +85,18 @@ public:
 	 * @param[in] val
 	 * @return cipher
 	 */
-	Cipher encryptSingle(CZZ& val, long cbits, bool isComplex = true);
+	Ciphertext encryptSingle(CZZ& val, long cbits, bool isComplex = true);
 
 	/**
 	 * decrypt with advance knowledge that slots = 1;
 	 * @param[in] cipher
 	 * @return val
 	 */
-	CZZ decryptSingle(SecKey& secretKey, Cipher& cipher);
+	CZZ decryptSingle(SecretKey& secretKey, Ciphertext& cipher);
 
 	//-----------------------------------------
 
-	void normalizeAndEqual(Cipher& cipher);
+	void normalizeAndEqual(Ciphertext& cipher);
 
 	/**
 	 * addition of ciphers
@@ -104,14 +104,14 @@ public:
 	 * @param[in] cipher(m2)
 	 * @return cipher(m1 + m2)
 	 */
-	Cipher add(Cipher& cipher1, Cipher& cipher2);
+	Ciphertext add(Ciphertext& cipher1, Ciphertext& cipher2);
 
 	/**
 	 * addition of ciphers
 	 * @param[in, out] cipher(m1) -> cipher(m1 + m2)
 	 * @param[in] cipher(m2)
 	 */
-	void addAndEqual(Cipher& cipher1, Cipher& cipher2);
+	void addAndEqual(Ciphertext& cipher1, Ciphertext& cipher2);
 
 	//-----------------------------------------
 
@@ -121,14 +121,14 @@ public:
 	 * @param[in] constant
 	 * @return cipher(m + constant)
 	 */
-	Cipher addConst(Cipher& cipher, ZZ& cnst);
+	Ciphertext addConst(Ciphertext& cipher, ZZ& cnst);
 
 	/**
 	 * constant addition
 	 * @param[in, out] cipher(m) -> cipher(m + constant)
 	 * @param[in] constant
 	 */
-	void addConstAndEqual(Cipher& cipher, ZZ& cnst);
+	void addConstAndEqual(Ciphertext& cipher, ZZ& cnst);
 
 	//-----------------------------------------
 
@@ -138,47 +138,47 @@ public:
 	 * @param[in] cipher(m2)
 	 * @return cipher(m1 - m2)
 	 */
-	Cipher sub(Cipher& cipher1, Cipher& cipher2);
+	Ciphertext sub(Ciphertext& cipher1, Ciphertext& cipher2);
 
 	/**
 	 * substraction of ciphers
 	 * @param[in, out] cipher(m1) -> cipher(m1 - m2)
 	 * @param[in] cipher(m2)
 	 */
-	void subAndEqual(Cipher& cipher1, Cipher& cipher2);
+	void subAndEqual(Ciphertext& cipher1, Ciphertext& cipher2);
 
 	/**
 	 * substraction of ciphers
 	 * @param[in] cipher(m1)
 	 * @param[in, out] cipher(m2) -> cipher(m1 - m2)
 	 */
-	void subAndEqual2(Cipher& cipher1, Cipher& cipher2);
+	void subAndEqual2(Ciphertext& cipher1, Ciphertext& cipher2);
 
 	/**
 	 * conjugation in cipher
 	 * @param[in] cipher(m = x + iy)
 	 * @return cipher(x - iy)
 	 */
-	Cipher conjugate(Cipher& cipher);
+	Ciphertext conjugate(Ciphertext& cipher);
 
 	/**
 	 * conjugation in cipher
 	 * @param[in, out] cipher(m = x + iy) -> cipher(x - iy)
 	 */
-	void conjugateAndEqual(Cipher& cipher);
+	void conjugateAndEqual(Ciphertext& cipher);
 
 	/**
 	 * multiplication by i (imaginary unit) in cipher
 	 * @param[in] cipher(m)
 	 * @return cipher(i * m)
 	 */
-	Cipher imult(Cipher& cipher, const long precisionBits);
+	Ciphertext imult(Ciphertext& cipher, const long precisionBits);
 
 	/**
 	 * multiplication by i (imaginary unit) in cipher
 	 * @param[in, out] cipher(m) -> cipher(i * m)
 	 */
-	void imultAndEqual(Cipher& cipher, const long precisionBits);
+	void imultAndEqual(Ciphertext& cipher, const long precisionBits);
 
 	//-----------------------------------------
 
@@ -189,7 +189,7 @@ public:
 	 * @param[in] cipher(m2)
 	 * @return cipher(m1 * m2)
 	 */
-	Cipher mult(Cipher& cipher1, Cipher& cipher2);
+	Ciphertext mult(Ciphertext& cipher1, Ciphertext& cipher2);
 
 	/**
 	 * multiplication of ciphers. This algorithm contain linearization.
@@ -197,7 +197,7 @@ public:
 	 * @param[in, out] cipher(m1) -> cipher(m1 * m2)
 	 * @param[in] cipher(m2)
 	 */
-	void multAndEqual(Cipher& cipher1, Cipher& cipher2);
+	void multAndEqual(Ciphertext& cipher1, Ciphertext& cipher2);
 
 	//-----------------------------------------
 
@@ -207,14 +207,14 @@ public:
 	 * @param[in] cipher(m)
 	 * @return cipher(m^2)
 	 */
-	Cipher square(Cipher& cipher);
+	Ciphertext square(Ciphertext& cipher);
 
 	/**
 	 * square of cipher. This algorithm contain linearization.
 	 * To manage the noise we usually need modular switching method after square
 	 * @param[in, out] cipher(m) -> cipher(m^2)
 	 */
-	void squareAndEqual(Cipher& cipher);
+	void squareAndEqual(Ciphertext& cipher);
 
 	//-----------------------------------------
 
@@ -224,14 +224,14 @@ public:
 	 * @param[in] constant
 	 * @return cipher(m * constant)
 	 */
-	Cipher multByConst(Cipher& cipher, ZZ& cnst);
+	Ciphertext multByConst(Ciphertext& cipher, ZZ& cnst);
 
 	/**
 	 * constant multiplication
 	 * @param[in, out] cipher(m) -> cipher(m * constant)
 	 * @param[in] constant
 	 */
-	void multByConstAndEqual(Cipher& cipher, ZZ& cnst);
+	void multByConstAndEqual(Ciphertext& cipher, ZZ& cnst);
 
 	/**
 	 * polynomial multiplication
@@ -239,14 +239,14 @@ public:
 	 * @param[in] polynomial
 	 * @return cipher(m * poly)
 	 */
-	Cipher multByPoly(Cipher& cipher, ZZX& poly);
+	Ciphertext multByPoly(Ciphertext& cipher, ZZX& poly);
 
 	/**
 	 * polynomial multiplication
 	 * @param[in, out] cipher(m) -> cipher(m * poly)
 	 * @param[in] polynomial
 	 */
-	void multByPolyAndEqual(Cipher& cipher, ZZX& poly);
+	void multByPolyAndEqual(Ciphertext& cipher, ZZX& poly);
 
 	/**
 	 * X^degree multiplication
@@ -254,14 +254,14 @@ public:
 	 * @param[in] degree
 	 * @return cipher(m * X^degree)
 	 */
-	Cipher multByMonomial(Cipher& cipher, const long degree);
+	Ciphertext multByMonomial(Ciphertext& cipher, const long degree);
 
 	/**
 	 * X^degree multiplication
 	 * @param[in, out] cipher(m) -> cipher(m * X^degree)
 	 * @param[in] degree
 	 */
-	void multByMonomialAndEqual(Cipher& cipher, const long degree);
+	void multByMonomialAndEqual(Ciphertext& cipher, const long degree);
 
 	/**
 	 * 2^bits multiplication
@@ -269,20 +269,20 @@ public:
 	 * @param[in] bits
 	 * @return cipher(m * 2^bits)
 	 */
-	Cipher leftShift(Cipher& cipher, long bits);
+	Ciphertext leftShift(Ciphertext& cipher, long bits);
 
 	/**
 	 * 2^bits multiplication
 	 * @param[in, out] cipher(m) -> cipher(m * 2^bits)
 	 * @param[in] bits
 	 */
-	void leftShiftAndEqual(Cipher& cipher, long bits);
+	void leftShiftAndEqual(Ciphertext& cipher, long bits);
 
 	/**
 	 * doubles
 	 * @param[in, out] cipher(m) -> cipher(2m)
 	 */
-	void doubleAndEqual(Cipher& cipher);
+	void doubleAndEqual(Ciphertext& cipher);
 
 	/**
 	 * rescaling procedure
@@ -290,41 +290,41 @@ public:
 	 * @param[in] bitsDown
 	 * @return cipher(m/2^bitsDown) with new cbits
 	 */
-	Cipher reScaleBy(Cipher& cipher, long bitsDown);
+	Ciphertext reScaleBy(Ciphertext& cipher, long bitsDown);
 
-	Cipher reScaleTo(Cipher& cipher, long newcbits);
+	Ciphertext reScaleTo(Ciphertext& cipher, long newcbits);
 	/**
 	 * rescaling procedure
 	 * @param[in, out] cipher(m) -> cipher(m/2^bitsDown) with new cbits
 	 * @param[in] bitsDown
 	 */
-	void reScaleByAndEqual(Cipher& cipher, long bitsDown);
+	void reScaleByAndEqual(Ciphertext& cipher, long bitsDown);
 
-	void reScaleToAndEqual(Cipher& cipher, long newcbits);
+	void reScaleToAndEqual(Ciphertext& cipher, long newcbits);
 	/**
 	 * modulus down procedure
 	 * @param[in] cipher(m)
 	 * @param[in] new cbits
 	 * @return cipher(m) with new cbits
 	 */
-	Cipher modDownBy(Cipher& cipher, long bitsDown);
+	Ciphertext modDownBy(Ciphertext& cipher, long bitsDown);
 
-	Cipher modDownTo(Cipher& cipher, long cbits);
+	Ciphertext modDownTo(Ciphertext& cipher, long cbits);
 	/**
 	 * modulus down procedure
 	 * @param[in, out] cipher(m) -> cipher(m) with new cbits
 	 * @param[in] new cbits
 	 */
-	void modDownByAndEqual(Cipher& cipher, long bitsDown);
+	void modDownByAndEqual(Ciphertext& cipher, long bitsDown);
 
-	void modDownToAndEqual(Cipher& cipher, long cbits);
+	void modDownToAndEqual(Ciphertext& cipher, long cbits);
 	/**
 	 * calculates cipher of array with rotated indexes
 	 * @param[in] cipher(m(v_1, v_2, ..., v_slots))
 	 * @param[in] log of rotation slots
 	 * @return cipher(m(v_{1+2^logsteps}, v_{2+2^logsteps}, ..., v_{slots+2^logsteps})
 	 */
-	Cipher leftRotateByPo2(Cipher& cipher, long logrotSlots);
+	Ciphertext leftRotateByPo2(Ciphertext& cipher, long logrotSlots);
 
 	/**
 	 * calculates cipher of array with rotated indexes
@@ -332,7 +332,7 @@ public:
 	 * @param[in] log of rotation slots
 	 * @return
 	 */
-	void leftRotateByPo2AndEqual(Cipher& cipher, long logrotSlots);
+	void leftRotateByPo2AndEqual(Ciphertext& cipher, long logrotSlots);
 
 	/**
 	 * calculates cipher of array with rotated indexes
@@ -340,7 +340,7 @@ public:
 	 * @param[in] log of rotation slots
 	 * @return cipher(m(v_{1-2^logsteps}, v_{2-2^logsteps}, ..., v_{slots-2^logsteps})
 	 */
-	Cipher rightRotateByPo2(Cipher& cipher, long logrotSlots);
+	Ciphertext rightRotateByPo2(Ciphertext& cipher, long logrotSlots);
 
 	/**
 	 * calculates cipher of array with rotated indexes
@@ -348,11 +348,11 @@ public:
 	 * @param[in] log of rotation slots
 	 * @return
 	 */
-	void rightRotateByPo2AndEqual(Cipher& cipher, long logrotSlots);
+	void rightRotateByPo2AndEqual(Ciphertext& cipher, long logrotSlots);
 
-	Cipher leftRotateFast(Cipher& cipher, long rotSlots);
+	Ciphertext leftRotateFast(Ciphertext& cipher, long rotSlots);
 
-	void leftRotateAndEqualFast(Cipher& cipher, long rotSlots);
+	void leftRotateAndEqualFast(Ciphertext& cipher, long rotSlots);
 
 	/**
 	 * calculates cipher of array with rotated indexes
@@ -360,14 +360,14 @@ public:
 	 * @param[in] rotation slots
 	 * @return cipher(m(v_{1+steps}, v_{2+steps}, ..., v_{slots+steps})
 	 */
-	Cipher leftRotate(Cipher& cipher, long rotSlots);
+	Ciphertext leftRotate(Ciphertext& cipher, long rotSlots);
 
 	/**
 	 * calculates cipher of array with rotated indexes
 	 * @param[in] cipher(m(v_1, v_2, ..., v_slots)) -> cipher(m(v_{1+steps}, v_{2+steps}, ..., v_{slots+steps})
 	 * @param[in] rotation slots
 	 */
-	void leftRotateAndEqual(Cipher& cipher, long rotSlots);
+	void leftRotateAndEqual(Ciphertext& cipher, long rotSlots);
 
 	/**
 	 * calculates cipher of array with rotated indexes
@@ -375,49 +375,49 @@ public:
 	 * @param[in] rotation slots
 	 * @return cipher(m(v_{1-steps}, v_{2-steps}, ..., v_{slots-steps})
 	 */
-	Cipher rightRotate(Cipher& cipher, long rotSlots);
+	Ciphertext rightRotate(Ciphertext& cipher, long rotSlots);
 
 	/**
 	 * calculates cipher of array with rotated indexes
 	 * @param[in] cipher(m(v_1, v_2, ..., v_slots)) -> cipher(m(v_{1-steps}, v_{2-steps}, ..., v_{slots-steps})
 	 * @param[in] rotation slots
 	 */
-	void rightRotateAndEqual(Cipher& cipher, long rotSlots);
+	void rightRotateAndEqual(Ciphertext& cipher, long rotSlots);
 
 	//-----------------------------------------
 
-	Cipher linearTransform(Cipher& cipher, long size);
+	Ciphertext linearTransform(Ciphertext& cipher, long size);
 
-	void linearTransformAndEqual(Cipher& cipher, long size);
+	void linearTransformAndEqual(Ciphertext& cipher, long size);
 
-	Cipher linearTransformInv(Cipher& cipher, long size);
+	Ciphertext linearTransformInv(Ciphertext& cipher, long size);
 
-	void linearTransformInvAndEqual(Cipher& cipher, long size);
+	void linearTransformInvAndEqual(Ciphertext& cipher, long size);
 
-	Cipher evaluateSin2pix7(Cipher& cipher, long pBits);
+	Ciphertext evaluateSin2pix7(Ciphertext& cipher, long pBits);
 
-	void evaluateSin2pix7AndEqual(Cipher& cipher, long pBits);
+	void evaluateSin2pix7AndEqual(Ciphertext& cipher, long pBits);
 
-	Cipher evaluateCos2pix6(Cipher& cipher, long pBits);
+	Ciphertext evaluateCos2pix6(Ciphertext& cipher, long pBits);
 
-	void evaluateCos2pix6AndEqual(Cipher& cipher, long pBits);
+	void evaluateCos2pix6AndEqual(Ciphertext& cipher, long pBits);
 
-	Cipher evaluateSin2x(Cipher& cSinx, Cipher& cCosx, long pBits);
+	Ciphertext evaluateSin2x(Ciphertext& cSinx, Ciphertext& cCosx, long pBits);
 
-	Cipher evaluateCos2x(Cipher& cSinx, Cipher& cCosx, long pBits);
+	Ciphertext evaluateCos2x(Ciphertext& cSinx, Ciphertext& cCosx, long pBits);
 
-	Cipher removeIpart(Cipher& cipher, long logq0, long logT, long logI = 4);
+	Ciphertext removeIpart(Ciphertext& cipher, long logq0, long logT, long logI = 4);
 
-	void removeIpartAndEqual(Cipher& cipher, long logq0, long logT, long logI = 4);
+	void removeIpartAndEqual(Ciphertext& cipher, long logq0, long logT, long logI = 4);
 
-	Cipher bootstrap(Cipher& cipher, long logq0, long logq, long logT, long logI = 4);
+	Ciphertext bootstrap(Ciphertext& cipher, long logq0, long logq, long logT, long logI = 4);
 
-	void bootstrapAndEqual(Cipher& cipher, long logq0, long logq, long logT, long logI = 4);
+	void bootstrapAndEqual(Ciphertext& cipher, long logq0, long logq, long logT, long logI = 4);
 
-	Cipher bootstrapOneReal(Cipher& cipher, long logq0, long logq, long logT, long logI = 4);
+	Ciphertext bootstrapOneReal(Ciphertext& cipher, long logq0, long logq, long logT, long logI = 4);
 
-	void bootstrapOneRealAndEqual(Cipher& cipher, long logq0, long logq, long logT, long logI = 4);
+	void bootstrapOneRealAndEqual(Ciphertext& cipher, long logq0, long logq, long logT, long logI = 4);
 
 };
 
-#endif /* SCHEME_SCHEME_H_ */
+#endif

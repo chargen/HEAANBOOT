@@ -134,7 +134,7 @@ int main() {
 	 */
 //	TestScheme::testFFTBatchLazyMultipleHadamard(13, 122, 50, 3, 13, 1);
 
-//	TestScheme::testBootstrap();
+	TestScheme::testBootstrap();
 
 	return 0;
 }

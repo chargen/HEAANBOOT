@@ -7,16 +7,16 @@
 #include <iostream>
 #include <string>
 
-#include "Cipher.h"
+#include "Ciphertext.h"
 #include "CZZ.h"
 #include "EvaluatorUtils.h"
 #include "NumUtils.h"
 #include "Params.h"
-#include "PubKey.h"
+#include "PublicKey.h"
 #include "Scheme.h"
 #include "SchemeAlgo.h"
 #include "SchemeAux.h"
-#include "SecKey.h"
+#include "SecretKey.h"
 #include "StringUtils.h"
 #include "TimeUtils.h"
 
@@ -29,8 +29,8 @@ void TestScheme::testEncodeBatch(long logN, long logq, long precisionBits, long 
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -39,7 +39,7 @@ void TestScheme::testEncodeBatch(long logN, long logq, long precisionBits, long 
 	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
 	//-----------------------------------------
 	timeutils.start("Encrypt batch");
-	Cipher cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
 	timeutils.stop("Encrypt batch");
 	//-----------------------------------------
 	timeutils.start("Decrypt batch");
@@ -57,8 +57,8 @@ void TestScheme::testConjugateBatch(long logN, long logq, long precisionBits, lo
 	cout << "!!! START TEST CONJUGATE BATCH !!!" << endl;
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -71,9 +71,9 @@ void TestScheme::testConjugateBatch(long logN, long logq, long precisionBits, lo
 		mvecconj[i] = mvec[i].conjugate();
 	}
 
-	Cipher cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
 	timeutils.start("Conjugate batch");
-	Cipher cconj = scheme.conjugate(cipher);
+	Ciphertext cconj = scheme.conjugate(cipher);
 	timeutils.stop("Conjugate batch");
 
 	CZZ* dvecconj = scheme.decrypt(secretKey, cconj);
@@ -87,8 +87,8 @@ void TestScheme::testimultBatch(long logN, long logq, long precisionBits, long l
 	cout << "!!! START TEST i MULTIPLICATION BATCH !!!" << endl;
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -101,9 +101,9 @@ void TestScheme::testimultBatch(long logN, long logq, long precisionBits, long l
 		imvec[i].i = mvec[i].r;
 	}
 
-	Cipher cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
 	timeutils.start("Multiplication by i batch");
-	Cipher icipher = scheme.imult(cipher, precisionBits);
+	Ciphertext icipher = scheme.imult(cipher, precisionBits);
 	timeutils.stop("Multiplication by i batch");
 
 	CZZ* idvec = scheme.decrypt(secretKey, icipher);
@@ -118,8 +118,8 @@ void TestScheme::testRotateByPo2Batch(long logN, long logq, long precisionBits, 
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -128,7 +128,7 @@ void TestScheme::testRotateByPo2Batch(long logN, long logq, long precisionBits, 
 	long slots = (1 << logSlots);
 	long rotSlots = (1 << rotlogSlots);
 	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
-	Cipher cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	if(isLeft) {
 		timeutils.start("Left Rotate by power of 2 batch");
@@ -156,8 +156,8 @@ void TestScheme::testRotateBatch(long logN, long logq, long precisionBits, long 
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -166,7 +166,7 @@ void TestScheme::testRotateBatch(long logN, long logq, long precisionBits, long 
 	//-----------------------------------------
 	long slots = (1 << logSlots);
 	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
-	Cipher cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	if(isLeft) {
 		timeutils.start("Left rotate batch");
@@ -194,8 +194,8 @@ void TestScheme::testSlotsSum(long logN, long logq, long precisionBits, long log
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -203,7 +203,7 @@ void TestScheme::testSlotsSum(long logN, long logq, long precisionBits, long log
 	//-----------------------------------------
 	long slots = (1 << logSlots);
 	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
-	Cipher cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start("slots sum");
 	algo.partialSlotsSumAndEqual(cipher, slots);
@@ -227,8 +227,8 @@ void TestScheme::testPowerOf2Batch(long logN, long logq, long precisionBits, lon
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -252,10 +252,10 @@ void TestScheme::testPowerOf2Batch(long logN, long logq, long precisionBits, lon
 			mpows[j][i] = EvaluatorUtils::evalCZZPow2(mr, mi, j, precisionBits);
 		}
 	}
-	Cipher cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start("Power of 2 batch");
-	Cipher cpow = algo.powerOf2(cipher, precisionBits, logDegree);
+	Ciphertext cpow = algo.powerOf2(cipher, precisionBits, logDegree);
 	timeutils.stop("Power of 2 batch");
 
 	//-----------------------------------------
@@ -272,8 +272,8 @@ void TestScheme::testPowerBatch(long logN, long logq, long precisionBits, long d
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -288,10 +288,10 @@ void TestScheme::testPowerBatch(long logN, long logq, long precisionBits, long d
 		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
 		mpow[i] = EvaluatorUtils::evalCZZPow(mr, mi, degree, precisionBits);
 	}
-	Cipher cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start("Power batch");
-	Cipher cpow = algo.power(cipher, precisionBits, degree);
+	Ciphertext cpow = algo.power(cipher, precisionBits, degree);
 	timeutils.stop("Power batch");
 	//-----------------------------------------
 	CZZ* dpow = scheme.decrypt(secretKey, cpow);
@@ -307,8 +307,8 @@ void TestScheme::testProdOfPo2Batch(long logN, long logq, long precisionBits, lo
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -316,7 +316,7 @@ void TestScheme::testProdOfPo2Batch(long logN, long logq, long precisionBits, lo
 	SetNumThreads(4);
 	long slots = 1 << logSlots;
 	long degree = 1 << logDegree;
-	Cipher* cvec = new Cipher[degree];
+	Ciphertext* cvec = new Ciphertext[degree];
 	CZZ** mvec = new CZZ*[degree];
 	for (long i = 0; i < degree; ++i) {
 		mvec[i] = new CZZ[slots];
@@ -339,7 +339,7 @@ void TestScheme::testProdOfPo2Batch(long logN, long logq, long precisionBits, lo
 	}
 	//-----------------------------------------
 	timeutils.start("Product of power of 2 batch");
-	Cipher cprod = algo.prodOfPo2(cvec, precisionBits, logDegree);
+	Ciphertext cprod = algo.prodOfPo2(cvec, precisionBits, logDegree);
 	timeutils.stop("Product of power of 2 batch");
 	//-----------------------------------------
 	CZZ* dvec = scheme.decrypt(secretKey, cprod);
@@ -353,15 +353,15 @@ void TestScheme::testProdBatch(long logN, long logq, long precisionBits, long de
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	SetNumThreads(4);
 	long slots = 1 << logSlots;
-	Cipher* cvec = new Cipher[degree];
+	Ciphertext* cvec = new Ciphertext[degree];
 	CZZ** mvec = new CZZ*[degree];
 	for (long i = 0; i < degree; ++i) {
 		mvec[i] = new CZZ[slots];
@@ -384,7 +384,7 @@ void TestScheme::testProdBatch(long logN, long logq, long precisionBits, long de
 	}
 	//-----------------------------------------
 	timeutils.start("Product batch");
-	Cipher cprod = algo.prod(cvec, precisionBits, degree);
+	Ciphertext cprod = algo.prod(cvec, precisionBits, degree);
 	timeutils.stop("Product batch");
 	//-----------------------------------------
 	CZZ* dvec = scheme.decrypt(secretKey, cprod);
@@ -400,8 +400,8 @@ void TestScheme::testInverseBatch(long logN, long logq, long precisionBits, long
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -416,10 +416,10 @@ void TestScheme::testInverseBatch(long logN, long logq, long precisionBits, long
 		mvec[i] = EvaluatorUtils::evalCZZ(1 - mr, -mi, precisionBits);
 		minv[i] = EvaluatorUtils::evalCZZInv(mr, mi, precisionBits);
 	}
-	Cipher cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start("Inverse batch");
-	Cipher cinv = algo.inverse(cipher, precisionBits, invSteps);
+	Ciphertext cinv = algo.inverse(cipher, precisionBits, invSteps);
 	timeutils.stop("Inverse batch");
 	//-----------------------------------------
 	CZZ* dinv = scheme.decrypt(secretKey, cinv);
@@ -435,8 +435,8 @@ void TestScheme::testLogarithmBatch(long logN, long logq, long precisionBits, lo
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -450,10 +450,10 @@ void TestScheme::testLogarithmBatch(long logN, long logq, long precisionBits, lo
 		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
 		mlog[i] = EvaluatorUtils::evalCZZLog(1 + mr, mi, precisionBits);
 	}
-	Cipher cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start(LOGARITHM + " batch");
-	Cipher clog = algo.function(cipher, LOGARITHM, precisionBits, degree);
+	Ciphertext clog = algo.function(cipher, LOGARITHM, precisionBits, degree);
 	timeutils.stop(LOGARITHM + " batch");
 	//-----------------------------------------
 	CZZ* dlog = scheme.decrypt(secretKey, clog);
@@ -469,8 +469,8 @@ void TestScheme::testExponentBatch(long logN, long logq, long precisionBits, lon
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -484,10 +484,10 @@ void TestScheme::testExponentBatch(long logN, long logq, long precisionBits, lon
 		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
 		mexp[i] = EvaluatorUtils::evalCZZExp(mr, mi, precisionBits);
 	}
-	Cipher cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start(EXPONENT + " batch");
-	Cipher cexp = algo.function(cipher, EXPONENT, precisionBits, degree);
+	Ciphertext cexp = algo.function(cipher, EXPONENT, precisionBits, degree);
 	timeutils.stop(EXPONENT + " batch");
 	//-----------------------------------------
 	CZZ* dexp = scheme.decrypt(secretKey, cexp);
@@ -501,8 +501,8 @@ void TestScheme::testExponentBatchLazy(long logN, long logq, long precisionBits,
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -517,10 +517,10 @@ void TestScheme::testExponentBatchLazy(long logN, long logq, long precisionBits,
 		mexp[i] = EvaluatorUtils::evalCZZExp(mr, mi, precisionBits);
 	}
 	EvaluatorUtils::leftShiftAndEqual(mexp, slots, precisionBits);
-	Cipher cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start(EXPONENT + " lazy");
-	Cipher cexp = algo.functionLazy(cipher, EXPONENT, precisionBits, degree);
+	Ciphertext cexp = algo.functionLazy(cipher, EXPONENT, precisionBits, degree);
 	timeutils.stop(EXPONENT + " lazy");
 	//-----------------------------------------
 	CZZ* dexp = scheme.decrypt(secretKey, cexp);
@@ -536,8 +536,8 @@ void TestScheme::testSigmoidBatch(long logN, long logq, long precisionBits, long
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -551,10 +551,10 @@ void TestScheme::testSigmoidBatch(long logN, long logq, long precisionBits, long
 		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
 		msig[i] = EvaluatorUtils::evalCZZSigmoid(mr, mi, precisionBits);
 	}
-	Cipher cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start(SIGMOID + " batch");
-	Cipher csig = algo.function(cipher, SIGMOID, precisionBits, degree);
+	Ciphertext csig = algo.function(cipher, SIGMOID, precisionBits, degree);
 	timeutils.stop(SIGMOID + " batch");
 	//-----------------------------------------
 	CZZ* dsig = scheme.decrypt(secretKey, csig);
@@ -568,8 +568,8 @@ void TestScheme::testSigmoidBatchLazy(long logN, long logq, long precisionBits, 
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -584,10 +584,10 @@ void TestScheme::testSigmoidBatchLazy(long logN, long logq, long precisionBits, 
 		msig[i] = EvaluatorUtils::evalCZZSigmoid(mr, mi, precisionBits);
 	}
 	EvaluatorUtils::leftShiftAndEqual(msig, slots, precisionBits);
-	Cipher cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start(SIGMOID + " lazy");
-	Cipher csig = algo.functionLazy(cipher, SIGMOID, precisionBits, degree);
+	Ciphertext csig = algo.functionLazy(cipher, SIGMOID, precisionBits, degree);
 	timeutils.stop(SIGMOID + " lazy");
 	//-----------------------------------------
 	CZZ* dsig = scheme.decrypt(secretKey, csig);
@@ -603,8 +603,8 @@ void TestScheme::testFFTBatch(long logN, long logq, long precisionBits, long log
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -621,8 +621,8 @@ void TestScheme::testFFTBatch(long logN, long logq, long precisionBits, long log
 		mvec2[i] = EvaluatorUtils::evalRandCZZArray(fftdim, precisionBits);
 	}
 
-	Cipher* cvec1 = new Cipher[fftdim];
-	Cipher* cvec2 = new Cipher[fftdim];
+	Ciphertext* cvec1 = new Ciphertext[fftdim];
+	Ciphertext* cvec2 = new Ciphertext[fftdim];
 	for (long j = 0; j < fftdim; ++j) {
 		CZZ* mvals1 = new CZZ[slots];
 		CZZ* mvals2	= new CZZ[slots];
@@ -682,8 +682,8 @@ void TestScheme::testFFTBatchLazy(long logN, long logq, long precisionBits, long
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -700,8 +700,8 @@ void TestScheme::testFFTBatchLazy(long logN, long logq, long precisionBits, long
 		mvec2[i] = EvaluatorUtils::evalRandCZZArray(fftdim, precisionBits);
 	}
 
-	Cipher* cvec1 = new Cipher[fftdim];
-	Cipher* cvec2 = new Cipher[fftdim];
+	Ciphertext* cvec1 = new Ciphertext[fftdim];
+	Ciphertext* cvec2 = new Ciphertext[fftdim];
 	for (long j = 0; j < fftdim; ++j) {
 		CZZ* mvals1 = new CZZ[slots];
 		CZZ* mvals2	= new CZZ[slots];
@@ -761,8 +761,8 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logq, long pre
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -773,7 +773,7 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logq, long pre
 	long hdim = 1 << logHdim;
 	long slots = 1 << logSlots;
 	CZZ*** mvecs = new CZZ**[hdim];
-	Cipher** cvecs = new Cipher*[hdim];
+	Ciphertext** cvecs = new Ciphertext*[hdim];
 	for (long h = 0; h < hdim; ++h) {
 		mvecs[h] = new CZZ*[slots];
 
@@ -781,7 +781,7 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logq, long pre
 			mvecs[h][i] = EvaluatorUtils::evalRandCZZArray(fftdim, precisionBits);
 		}
 
-		cvecs[h] = new Cipher[fftdim];
+		cvecs[h] = new Ciphertext[fftdim];
 
 		for (long j = 0; j < fftdim; ++j) {
 			CZZ* mvals = new CZZ[slots];
@@ -867,8 +867,8 @@ void TestScheme::testBootstrap() {
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -886,7 +886,7 @@ void TestScheme::testBootstrap() {
 
 	//-----------------------------------------
 	timeutils.start("Encrypt batch");
-	Cipher cipher = scheme.encrypt(mvec, slots, logq0);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq0);
 	timeutils.stop("Encrypt batch");
 
 	scheme.normalizeAndEqual(cipher);
@@ -894,15 +894,15 @@ void TestScheme::testBootstrap() {
 	cipher.mod = power2_ZZ(logq);
 
 	if(logSlots == params.logN - 1) {
-		Cipher cshift1 = scheme.multByMonomial(cipher, 2 * params.N - 1);
+		Ciphertext cshift1 = scheme.multByMonomial(cipher, 2 * params.N - 1);
 		scheme.linearTransformAndEqual(cipher, params.N / 2);
 		scheme.linearTransformAndEqual(cshift1, params.N / 2);
 
-		Cipher clinEvenConj = scheme.conjugate(cipher);
+		Ciphertext clinEvenConj = scheme.conjugate(cipher);
 		scheme.addAndEqual(cipher, clinEvenConj);
 		scheme.reScaleByAndEqual(cipher, logq0 + logI + logSlots);
 
-		Cipher clinOddConj = scheme.conjugate(cshift1);
+		Ciphertext clinOddConj = scheme.conjugate(cshift1);
 		scheme.addAndEqual(cshift1, clinOddConj);
 		scheme.reScaleByAndEqual(cshift1, logq0 + logI + logSlots);
 
@@ -917,13 +917,13 @@ void TestScheme::testBootstrap() {
 		scheme.reScaleByAndEqual(cipher, logq0 + logI);
 	} else {
 		for (long i = logSlots; i < params.logN - 1; ++i) {
-			Cipher rot = scheme.leftRotateByPo2(cipher, i);
+			Ciphertext rot = scheme.leftRotateByPo2(cipher, i);
 			scheme.addAndEqual(cipher, rot);
 		}
 		scheme.reScaleByAndEqual(cipher, params.logN - 1 - logSlots);
 		scheme.linearTransformAndEqual(cipher, cipher.slots * 2);
 
-		Cipher cipherConj = scheme.conjugate(cipher);
+		Ciphertext cipherConj = scheme.conjugate(cipher);
 		scheme.addAndEqual(cipher, cipherConj);
 		scheme.reScaleByAndEqual(cipher, logq0 + logI + logSlots + 2);
 
@@ -932,7 +932,6 @@ void TestScheme::testBootstrap() {
 		scheme.reScaleByAndEqual(cipher, logq0 + logI);
 	}
 	CZZ* dvec = scheme.decrypt(secretKey, cipher);
-	timeutils.stop("Decrypt batch");
 
 	StringUtils::showcompare(mvec, dvec, slots, "m");
 	cout << "!!! END TEST BOOTSRTAP ALL !!!" << endl;
@@ -953,8 +952,8 @@ void TestScheme::testBootstrapOneReal() {
 	TimeUtils timeutils;
 	timeutils.start("scheme generation");
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -970,7 +969,7 @@ void TestScheme::testBootstrapOneReal() {
 
 	//-----------------------------------------
 	timeutils.start("Encrypt batch");
-	Cipher cipher = scheme.encrypt(mvec, slots, logq0);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq0);
 	timeutils.stop("Encrypt batch");
 
 	scheme.normalizeAndEqual(cipher);
@@ -979,10 +978,10 @@ void TestScheme::testBootstrapOneReal() {
 	cipher.mod = power2_ZZ(logq);
 
 	for (long i = logSlots; i < params.logN - 1; ++i) {
-		Cipher rot = scheme.leftRotateByPo2(cipher, i);
+		Ciphertext rot = scheme.leftRotateByPo2(cipher, i);
 		scheme.addAndEqual(cipher, rot);
 	}
-	Cipher cconj = scheme.conjugate(cipher);
+	Ciphertext cconj = scheme.conjugate(cipher);
 	scheme.addAndEqual(cipher, cconj);
 	scheme.reScaleByAndEqual(cipher, params.logN - logSlots);
 
@@ -1010,8 +1009,8 @@ void TestScheme::testBoundOfI() {
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
-	SecKey secretKey(params);
-	PubKey publicKey(params, secretKey);
+	SecretKey secretKey(params);
+	PublicKey publicKey(params, secretKey);
 	SchemeAux schemeaux(logN);
 	Scheme scheme(params, publicKey, schemeaux);
 	SchemeAlgo algo(scheme);
@@ -1022,11 +1021,11 @@ void TestScheme::testBoundOfI() {
 
 	//-----------------------------------------
 	timeutils.start("Encrypt batch");
-	Cipher cipher = scheme.encrypt(mvec, slots, logq0);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq0);
 	timeutils.stop("Encrypt batch");
 
 	timeutils.start("Decrypt batch");
-	Message msgSmall = scheme.decryptMsg(secretKey, cipher);
+	Plaintext msgSmall = scheme.decryptMsg(secretKey, cipher);
 	timeutils.stop("Decrypt batch");
 
 	for (long i = 0; i < params.N; ++i) {
@@ -1040,7 +1039,7 @@ void TestScheme::testBoundOfI() {
 	cipher.mod = params.q;
 
 	timeutils.start("Decrypt batch");
-	Message msgBig = scheme.decryptMsg(secretKey, cipher);
+	Plaintext msgBig = scheme.decryptMsg(secretKey, cipher);
 	timeutils.stop("Decrypt batch");
 
 	for (long i = 0; i < params.N; ++i) {
@@ -1058,6 +1057,7 @@ void TestScheme::testBoundOfI() {
 			pmax = pdiv.rep[i];
 		}
 	}
+
 	cout << pmax << endl;
 	cout << "!!! STOP TEST BOUND OF I !!!" << endl;
 }

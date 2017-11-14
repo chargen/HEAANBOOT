@@ -7,20 +7,20 @@
 
 #include "CZZ.h"
 #include "EvaluatorUtils.h"
-#include "Message.h"
 #include "Params.h"
+#include "Plaintext.h"
 #include "SchemeAux.h"
-#include "SecKey.h"
+#include "SecretKey.h"
 
-Cipher* SchemeAlgo::encryptSingleArray(CZZ*& vals, long size) {
-	Cipher* res = new Cipher[size];
+Ciphertext* SchemeAlgo::encryptSingleArray(CZZ*& vals, long size) {
+	Ciphertext* res = new Ciphertext[size];
 	for (long i = 0; i < size; ++i) {
 		res[i] = scheme.encryptSingle(vals[i], scheme.params.logq);
 	}
 	return res;
 }
 
-CZZ* SchemeAlgo::decryptSingleArray(SecKey& secretKey, Cipher*& ciphers, long size) {
+CZZ* SchemeAlgo::decryptSingleArray(SecretKey& secretKey, Ciphertext*& ciphers, long size) {
 	CZZ* res = new CZZ[size];
 	for (int i = 0; i < size; ++i) {
 		res[i] = scheme.decryptSingle(secretKey, ciphers[i]);
@@ -28,8 +28,8 @@ CZZ* SchemeAlgo::decryptSingleArray(SecKey& secretKey, Cipher*& ciphers, long si
 	return res;
 }
 
-Cipher SchemeAlgo::powerOf2(Cipher& cipher, const long precisionBits, const long logDegree) {
-	Cipher res = cipher;
+Ciphertext SchemeAlgo::powerOf2(Ciphertext& cipher, const long precisionBits, const long logDegree) {
+	Ciphertext res = cipher;
 	for (long i = 0; i < logDegree; ++i) {
 		scheme.squareAndEqual(res);
 		scheme.reScaleByAndEqual(res, precisionBits);
@@ -37,8 +37,8 @@ Cipher SchemeAlgo::powerOf2(Cipher& cipher, const long precisionBits, const long
 	return res;
 }
 
-Cipher* SchemeAlgo::powerOf2Extended(Cipher& cipher, const long precisionBits, const long logDegree) {
-	Cipher* res = new Cipher[logDegree + 1];
+Ciphertext* SchemeAlgo::powerOf2Extended(Ciphertext& cipher, const long precisionBits, const long logDegree) {
+	Ciphertext* res = new Ciphertext[logDegree + 1];
 	res[0] = cipher;
 	for (long i = 1; i < logDegree + 1; ++i) {
 		res[i] = scheme.square(res[i-1]);
@@ -49,14 +49,14 @@ Cipher* SchemeAlgo::powerOf2Extended(Cipher& cipher, const long precisionBits, c
 
 //-----------------------------------------
 
-Cipher SchemeAlgo::power(Cipher& cipher, const long precisionBits, const long degree) {
+Ciphertext SchemeAlgo::power(Ciphertext& cipher, const long precisionBits, const long degree) {
 	long logDegree = log2((double)degree);
 	long po2Degree = 1 << logDegree;
 
-	Cipher res = powerOf2(cipher, precisionBits, logDegree);
+	Ciphertext res = powerOf2(cipher, precisionBits, logDegree);
 	long remDegree = degree - po2Degree;
 	if(remDegree > 0) {
-		Cipher tmp = power(cipher, precisionBits, remDegree);
+		Ciphertext tmp = power(cipher, precisionBits, remDegree);
 		long bitsDown = tmp.cbits - res.cbits;
 		scheme.modDownByAndEqual(tmp, bitsDown);
 		scheme.multAndEqual(res, tmp);
@@ -65,10 +65,10 @@ Cipher SchemeAlgo::power(Cipher& cipher, const long precisionBits, const long de
 	return res;
 }
 
-Cipher* SchemeAlgo::powerExtended(Cipher& cipher, const long precisionBits, const long degree) {
-	Cipher* res = new Cipher[degree];
+Ciphertext* SchemeAlgo::powerExtended(Ciphertext& cipher, const long precisionBits, const long degree) {
+	Ciphertext* res = new Ciphertext[degree];
 	long logDegree = log2((double)degree);
-	Cipher* cpows = powerOf2Extended(cipher, precisionBits, logDegree);
+	Ciphertext* cpows = powerOf2Extended(cipher, precisionBits, logDegree);
 	long idx = 0;
 	for (long i = 0; i < logDegree; ++i) {
 		long powi = (1 << i);
@@ -93,11 +93,11 @@ Cipher* SchemeAlgo::powerExtended(Cipher& cipher, const long precisionBits, cons
 
 //-----------------------------------------
 
-Cipher SchemeAlgo::prodOfPo2(Cipher*& ciphers, const long precisionBits, const long logDegree) {
-	Cipher* res = ciphers;
+Ciphertext SchemeAlgo::prodOfPo2(Ciphertext*& ciphers, const long precisionBits, const long logDegree) {
+	Ciphertext* res = ciphers;
 	for (long i = logDegree - 1; i >= 0; --i) {
 		long powih = (1 << i);
-		Cipher* tmp = new Cipher[powih];
+		Ciphertext* tmp = new Ciphertext[powih];
 		NTL_EXEC_RANGE(powih, first, last);
 		for (long j = first; j < last; ++j) {
 			tmp[j] = scheme.mult(res[2 * j], res[2 * j + 1]);
@@ -109,19 +109,19 @@ Cipher SchemeAlgo::prodOfPo2(Cipher*& ciphers, const long precisionBits, const l
 	return res[0];
 }
 
-Cipher SchemeAlgo::prod(Cipher*& ciphers, const long precisionBits, const long degree) {
+Ciphertext SchemeAlgo::prod(Ciphertext*& ciphers, const long precisionBits, const long degree) {
 	long logDegree = log2((double)degree) + 1;
 	long idx = 0;
 	bool isinit = false;
-	Cipher res;
+	Ciphertext res;
 	for (long i = 0; i < logDegree; ++i) {
 		if(bit(degree, i)) {
 			long powi = (1 << i);
-			Cipher* tmp = new Cipher[powi];
+			Ciphertext* tmp = new Ciphertext[powi];
 			for (long j = 0; j < powi; ++j) {
 				tmp[j] = ciphers[idx + j];
 			}
-			Cipher iprod = prodOfPo2(tmp, precisionBits, i);
+			Ciphertext iprod = prodOfPo2(tmp, precisionBits, i);
 			if(isinit) {
 				long bitsDown = res.cbits - iprod.cbits;
 				scheme.modDownByAndEqual(res, bitsDown);
@@ -137,24 +137,24 @@ Cipher SchemeAlgo::prod(Cipher*& ciphers, const long precisionBits, const long d
 	return res;
 }
 
-Cipher SchemeAlgo::sum(Cipher*& ciphers, const long size) {
-	Cipher res = ciphers[0];
+Ciphertext SchemeAlgo::sum(Ciphertext*& ciphers, const long size) {
+	Ciphertext res = ciphers[0];
 	for (long i = 1; i < size; ++i) {
 		scheme.addAndEqual(res, ciphers[i]);
 	}
 	return res;
 }
 
-Cipher SchemeAlgo::distance(Cipher& cipher1, Cipher& cipher2, const long precisionBits) {
-	Cipher cres = scheme.sub(cipher1, cipher2);
+Ciphertext SchemeAlgo::distance(Ciphertext& cipher1, Ciphertext& cipher2, const long precisionBits) {
+	Ciphertext cres = scheme.sub(cipher1, cipher2);
 	scheme.squareAndEqual(cres);
 	scheme.reScaleByAndEqual(cres, precisionBits);
 	partialSlotsSumAndEqual(cres, cres.slots);
 	return cres;
 }
 
-Cipher* SchemeAlgo::multVec(Cipher*& ciphers1, Cipher*& ciphers2, const long size) {
-	Cipher* res = new Cipher[size];
+Ciphertext* SchemeAlgo::multVec(Ciphertext*& ciphers1, Ciphertext*& ciphers2, const long size) {
+	Ciphertext* res = new Ciphertext[size];
 	NTL_EXEC_RANGE(size, first, last);
 	for (long i = first; i < last; ++i) {
 		res[i] = scheme.mult(ciphers1[i], ciphers2[i]);
@@ -163,7 +163,7 @@ Cipher* SchemeAlgo::multVec(Cipher*& ciphers1, Cipher*& ciphers2, const long siz
 	return res;
 }
 
-void SchemeAlgo::multAndEqualVec(Cipher*& ciphers1, Cipher*& ciphers2, const long size) {
+void SchemeAlgo::multAndEqualVec(Ciphertext*& ciphers1, Ciphertext*& ciphers2, const long size) {
 	NTL_EXEC_RANGE(size, first, last);
 	for (long i = first; i < last; ++i) {
 		scheme.multAndEqual(ciphers1[i], ciphers2[i]);
@@ -172,8 +172,8 @@ void SchemeAlgo::multAndEqualVec(Cipher*& ciphers1, Cipher*& ciphers2, const lon
 }
 
 
-Cipher* SchemeAlgo::multAndModSwitchVec(Cipher*& ciphers1, Cipher*& ciphers2, const long precisionBits, const long size) {
-	Cipher* res = new Cipher[size];
+Ciphertext* SchemeAlgo::multAndModSwitchVec(Ciphertext*& ciphers1, Ciphertext*& ciphers2, const long precisionBits, const long size) {
+	Ciphertext* res = new Ciphertext[size];
 	NTL_EXEC_RANGE(size, first, last);
 	for (long i = first; i < last; ++i) {
 		res[i] = scheme.mult(ciphers1[i], ciphers2[i]);
@@ -183,7 +183,7 @@ Cipher* SchemeAlgo::multAndModSwitchVec(Cipher*& ciphers1, Cipher*& ciphers2, co
 	return res;
 }
 
-void SchemeAlgo::multModSwitchAndEqualVec(Cipher*& ciphers1, Cipher*& ciphers2, const long precisionBits, const long size) {
+void SchemeAlgo::multModSwitchAndEqualVec(Ciphertext*& ciphers1, Ciphertext*& ciphers2, const long precisionBits, const long size) {
 	NTL_EXEC_RANGE(size, first, last);
 	for (long i = first; i < last; ++i) {
 		scheme.multAndEqual(ciphers1[i], ciphers2[i]);
@@ -192,12 +192,12 @@ void SchemeAlgo::multModSwitchAndEqualVec(Cipher*& ciphers1, Cipher*& ciphers2, 
 	NTL_EXEC_RANGE_END;
 }
 
-Cipher SchemeAlgo::innerProd(Cipher*& ciphers1, Cipher*& ciphers2, const long precisionBits, const long size) {
-	Cipher cip = scheme.mult(ciphers1[size-1], ciphers2[size-1]);
+Ciphertext SchemeAlgo::innerProd(Ciphertext*& ciphers1, Ciphertext*& ciphers2, const long precisionBits, const long size) {
+	Ciphertext cip = scheme.mult(ciphers1[size-1], ciphers2[size-1]);
 
 	NTL_EXEC_RANGE(size-1, first, last);
 	for (long i = first; i < last; ++i) {
-		Cipher cprodi = scheme.mult(ciphers1[i], ciphers2[i]);
+		Ciphertext cprodi = scheme.mult(ciphers1[i], ciphers2[i]);
 		scheme.addAndEqual(cip, cprodi);
 	}
 	NTL_EXEC_RANGE_END;
@@ -206,30 +206,30 @@ Cipher SchemeAlgo::innerProd(Cipher*& ciphers1, Cipher*& ciphers2, const long pr
 	return cip;
 }
 
-Cipher SchemeAlgo::partialSlotsSum(Cipher& cipher, const long slots) {
-	Cipher res = cipher;
+Ciphertext SchemeAlgo::partialSlotsSum(Ciphertext& cipher, const long slots) {
+	Ciphertext res = cipher;
 	for (long i = 1; i < slots; i <<= 1) {
-		Cipher rot = scheme.leftRotateFast(cipher, i);
+		Ciphertext rot = scheme.leftRotateFast(cipher, i);
 		scheme.addAndEqual(res, rot);
 	}
 	return res;
 }
 
-void SchemeAlgo::partialSlotsSumAndEqual(Cipher& cipher, const long slots) {
+void SchemeAlgo::partialSlotsSumAndEqual(Ciphertext& cipher, const long slots) {
 	for (long i = 1; i < slots; i <<= 1) {
-		Cipher rot = scheme.leftRotateFast(cipher, i);
+		Ciphertext rot = scheme.leftRotateFast(cipher, i);
 		scheme.addAndEqual(cipher, rot);
 	}
 }
 
 //-----------------------------------------
 
-Cipher SchemeAlgo::inverse(Cipher& cipher, const long precisionBits, const long steps) {
+Ciphertext SchemeAlgo::inverse(Ciphertext& cipher, const long precisionBits, const long steps) {
 	ZZ precision = power2_ZZ(precisionBits);
-	Cipher cpow = cipher;
-	Cipher tmp = scheme.addConst(cipher, precision);
+	Ciphertext cpow = cipher;
+	Ciphertext tmp = scheme.addConst(cipher, precision);
 	scheme.modDownByAndEqual(tmp, precisionBits);
-	Cipher res = tmp;
+	Ciphertext res = tmp;
 
 	for (long i = 1; i < steps; ++i) {
 		scheme.squareAndEqual(cpow);
@@ -243,12 +243,12 @@ Cipher SchemeAlgo::inverse(Cipher& cipher, const long precisionBits, const long 
 	return res;
 }
 
-Cipher* SchemeAlgo::inverseExtended(Cipher& cipher, const long precisionBits, const long steps) {
+Ciphertext* SchemeAlgo::inverseExtended(Ciphertext& cipher, const long precisionBits, const long steps) {
 	ZZ precision = power2_ZZ(precisionBits);
 
-	Cipher* res = new Cipher[steps];
-	Cipher cpow = cipher;
-	Cipher tmp = scheme.addConst(cipher, precision);
+	Ciphertext* res = new Ciphertext[steps];
+	Ciphertext cpow = cipher;
+	Ciphertext tmp = scheme.addConst(cipher, precision);
 	scheme.modDownByAndEqual(tmp, precisionBits);
 	res[0] = tmp;
 
@@ -266,15 +266,15 @@ Cipher* SchemeAlgo::inverseExtended(Cipher& cipher, const long precisionBits, co
 
 //-----------------------------------------
 
-Cipher SchemeAlgo::function(Cipher& cipher, string& funcName, const long precisionBits, const long degree) {
-	Cipher* cpows = powerExtended(cipher, precisionBits, degree);
+Ciphertext SchemeAlgo::function(Ciphertext& cipher, string& funcName, const long precisionBits, const long degree) {
+	Ciphertext* cpows = powerExtended(cipher, precisionBits, degree);
 
 	long dprecisionBits = 2 * precisionBits;
 
 	double* coeffs = scheme.aux.taylorCoeffsMap.at(funcName);
 
 	ZZ tmp = EvaluatorUtils::evalZZ(coeffs[1], precisionBits);
-	Cipher res = scheme.multByConst(cpows[0], tmp);
+	Ciphertext res = scheme.multByConst(cpows[0], tmp);
 
 	tmp = EvaluatorUtils::evalZZ(coeffs[0], dprecisionBits);
 	scheme.addConstAndEqual(res, tmp);
@@ -282,7 +282,7 @@ Cipher SchemeAlgo::function(Cipher& cipher, string& funcName, const long precisi
 	for (int i = 1; i < degree; ++i) {
 		if(abs(coeffs[i + 1]) > 1e-27) {
 			tmp = EvaluatorUtils::evalZZ(coeffs[i + 1], precisionBits);
-			Cipher aixi = scheme.multByConst(cpows[i], tmp);
+			Ciphertext aixi = scheme.multByConst(cpows[i], tmp);
 			long bitsDown = res.cbits - aixi.cbits;
 			scheme.modDownByAndEqual(res, bitsDown);
 			scheme.addAndEqual(res, aixi);
@@ -292,15 +292,15 @@ Cipher SchemeAlgo::function(Cipher& cipher, string& funcName, const long precisi
 	return res;
 }
 
-Cipher SchemeAlgo::functionLazy(Cipher& cipher, string& funcName, const long precisionBits, const long degree) {
-	Cipher* cpows = powerExtended(cipher, precisionBits, degree);
+Ciphertext SchemeAlgo::functionLazy(Ciphertext& cipher, string& funcName, const long precisionBits, const long degree) {
+	Ciphertext* cpows = powerExtended(cipher, precisionBits, degree);
 
 	long dprecisionBits = 2 * precisionBits;
 
 	double* coeffs = scheme.aux.taylorCoeffsMap.at(funcName);
 
 	ZZ tmp = EvaluatorUtils::evalZZ(coeffs[1], precisionBits);
-	Cipher res = scheme.multByConst(cpows[0], tmp);
+	Ciphertext res = scheme.multByConst(cpows[0], tmp);
 
 	tmp = EvaluatorUtils::evalZZ(coeffs[0], dprecisionBits);
 	scheme.addConstAndEqual(res, tmp);
@@ -308,7 +308,7 @@ Cipher SchemeAlgo::functionLazy(Cipher& cipher, string& funcName, const long pre
 	for (int i = 1; i < degree; ++i) {
 		if(abs(coeffs[i + 1]) > 1e-27) {
 			tmp = EvaluatorUtils::evalZZ(coeffs[i + 1], precisionBits);
-			Cipher aixi = scheme.multByConst(cpows[i], tmp);
+			Ciphertext aixi = scheme.multByConst(cpows[i], tmp);
 			long bitsDown = res.cbits - aixi.cbits;
 			scheme.modDownByAndEqual(res, bitsDown);
 			scheme.addAndEqual(res, aixi);
@@ -317,26 +317,26 @@ Cipher SchemeAlgo::functionLazy(Cipher& cipher, string& funcName, const long pre
 	return res;
 }
 
-Cipher* SchemeAlgo::functionExtended(Cipher& cipher, string& funcName, const long precisionBits, const long degree) {
-	Cipher* cpows = powerExtended(cipher, precisionBits, degree);
+Ciphertext* SchemeAlgo::functionExtended(Ciphertext& cipher, string& funcName, const long precisionBits, const long degree) {
+	Ciphertext* cpows = powerExtended(cipher, precisionBits, degree);
 
 	long dprecisionBits = 2 * precisionBits;
 	double* coeffs = scheme.aux.taylorCoeffsMap.at(funcName);
 
 	ZZ tmp = EvaluatorUtils::evalZZ(coeffs[1], precisionBits);
-	Cipher aixi = scheme.multByConst(cpows[0], tmp);
+	Ciphertext aixi = scheme.multByConst(cpows[0], tmp);
 
 	tmp = EvaluatorUtils::evalZZ(coeffs[0], dprecisionBits);
 	scheme.addConstAndEqual(aixi, tmp);
 
-	Cipher* res = new Cipher[degree];
+	Ciphertext* res = new Ciphertext[degree];
 	res[0] = aixi;
 	for (long i = 1; i < degree; ++i) {
 		if(abs(coeffs[i + 1]) > 1e-27) {
 			tmp = EvaluatorUtils::evalZZ(coeffs[i + 1], precisionBits);
 			aixi = scheme.multByConst(cpows[i], tmp);
 			long bitsDown = res[i - 1].cbits - aixi.cbits;
-			Cipher ctmp = scheme.modDownBy(res[i - 1], bitsDown);
+			Ciphertext ctmp = scheme.modDownBy(res[i - 1], bitsDown);
 			scheme.addAndEqual(aixi, ctmp);
 			res[i] = aixi;
 		} else {
@@ -351,7 +351,7 @@ Cipher* SchemeAlgo::functionExtended(Cipher& cipher, string& funcName, const lon
 	return res;
 }
 
-void SchemeAlgo::fftRaw(Cipher*& ciphers, const long size, const bool isForward) {
+void SchemeAlgo::fftRaw(Ciphertext*& ciphers, const long size, const bool isForward) {
 	for (long i = 1, j = 0; i < size; ++i) {
 		long bit = size >> 1;
 		for (; j >= bit; bit>>=1) {
@@ -368,7 +368,7 @@ void SchemeAlgo::fftRaw(Cipher*& ciphers, const long size, const bool isForward)
 		for (long i = 0; i < size; i += len) {
 			NTL_EXEC_RANGE(len / 2, first, last);
 			for (long j = first; j < last; ++j) {
-				Cipher u = ciphers[i + j];
+				Ciphertext u = ciphers[i + j];
 				scheme.multByMonomialAndEqual(ciphers[i + j + len / 2], shift * j);
 				scheme.addAndEqual(ciphers[i + j], ciphers[i + j + len / 2]);
 				scheme.subAndEqual2(u, ciphers[i + j + len / 2]);
@@ -378,11 +378,11 @@ void SchemeAlgo::fftRaw(Cipher*& ciphers, const long size, const bool isForward)
 	}
 }
 
-void SchemeAlgo::fft(Cipher*& ciphers, const long size) {
+void SchemeAlgo::fft(Ciphertext*& ciphers, const long size) {
 	fftRaw(ciphers, size, true);
 }
 
-void SchemeAlgo::fftInv(Cipher*& ciphers, const long size) {
+void SchemeAlgo::fftInv(Ciphertext*& ciphers, const long size) {
 	fftRaw(ciphers, size, false);
 	long logsize = log2((double)size);
 
@@ -393,6 +393,6 @@ void SchemeAlgo::fftInv(Cipher*& ciphers, const long size) {
 	NTL_EXEC_RANGE_END;
 }
 
-void SchemeAlgo::fftInvLazy(Cipher*& ciphers, const long size) {
+void SchemeAlgo::fftInvLazy(Ciphertext*& ciphers, const long size) {
 	return fftRaw(ciphers, size, false);
 }

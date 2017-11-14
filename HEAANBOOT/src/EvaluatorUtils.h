@@ -1,5 +1,5 @@
-#ifndef UTILS_EVALUATORUTILS_H_
-#define UTILS_EVALUATORUTILS_H_
+#ifndef HEAAN_EVALUATORUTILS_H_
+#define HEAAN_EVALUATORUTILS_H_
 
 #include <NTL/RR.h>
 
@@ -252,4 +252,4 @@ public:
 	//-----------------------------------------
 };
 
-#endif /* UTILS_EVALUATORUTILS_H_ */
+#endif

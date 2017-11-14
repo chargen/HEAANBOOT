@@ -1,5 +1,5 @@
-#ifndef BOOTKEY_H_
-#define BOOTKEY_H_
+#ifndef HEAAN_BOOTKEY_H_
+#define HEAAN_BOOTKEY_H_
 
 #include "SchemeAux.h"
 
@@ -13,4 +13,4 @@ public:
 	BootKey(Params& params, SchemeAux& aux, long pBits, long l);
 };
 
-#endif /* BOOTKEY_H_ */
+#endif

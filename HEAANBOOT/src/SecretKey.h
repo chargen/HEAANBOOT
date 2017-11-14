@@ -1,5 +1,5 @@
-#ifndef SCHEME_SECKEY_H_
-#define SCHEME_SECKEY_H_
+#ifndef HEAAN_SECRETKEY_H_
+#define HEAAN_SECRETKEY_H_
 
 #include <NTL/ZZX.h>
 
@@ -8,17 +8,17 @@
 using namespace std;
 using namespace NTL;
 
-class SecKey {
+class SecretKey {
 public:
 
 	ZZX sx; ///< secret key
 
 	//-----------------------------------------
 
-	SecKey(Params& params);
+	SecretKey(Params& params);
 
 	//-----------------------------------------
 
 };
 
-#endif /* SCHEME_SECKEY_H_ */
+#endif

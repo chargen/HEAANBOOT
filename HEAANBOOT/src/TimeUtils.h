@@ -1,5 +1,5 @@
-#ifndef POLYSCHEME_TIMEUTILS_H_
-#define POLYSCHEME_TIMEUTILS_H_
+#ifndef HEAAN_TIMEUTILS_H_
+#define HEAAN_TIMEUTILS_H_
 
 #include <iostream>
 
@@ -34,4 +34,4 @@ public:
 	//-----------------------------------------
 };
 
-#endif /* POLYSCHEME_TIMEUTILS_H_ */
+#endif

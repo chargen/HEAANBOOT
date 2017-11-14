@@ -1,7 +1,7 @@
-#include "SecKey.h"
+#include "SecretKey.h"
 
 #include "NumUtils.h"
 
-SecKey::SecKey(Params& params) {
+SecretKey::SecretKey(Params& params) {
 	NumUtils::sampleHWT(sx, params.N, params.h);
 }

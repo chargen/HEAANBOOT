@@ -1,5 +1,5 @@
-#ifndef SCHEME_CIPHER_H_
-#define SCHEME_CIPHER_H_
+#ifndef HEAAN_CIPHERTEXT_H_
+#define HEAAN_CIPHERTEXT_H_
 
 #include <NTL/ZZ.h>
 #include <NTL/ZZX.h>
@@ -11,7 +11,7 @@ using namespace NTL;
  * Cipher consist a pair of elements (ax, bx) of ring Z_qi[X] / (X^N + 1)
  *
  */
-class Cipher {
+class Ciphertext {
 public:
 
 	ZZX ax;
@@ -29,10 +29,10 @@ public:
 	 * @param[in] bits: bits in cipher
 	 * @param[in] slots: number of slots
 	 */
-	Cipher(ZZX ax = ZZX::zero(), ZZX bx = ZZX::zero(), ZZ mod = ZZ::zero(), long cbits = 0, long slots = 1, bool isComplex = true) : ax(ax), bx(bx), mod(mod), cbits(cbits), slots(slots), isComplex(isComplex) {}
+	Ciphertext(ZZX ax = ZZX::zero(), ZZX bx = ZZX::zero(), ZZ mod = ZZ::zero(), long cbits = 0, long slots = 1, bool isComplex = true) : ax(ax), bx(bx), mod(mod), cbits(cbits), slots(slots), isComplex(isComplex) {}
 
-	Cipher(const Cipher& o) : ax(o.ax), bx(o.bx), mod(o.mod), cbits(o.cbits), slots(o.slots), isComplex(o.isComplex) {}
+	Ciphertext(const Ciphertext& o) : ax(o.ax), bx(o.bx), mod(o.mod), cbits(o.cbits), slots(o.slots), isComplex(o.isComplex) {}
 
 };
 
-#endif /* SCHEME_CIPHER_H_ */
+#endif
