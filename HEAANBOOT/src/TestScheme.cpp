@@ -3,23 +3,21 @@
 #include <NTL/BasicThreadPool.h>
 #include <NTL/RR.h>
 #include <NTL/ZZ.h>
-#include <cstdlib>
-#include <iostream>
-#include <string>
 
+#include "Common.h"
 #include "Ciphertext.h"
 #include "CZZ.h"
 #include "EvaluatorUtils.h"
 #include "NumUtils.h"
 #include "Params.h"
-#include "PublicKey.h"
 #include "Scheme.h"
 #include "SchemeAlgo.h"
-#include "SchemeAux.h"
 #include "SecretKey.h"
 #include "StringUtils.h"
 #include "TimeUtils.h"
+#include "Context.h"
 
+using namespace std;
 using namespace NTL;
 
 //-----------------------------------------
@@ -29,10 +27,9 @@ void TestScheme::testEncodeBatch(long logN, long logq, long precisionBits, long 
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
@@ -57,12 +54,11 @@ void TestScheme::testConjugateBatch(long logN, long logq, long precisionBits, lo
 	cout << "!!! START TEST CONJUGATE BATCH !!!" << endl;
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
-	publicKey.addConjKey(params, secretKey);
+	scheme.addConjKey(secretKey);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
 	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
@@ -87,10 +83,9 @@ void TestScheme::testimultBatch(long logN, long logq, long precisionBits, long l
 	cout << "!!! START TEST i MULTIPLICATION BATCH !!!" << endl;
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
@@ -118,12 +113,11 @@ void TestScheme::testRotateByPo2Batch(long logN, long logq, long precisionBits, 
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
-	publicKey.addLeftRotKeys(params, secretKey);
+	scheme.addLeftRotKeys(secretKey);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
 	long rotSlots = (1 << rotlogSlots);
@@ -156,13 +150,12 @@ void TestScheme::testRotateBatch(long logN, long logq, long precisionBits, long 
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
-	publicKey.addLeftRotKeys(params, secretKey);
-	publicKey.addRightRotKeys(params, secretKey);
+	scheme.addLeftRotKeys(secretKey);
+	scheme.addRightRotKeys(secretKey);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
 	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
@@ -194,12 +187,11 @@ void TestScheme::testSlotsSum(long logN, long logq, long precisionBits, long log
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
-	publicKey.addLeftRotKeys(params, secretKey);
+	scheme.addLeftRotKeys(secretKey);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
 	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
@@ -227,10 +219,9 @@ void TestScheme::testPowerOf2Batch(long logN, long logq, long precisionBits, lon
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	long slots = 1 << logSlots;
@@ -272,10 +263,9 @@ void TestScheme::testPowerBatch(long logN, long logq, long precisionBits, long d
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	long slots = 1 << logSlots;
@@ -307,10 +297,9 @@ void TestScheme::testProdOfPo2Batch(long logN, long logq, long precisionBits, lo
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	SetNumThreads(4);
@@ -353,10 +342,9 @@ void TestScheme::testProdBatch(long logN, long logq, long precisionBits, long de
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	SetNumThreads(4);
@@ -400,10 +388,9 @@ void TestScheme::testInverseBatch(long logN, long logq, long precisionBits, long
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	long slots = 1 << logSlots;
@@ -435,10 +422,9 @@ void TestScheme::testLogarithmBatch(long logN, long logq, long precisionBits, lo
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	long slots = 1 << logSlots;
@@ -469,10 +455,9 @@ void TestScheme::testExponentBatch(long logN, long logq, long precisionBits, lon
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	long slots = 1 << logSlots;
@@ -501,10 +486,9 @@ void TestScheme::testExponentBatchLazy(long logN, long logq, long precisionBits,
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	long slots = 1 << logSlots;
@@ -536,10 +520,9 @@ void TestScheme::testSigmoidBatch(long logN, long logq, long precisionBits, long
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	long slots = 1 << logSlots;
@@ -568,10 +551,9 @@ void TestScheme::testSigmoidBatchLazy(long logN, long logq, long precisionBits, 
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	long slots = 1 << logSlots;
@@ -603,10 +585,9 @@ void TestScheme::testFFTBatch(long logN, long logq, long precisionBits, long log
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	SetNumThreads(8);
@@ -637,13 +618,13 @@ void TestScheme::testFFTBatch(long logN, long logq, long precisionBits, long log
 	}
 
 	for (long i = 0; i < slots; ++i) {
-		NumUtils::fft(mvec1[i], fftdim, schemeaux);
-		NumUtils::fft(mvec2[i], fftdim, schemeaux);
+		NumUtils::fft(mvec1[i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
+		NumUtils::fft(mvec2[i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
 		for (long j = 0; j < fftdim; ++j) {
 			mvec1[i][j] *= mvec2[i][j];
 			mvec1[i][j] >>= precisionBits;
 		}
-		NumUtils::fftInv(mvec1[i], fftdim, schemeaux);
+		NumUtils::fftInv(mvec1[i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
 	}
 	//-----------------------------------------
 	timeutils.start("ciphers fft 1 batch");
@@ -682,10 +663,9 @@ void TestScheme::testFFTBatchLazy(long logN, long logq, long precisionBits, long
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	SetNumThreads(8);
@@ -716,13 +696,13 @@ void TestScheme::testFFTBatchLazy(long logN, long logq, long precisionBits, long
 	}
 
 	for (long i = 0; i < slots; ++i) {
-		NumUtils::fft(mvec1[i], fftdim, schemeaux);
-		NumUtils::fft(mvec2[i], fftdim, schemeaux);
+		NumUtils::fft(mvec1[i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
+		NumUtils::fft(mvec2[i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
 		for (long j = 0; j < fftdim; ++j) {
 			mvec1[i][j] *= mvec2[i][j];
 			mvec1[i][j] >>= precisionBits;
 		}
-		NumUtils::fftInvLazy(mvec1[i], fftdim, schemeaux);
+		NumUtils::fftInvLazy(mvec1[i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
 	}
 	//-----------------------------------------
 	timeutils.start("ciphers fft 1");
@@ -761,10 +741,9 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logq, long pre
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	SetNumThreads(8);
@@ -792,7 +771,7 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logq, long pre
 			delete[] mvals;
 		}
 		for (long i = 0; i < slots; ++i) {
-			NumUtils::fft(mvecs[h][i], fftdim, schemeaux);
+			NumUtils::fft(mvecs[h][i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
 		}
 	}
 
@@ -809,7 +788,7 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logq, long pre
 	}
 
 	for (long i = 0; i < slots; ++i) {
-		NumUtils::fftInvLazy(mvecs[0][i], fftdim, schemeaux);
+		NumUtils::fftInvLazy(mvecs[0][i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
 	}
 
 	for (long h = 1; h < hdim; ++h) {
@@ -867,16 +846,15 @@ void TestScheme::testBootstrap() {
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	timeutils.start("Boot Key generating");
-	publicKey.addConjKey(params, secretKey);
-	publicKey.addLeftRotKeys(params, secretKey);
-	publicKey.addBootKeys(params, secretKey, schemeaux, lkey, logq0 + logI);
+	scheme.addConjKey(secretKey);
+	scheme.addLeftRotKeys(secretKey);
+	scheme.addBootKeys(secretKey, lkey, logq0 + logI);
 	timeutils.stop("Boot Key generated");
 	//-----------------------------------------
 	SetNumThreads(1);
@@ -952,10 +930,9 @@ void TestScheme::testBootstrapOneReal() {
 	TimeUtils timeutils;
 	timeutils.start("scheme generation");
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	timeutils.stop("scheme generation");
 	//-----------------------------------------
@@ -1009,10 +986,9 @@ void TestScheme::testBoundOfI() {
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logq);
+	Context context(params);
 	SecretKey secretKey(params);
-	PublicKey publicKey(params, secretKey);
-	SchemeAux schemeaux(logN);
-	Scheme scheme(params, publicKey, schemeaux);
+	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	SetNumThreads(1);
@@ -1036,7 +1012,7 @@ void TestScheme::testBoundOfI() {
 	scheme.normalizeAndEqual(cipher);
 
 	cipher.cbits = logq;
-	cipher.mod = params.q;
+	cipher.mod = context.q;
 
 	timeutils.start("Decrypt batch");
 	Plaintext msgBig = scheme.decryptMsg(secretKey, cipher);

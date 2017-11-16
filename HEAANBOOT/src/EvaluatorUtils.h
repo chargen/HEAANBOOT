@@ -2,8 +2,9 @@
 #define HEAAN_EVALUATORUTILS_H_
 
 #include <NTL/RR.h>
+#include <NTL/ZZ.h>
 
-#include "SchemeAux.h"
+#include "Context.h"
 #include "CZZ.h"
 
 using namespace NTL;

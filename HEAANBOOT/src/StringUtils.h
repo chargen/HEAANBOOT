@@ -1,8 +1,7 @@
 #ifndef HEAAN_STRINGUTILS_H_
 #define HEAAN_STRINGUTILS_H_
 
-#include <iostream>
-
+#include "Common.h"
 #include "CZZ.h"
 
 class StringUtils {

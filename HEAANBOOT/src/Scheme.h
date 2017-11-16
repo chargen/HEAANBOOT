@@ -1,27 +1,51 @@
 #ifndef HEAAN_SCHEME_H_
 #define HEAAN_SCHEME_H_
 
-#include <stdexcept>
+#include <NTL/RR.h>
+#include <NTL/ZZ.h>
+#include <NTL/ZZX.h>
 
+
+#include "Common.h"
 #include "CZZ.h"
 #include "SecretKey.h"
-#include "SchemeAux.h"
 #include "Ciphertext.h"
 #include "Plaintext.h"
-#include "PublicKey.h"
+#include "Key.h"
+#include "Context.h"
+#include "BootKey.h"
+#include "EvaluatorUtils.h"
+#include "NumUtils.h"
+#include "Params.h"
+#include "Ring2Utils.h"
 
 using namespace std;
 using namespace NTL;
 
+static long ENCRYPTION = 0;
+static long MULTIPLICATION  = 1;
+static long CONJUGATION = 2;
+
 class Scheme {
 private:
 public:
-	Params& params;
-	PublicKey& publicKey;
-	SchemeAux& aux;
+	Context& context;
+	map<long, Key> keyMap;
+	map<long, Key> leftRotKeyMap;
+	map<long, BootKey> bootKeyMap;
 
+	Scheme(SecretKey& secretKey, Context& context);
 
-	Scheme(Params& params, PublicKey& publicKey, SchemeAux& schemeaux) : params(params), publicKey(publicKey), aux(schemeaux) {};
+	void addEncKey(SecretKey& secretKey);
+	void addConjKey(SecretKey& secretKey);
+	void addMultKey(SecretKey& secretKey);
+
+	void addLeftRotKey(SecretKey& secretKey, long rot);
+	void addLeftRotKeys(SecretKey& secretKey);
+	void addRightRotKeys(SecretKey& secretKey);
+
+	void addBootKeys(SecretKey& secretKey, long logsize, long pBits);
+	void addSortKeys(SecretKey& secretKey, long size);
 
 	//-----------------------------------------
 

@@ -4,6 +4,8 @@
 #include <NTL/ZZX.h>
 
 #include "Params.h"
+#include "NumUtils.h"
+
 
 using namespace std;
 using namespace NTL;

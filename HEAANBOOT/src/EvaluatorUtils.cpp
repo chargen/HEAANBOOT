@@ -1,8 +1,5 @@
 #include "EvaluatorUtils.h"
 
-#include <NTL/ZZ.h>
-#include <cmath>
-
 
 ZZ EvaluatorUtils::evalZZ(const double& x, const long& bits) {
 	return evalZZ(to_RR(x), bits);

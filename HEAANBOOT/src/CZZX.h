@@ -2,9 +2,11 @@
 #define HEAAN_CZZX_H_
 
 #include <NTL/ZZX.h>
-#include <iostream>
+#include <NTL/ZZ.h>
 
+#include "Common.h"
 #include "CZZ.h"
+
 
 using namespace std;
 using namespace NTL;

@@ -1,7 +1,14 @@
 #ifndef HEAAN_BOOTKEY_H_
 #define HEAAN_BOOTKEY_H_
 
-#include "SchemeAux.h"
+#include <NTL/ZZ.h>
+#include <NTL/ZZX.h>
+
+#include "CZZ.h"
+#include "EvaluatorUtils.h"
+#include "NumUtils.h"
+#include "Ring2Utils.h"
+#include "Context.h"
 
 class BootKey {
 public:
@@ -10,7 +17,7 @@ public:
 	ZZX* pvec;
 	ZZX* pvecInv;
 
-	BootKey(Params& params, SchemeAux& aux, long pBits, long l);
+	BootKey(Context& context, long pBits, long l);
 };
 
 #endif

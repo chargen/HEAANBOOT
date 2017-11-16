@@ -1,8 +1,15 @@
 #ifndef HEAAN_SCHEMEALGO_H_
 #define HEAAN_SCHEMEALGO_H_
 
-#include <iostream>
+#include <NTL/BasicThreadPool.h>
+#include <NTL/ZZ.h>
 
+#include "Common.h"
+#include "CZZ.h"
+#include "EvaluatorUtils.h"
+#include "Params.h"
+#include "Plaintext.h"
+#include "SecretKey.h"
 #include "Ciphertext.h"
 #include "Scheme.h"
 

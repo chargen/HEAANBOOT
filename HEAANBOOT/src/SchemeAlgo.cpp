@@ -1,21 +1,10 @@
 #include "SchemeAlgo.h"
 
-#include <NTL/BasicThreadPool.h>
-#include <NTL/ZZ.h>
-#include <cmath>
-#include <map>
-
-#include "CZZ.h"
-#include "EvaluatorUtils.h"
-#include "Params.h"
-#include "Plaintext.h"
-#include "SchemeAux.h"
-#include "SecretKey.h"
 
 Ciphertext* SchemeAlgo::encryptSingleArray(CZZ*& vals, long size) {
 	Ciphertext* res = new Ciphertext[size];
 	for (long i = 0; i < size; ++i) {
-		res[i] = scheme.encryptSingle(vals[i], scheme.params.logq);
+		res[i] = scheme.encryptSingle(vals[i], scheme.context.logq);
 	}
 	return res;
 }
@@ -271,7 +260,7 @@ Ciphertext SchemeAlgo::function(Ciphertext& cipher, string& funcName, const long
 
 	long dprecisionBits = 2 * precisionBits;
 
-	double* coeffs = scheme.aux.taylorCoeffsMap.at(funcName);
+	double* coeffs = scheme.context.taylorCoeffsMap.at(funcName);
 
 	ZZ tmp = EvaluatorUtils::evalZZ(coeffs[1], precisionBits);
 	Ciphertext res = scheme.multByConst(cpows[0], tmp);
@@ -297,7 +286,7 @@ Ciphertext SchemeAlgo::functionLazy(Ciphertext& cipher, string& funcName, const 
 
 	long dprecisionBits = 2 * precisionBits;
 
-	double* coeffs = scheme.aux.taylorCoeffsMap.at(funcName);
+	double* coeffs = scheme.context.taylorCoeffsMap.at(funcName);
 
 	ZZ tmp = EvaluatorUtils::evalZZ(coeffs[1], precisionBits);
 	Ciphertext res = scheme.multByConst(cpows[0], tmp);
@@ -321,7 +310,7 @@ Ciphertext* SchemeAlgo::functionExtended(Ciphertext& cipher, string& funcName, c
 	Ciphertext* cpows = powerExtended(cipher, precisionBits, degree);
 
 	long dprecisionBits = 2 * precisionBits;
-	double* coeffs = scheme.aux.taylorCoeffsMap.at(funcName);
+	double* coeffs = scheme.context.taylorCoeffsMap.at(funcName);
 
 	ZZ tmp = EvaluatorUtils::evalZZ(coeffs[1], precisionBits);
 	Ciphertext aixi = scheme.multByConst(cpows[0], tmp);
@@ -364,7 +353,7 @@ void SchemeAlgo::fftRaw(Ciphertext*& ciphers, const long size, const bool isForw
 	}
 
 	for (long len = 2; len <= size; len <<= 1) {
-		long shift = isForward ? ((scheme.params.N / len) << 1) : ((scheme.params.N - scheme.params.N / len) << 1);
+		long shift = isForward ? ((scheme.context.N / len) << 1) : ((scheme.context.N - scheme.context.N / len) << 1);
 		for (long i = 0; i < size; i += len) {
 			NTL_EXEC_RANGE(len / 2, first, last);
 			for (long j = first; j < last; ++j) {

@@ -3,9 +3,10 @@
 
 #include <NTL/ZZX.h>
 #include <NTL/RR.h>
-#include "SchemeAux.h"
+#include <NTL/ZZ.h>
 #include "CZZ.h"
 
+#include "Common.h"
 using namespace NTL;
 
 class NumUtils {
@@ -69,7 +70,7 @@ public:
 	 * @param[in] auxiliary information
 	 * @return pre fft
 	 */
-	static void fftRaw(CZZ*& vals, const long& size, SchemeAux& aux, const bool& isForward);
+	static void fftRaw(CZZ*& vals, const long& size, const RR* ksiPowsr, const RR* ksiPowsi, const long& M, const bool& isForward);
 
 	/**
 	 * calculates fft in Z_q[X] / (X^N + 1)
@@ -78,7 +79,7 @@ public:
 	 * @param[in] auxiliary information
 	 * @param[in] auxiliary information
 	 */
-	static void fft(CZZ*& vals, const long& size, SchemeAux& aux);
+	static void fft(CZZ*& vals, const long& size, const RR* ksiPowsr, const RR* ksiPowsi, const long& M);
 
 	/**
 	 * calculates fft inverse in Z_q[X] / (X^N + 1)
@@ -87,7 +88,7 @@ public:
 	 * @param[in] auxiliary information
 	 * @param[in] auxiliary information
 	 */
-	static void fftInv(CZZ*& vals, const long& size, SchemeAux& aux);
+	static void fftInv(CZZ*& vals, const long& size, const RR* ksiPowsr, const RR* ksiPowsi, const long& M);
 
 	/**
 	 * calculates fft inverse without last division by size in Z_q[X] / (X^N + 1)
@@ -96,7 +97,7 @@ public:
 	 * @param[in] auxiliary information
 	 * @param[in] auxiliary information
 	 */
-	static void fftInvLazy(CZZ*& vals, const long& size, SchemeAux& aux);
+	static void fftInvLazy(CZZ*& vals, const long& size, const RR* ksiPowsr, const RR* ksiPowsi, const long& M);
 
 	//-----------------------------------------
 
@@ -107,7 +108,7 @@ public:
 	 * @param[in] auxiliary information
 	 * @param[in] auxiliary information
 	 */
-	static void fftSpecial(CZZ*& vals, const long& size, SchemeAux& aux);
+	static void fftSpecial(CZZ*& vals, const long& size, const RR* ksiPowsr, const RR* ksiPowsi, const long& M);
 
 	/**
 	 * calculates special fft inverse in Z_q[X] / (X^N + 1) needed for encoding/decoding
@@ -116,7 +117,7 @@ public:
 	 * @param[in] auxiliary information
 	 * @param[in] auxiliary information
 	 */
-	static void fftSpecialInv(CZZ*& vals, const long& size, SchemeAux& aux);
+	static void fftSpecialInv(CZZ*& vals, const long& size, const RR* ksiPowsr, const RR* ksiPowsi, const long& M);
 
 	//-----------------------------------------
 };
