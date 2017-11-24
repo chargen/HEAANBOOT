@@ -63,10 +63,10 @@ void NumUtils::sampleBinary(ZZX& res, const long& size) {
 	}
 }
 
-void NumUtils::sampleUniform2(ZZX& res, const long& size, const long& logBnd) {
+void NumUtils::sampleUniform2(ZZX& res, const long& size, const long& bits) {
 	res.SetLength(size);
 	for (long i = 0; i < size; i++) {
-		res.rep[i] = RandomBits_ZZ(logBnd);
+		res.rep[i] = RandomBits_ZZ(bits);
 	}
 }
 

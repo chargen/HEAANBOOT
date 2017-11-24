@@ -1,69 +1,69 @@
 #include "BootKey.h"
 
-BootKey::BootKey(Context& context, long pBits, long l) : pBits(pBits) {
-	ZZ pmod = power2_ZZ(pBits);
+BootKey::BootKey(Context& context, long logp, long logl) : logp(logp) {
+	ZZ p = power2_ZZ(logp);
 
 	ZZX ex;
-	long lh = l/2;
-	long lpow = 1 << l;
-	long lpow2 = lpow << 1;
-	long Noverl = context.N >> l;
+	long loglh = logl/2;
+	long l = 1 << logl;
+	long dl = l << 1;
+	long Noverl = context.N >> logl;
 
-	long lk = 1 << lh;
-	long lm = 1 << (l - lh);
+	long lk = 1 << loglh;
+	long lm = 1 << (logl - loglh);
 
-	pvec = new ZZX[lpow];
-	pvecInv = new ZZX[lpow];
+	pvec = new ZZX[l];
+	pvecInv = new ZZX[l];
 
-	CZZ* pdvals = new CZZ[lpow2];
-	for (long j = 0; j < lpow; ++j) {
-		for (long i = j; i < lpow; ++i) {
+	CZZ* pdvals = new CZZ[dl];
+	for (long j = 0; j < l; ++j) {
+		for (long i = j; i < l; ++i) {
 			long deg =((2 * context.N - context.rotGroup[i]) * (i - j) * Noverl) % (2 * context.N);
-			CZZ tmp = EvaluatorUtils::evalCZZ(context.ksiPowsr[deg], context.ksiPowsi[deg], pBits);
-			long idx = (context.rotGroup[i-j] % (2 * lpow2)  - 1) / 2;
+			CZZ tmp = EvaluatorUtils::evalCZZ(context.ksiPowsr[deg], context.ksiPowsi[deg], logp);
+			long idx = (context.rotGroup[i-j] % (2 * dl)  - 1) / 2;
 					pdvals[idx] = tmp;
-					pdvals[lpow2 - idx - 1] = tmp.conjugate();
+					pdvals[dl - idx - 1] = tmp.conjugate();
 		}
 		for (long i = 0; i < j; ++i) {
-			long deg =((2 * context.N - context.rotGroup[i]) * (lpow + i - j) * Noverl) % (2 * context.N);
-			CZZ tmp = EvaluatorUtils::evalCZZ(context.ksiPowsr[deg], context.ksiPowsi[deg], pBits);
-			long idx = (context.rotGroup[lpow + i - j] % (2 * lpow2) - 1) / 2;
+			long deg =((2 * context.N - context.rotGroup[i]) * (l + i - j) * Noverl) % (2 * context.N);
+			CZZ tmp = EvaluatorUtils::evalCZZ(context.ksiPowsr[deg], context.ksiPowsi[deg], logp);
+			long idx = (context.rotGroup[l + i - j] % (2 * dl) - 1) / 2;
 			pdvals[idx] = tmp;
-			pdvals[lpow2 - idx - 1] = tmp.conjugate();
+			pdvals[dl - idx - 1] = tmp.conjugate();
 		}
 
-		NumUtils::fftSpecialInv(pdvals, lpow2, context.ksiPowsr, context.ksiPowsi, context.M);
+		NumUtils::fftSpecialInv(pdvals, dl, context.ksiPowsr, context.ksiPowsi, context.M);
 
 		pvec[j].SetLength(context.N);
 		long idx = 0;
-		long gap = context.N / lpow2;
-		for (long i = 0; i < lpow2; ++i) {
+		long gap = context.N / dl;
+		for (long i = 0; i < dl; ++i) {
 			pvec[j].rep[idx] = pdvals[i].r;
 			idx += gap;
 		}
 	}
 
-	for (long j = 0; j < lpow; ++j) {
-		for (long i = j; i < lpow; ++i) {
+	for (long j = 0; j < l; ++j) {
+		for (long i = j; i < l; ++i) {
 			long deg =(context.rotGroup[i-j] * i * Noverl) % (2 * context.N);
-			CZZ tmp = EvaluatorUtils::evalCZZ(context.ksiPowsr[deg], context.ksiPowsi[deg], pBits);
-			long idx = (context.rotGroup[i-j] % (2 * lpow2) - 1) / 2;
+			CZZ tmp = EvaluatorUtils::evalCZZ(context.ksiPowsr[deg], context.ksiPowsi[deg], logp);
+			long idx = (context.rotGroup[i-j] % (2 * dl) - 1) / 2;
 			pdvals[idx] = tmp;
-			pdvals[lpow2 - idx - 1] = tmp.conjugate();
+			pdvals[dl - idx - 1] = tmp.conjugate();
 		}
 		for (long i = 0; i < j; ++i) {
-			long deg = (context.rotGroup[lpow + i - j] * i * Noverl) % (2 * context.N);
-			CZZ tmp = EvaluatorUtils::evalCZZ(context.ksiPowsr[deg], context.ksiPowsi[deg], pBits);
-			long idx = (context.rotGroup[lpow + i - j] % (2 * lpow2) - 1) / 2;
+			long deg = (context.rotGroup[l + i - j] * i * Noverl) % (2 * context.N);
+			CZZ tmp = EvaluatorUtils::evalCZZ(context.ksiPowsr[deg], context.ksiPowsi[deg], logp);
+			long idx = (context.rotGroup[l + i - j] % (2 * dl) - 1) / 2;
 			pdvals[idx] = tmp;
-			pdvals[lpow2 - idx - 1] = tmp.conjugate();
+			pdvals[dl - idx - 1] = tmp.conjugate();
 		}
-		NumUtils::fftSpecialInv(pdvals, lpow2, context.ksiPowsr, context.ksiPowsi, context.M);
+		NumUtils::fftSpecialInv(pdvals, dl, context.ksiPowsr, context.ksiPowsi, context.M);
 
 		pvecInv[j].SetLength(context.N);
 		long idx = 0;
-		long gap = context.N / lpow2;
-		for (long i = 0; i < lpow2; ++i) {
+		long gap = context.N / dl;
+		for (long i = 0; i < dl; ++i) {
 			pvecInv[j].rep[idx] = pdvals[i].r;
 			idx += gap;
 		}
@@ -72,8 +72,8 @@ BootKey::BootKey(Context& context, long pBits, long l) : pBits(pBits) {
 
 	for (long i = 1; i < lm; ++i) {
 		for (long j = 0; j < lk; ++j) {
-			pvec[j + lk * i] = Ring2Utils::inpower(pvec[j + lk * i], context.rotGroup[lpow - lk * i], pmod, context.N);
-			pvecInv[j + lk * i] = Ring2Utils::inpower(pvecInv[j + lk * i], context.rotGroup[lpow - lk * i], pmod, context.N);
+			pvec[j + lk * i] = Ring2Utils::inpower(pvec[j + lk * i], context.rotGroup[l - lk * i], p, context.N);
+			pvecInv[j + lk * i] = Ring2Utils::inpower(pvecInv[j + lk * i], context.rotGroup[l - lk * i], p, context.N);
 		}
 	}
 }

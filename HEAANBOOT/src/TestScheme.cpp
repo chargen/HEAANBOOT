@@ -22,21 +22,21 @@ using namespace NTL;
 
 //-----------------------------------------
 
-void TestScheme::testEncodeBatch(long logN, long logq, long precisionBits, long logSlots) {
+void TestScheme::testEncodeBatch(long logN, long logQ, long logp, long logSlots) {
 	cout << "!!! START TEST ENCODE BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
-	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
+	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, logp);
 	//-----------------------------------------
 	timeutils.start("Encrypt batch");
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logQ);
 	timeutils.stop("Encrypt batch");
 	//-----------------------------------------
 	timeutils.start("Decrypt batch");
@@ -50,10 +50,10 @@ void TestScheme::testEncodeBatch(long logN, long logq, long precisionBits, long 
 
 //-----------------------------------------
 
-void TestScheme::testConjugateBatch(long logN, long logq, long precisionBits, long logSlots) {
+void TestScheme::testConjugateBatch(long logN, long logQ, long logp, long logSlots) {
 	cout << "!!! START TEST CONJUGATE BATCH !!!" << endl;
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
@@ -61,13 +61,13 @@ void TestScheme::testConjugateBatch(long logN, long logq, long precisionBits, lo
 	scheme.addConjKey(secretKey);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
-	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
+	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, logp);
 	CZZ* mvecconj = new CZZ[slots];
 	for (long i = 0; i < slots; ++i) {
 		mvecconj[i] = mvec[i].conjugate();
 	}
 
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logQ);
 	timeutils.start("Conjugate batch");
 	Ciphertext cconj = scheme.conjugate(cipher);
 	timeutils.stop("Conjugate batch");
@@ -79,26 +79,26 @@ void TestScheme::testConjugateBatch(long logN, long logq, long precisionBits, lo
 	cout << "!!! END TEST CONJUGATE BATCH !!!" << endl;
 }
 
-void TestScheme::testimultBatch(long logN, long logq, long precisionBits, long logSlots) {
+void TestScheme::testimultBatch(long logN, long logQ, long logp, long logSlots) {
 	cout << "!!! START TEST i MULTIPLICATION BATCH !!!" << endl;
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
-	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
+	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, logp);
 	CZZ* imvec = new CZZ[slots];
 	for (long i = 0; i < slots; ++i) {
 		imvec[i].r = -mvec[i].i;
 		imvec[i].i = mvec[i].r;
 	}
 
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logQ);
 	timeutils.start("Multiplication by i batch");
-	Ciphertext icipher = scheme.imult(cipher, precisionBits);
+	Ciphertext icipher = scheme.imult(cipher);
 	timeutils.stop("Multiplication by i batch");
 
 	CZZ* idvec = scheme.decrypt(secretKey, icipher);
@@ -108,11 +108,11 @@ void TestScheme::testimultBatch(long logN, long logq, long precisionBits, long l
 	cout << "!!! END TEST i MULTIPLICATION BATCH !!!" << endl;
 }
 
-void TestScheme::testRotateByPo2Batch(long logN, long logq, long precisionBits, long rotlogSlots, long logSlots, bool isLeft) {
+void TestScheme::testRotateByPo2Batch(long logN, long logQ, long logp, long logRotSlots, long logSlots, bool isLeft) {
 	cout << "!!! START TEST ROTATE BY POWER OF 2 BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
@@ -120,17 +120,17 @@ void TestScheme::testRotateByPo2Batch(long logN, long logq, long precisionBits, 
 	scheme.addLeftRotKeys(secretKey);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
-	long rotSlots = (1 << rotlogSlots);
-	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
+	long rotSlots = (1 << logRotSlots);
+	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, logp);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logQ);
 	//-----------------------------------------
 	if(isLeft) {
 		timeutils.start("Left Rotate by power of 2 batch");
-		scheme.leftRotateByPo2AndEqual(cipher, rotlogSlots);
+		scheme.leftRotateByPo2AndEqual(cipher, logRotSlots);
 		timeutils.stop("Left Rotate by power of 2 batch");
 	} else {
 		timeutils.start("Right Rotate by power of 2 batch");
-		scheme.rightRotateByPo2AndEqual(cipher, rotlogSlots);
+		scheme.rightRotateByPo2AndEqual(cipher, logRotSlots);
 		timeutils.stop("Right Rotate by power of 2 batch");
 	}
 	//-----------------------------------------
@@ -145,11 +145,11 @@ void TestScheme::testRotateByPo2Batch(long logN, long logq, long precisionBits, 
 	cout << "!!! END TEST ROTATE BY POWER OF 2 BATCH !!!" << endl;
 }
 
-void TestScheme::testRotateBatch(long logN, long logq, long precisionBits, long rotSlots, long logSlots, bool isLeft) {
+void TestScheme::testRotateBatch(long logN, long logQ, long logp, long rotSlots, long logSlots, bool isLeft) {
 	cout << "!!! START TEST ROTATE BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
@@ -158,8 +158,8 @@ void TestScheme::testRotateBatch(long logN, long logq, long precisionBits, long 
 	scheme.addRightRotKeys(secretKey);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
-	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
+	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, logp);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logQ);
 	//-----------------------------------------
 	if(isLeft) {
 		timeutils.start("Left rotate batch");
@@ -182,11 +182,11 @@ void TestScheme::testRotateBatch(long logN, long logq, long precisionBits, long 
 	cout << "!!! END TEST ROTATE BATCH !!!" << endl;
 }
 
-void TestScheme::testSlotsSum(long logN, long logq, long precisionBits, long logSlots) {
+void TestScheme::testSlotsSum(long logN, long logQ, long logp, long logSlots) {
 	cout << "!!! START TEST SLOTS SUM !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
@@ -194,8 +194,8 @@ void TestScheme::testSlotsSum(long logN, long logq, long precisionBits, long log
 	scheme.addLeftRotKeys(secretKey);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
-	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, precisionBits);
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
+	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, logp);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logQ);
 	//-----------------------------------------
 	timeutils.start("slots sum");
 	algo.partialSlotsSumAndEqual(cipher, slots);
@@ -214,11 +214,11 @@ void TestScheme::testSlotsSum(long logN, long logq, long precisionBits, long log
 
 //-----------------------------------------
 
-void TestScheme::testPowerOf2Batch(long logN, long logq, long precisionBits, long logDegree, long logSlots) {
+void TestScheme::testPowerOf2Batch(long logN, long logQ, long logp, long logDegree, long logSlots) {
 	cout << "!!! START TEST POWER OF 2 BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
@@ -237,16 +237,16 @@ void TestScheme::testPowerOf2Batch(long logN, long logq, long precisionBits, lon
 		RR angle = random_RR();
 		RR mr = cos(angle * 2 * Pi);
 		RR mi = sin(angle * 2 * Pi);
-		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
-		mpow[i] = EvaluatorUtils::evalCZZPow2(mr, mi, logDegree, precisionBits);
+		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, logp);
+		mpow[i] = EvaluatorUtils::evalCZZPow2(mr, mi, logDegree, logp);
 		for (int j = 0; j < logDegree + 1; ++j) {
-			mpows[j][i] = EvaluatorUtils::evalCZZPow2(mr, mi, j, precisionBits);
+			mpows[j][i] = EvaluatorUtils::evalCZZPow2(mr, mi, j, logp);
 		}
 	}
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logQ);
 	//-----------------------------------------
 	timeutils.start("Power of 2 batch");
-	Ciphertext cpow = algo.powerOf2(cipher, precisionBits, logDegree);
+	Ciphertext cpow = algo.powerOf2(cipher, logp, logDegree);
 	timeutils.stop("Power of 2 batch");
 
 	//-----------------------------------------
@@ -258,11 +258,11 @@ void TestScheme::testPowerOf2Batch(long logN, long logq, long precisionBits, lon
 
 //-----------------------------------------
 
-void TestScheme::testPowerBatch(long logN, long logq, long precisionBits, long degree, long logSlots) {
+void TestScheme::testPowerBatch(long logN, long logQ, long logp, long degree, long logSlots) {
 	cout << "!!! START TEST POWER BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
@@ -275,13 +275,13 @@ void TestScheme::testPowerBatch(long logN, long logq, long precisionBits, long d
 		RR angle = random_RR();
 		RR mr = cos(angle * 2 * Pi);
 		RR mi = sin(angle * 2 * Pi);
-		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
-		mpow[i] = EvaluatorUtils::evalCZZPow(mr, mi, degree, precisionBits);
+		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, logp);
+		mpow[i] = EvaluatorUtils::evalCZZPow(mr, mi, degree, logp);
 	}
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logQ);
 	//-----------------------------------------
 	timeutils.start("Power batch");
-	Ciphertext cpow = algo.power(cipher, precisionBits, degree);
+	Ciphertext cpow = algo.power(cipher, logp, degree);
 	timeutils.stop("Power batch");
 	//-----------------------------------------
 	CZZ* dpow = scheme.decrypt(secretKey, cpow);
@@ -292,11 +292,11 @@ void TestScheme::testPowerBatch(long logN, long logq, long precisionBits, long d
 
 //-----------------------------------------
 
-void TestScheme::testProdOfPo2Batch(long logN, long logq, long precisionBits, long logDegree, long logSlots) {
+void TestScheme::testProdOfPo2Batch(long logN, long logQ, long logp, long logDegree, long logSlots) {
 	cout << "!!! START TEST PROD OF POWER OF 2 BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
@@ -313,22 +313,22 @@ void TestScheme::testProdOfPo2Batch(long logN, long logq, long precisionBits, lo
 	CZZ* pvec = new CZZ[slots];
 	for (long i = 0; i < degree; ++i) {
 		for (long j = 0; j < slots; ++j) {
-			mvec[i][j] = EvaluatorUtils::evalRandCZZCircle(precisionBits);
+			mvec[i][j] = EvaluatorUtils::evalRandCZZCircle(logp);
 		}
 	}
 	for (long j = 0; j < slots; ++j) {
 		pvec[j] = mvec[0][j];
 		for (long i = 1; i < degree; ++i) {
 			pvec[j] *= mvec[i][j];
-			pvec[j] >>= precisionBits;
+			pvec[j] >>= logp;
 		}
 	}
 	for (long i = 0; i < degree; ++i) {
-		cvec[i] = scheme.encrypt(mvec[i], slots, logq);
+		cvec[i] = scheme.encrypt(mvec[i], slots, logQ);
 	}
 	//-----------------------------------------
 	timeutils.start("Product of power of 2 batch");
-	Ciphertext cprod = algo.prodOfPo2(cvec, precisionBits, logDegree);
+	Ciphertext cprod = algo.prodOfPo2(cvec, logp, logDegree);
 	timeutils.stop("Product of power of 2 batch");
 	//-----------------------------------------
 	CZZ* dvec = scheme.decrypt(secretKey, cprod);
@@ -337,11 +337,11 @@ void TestScheme::testProdOfPo2Batch(long logN, long logq, long precisionBits, lo
 	cout << "!!! END TEST PROD OF POWER OF 2 BATCH !!!" << endl;
 }
 
-void TestScheme::testProdBatch(long logN, long logq, long precisionBits, long degree, long logSlots) {
+void TestScheme::testProdBatch(long logN, long logQ, long logp, long degree, long logSlots) {
 	cout << "!!! START TEST PROD BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
@@ -357,22 +357,22 @@ void TestScheme::testProdBatch(long logN, long logq, long precisionBits, long de
 	CZZ* pvec = new CZZ[slots];
 	for (long i = 0; i < degree; ++i) {
 		for (long j = 0; j < slots; ++j) {
-			mvec[i][j] = EvaluatorUtils::evalRandCZZCircle(precisionBits);
+			mvec[i][j] = EvaluatorUtils::evalRandCZZCircle(logp);
 		}
 	}
 	for (long j = 0; j < slots; ++j) {
 		pvec[j] = mvec[0][j];
 		for (long i = 1; i < degree; ++i) {
 			pvec[j] *= mvec[i][j];
-			pvec[j] >>= precisionBits;
+			pvec[j] >>= logp;
 		}
 	}
 	for (long i = 0; i < degree; ++i) {
-		cvec[i] = scheme.encrypt(mvec[i], slots, logq);
+		cvec[i] = scheme.encrypt(mvec[i], slots, logQ);
 	}
 	//-----------------------------------------
 	timeutils.start("Product batch");
-	Ciphertext cprod = algo.prod(cvec, precisionBits, degree);
+	Ciphertext cprod = algo.prod(cvec, logp, degree);
 	timeutils.stop("Product batch");
 	//-----------------------------------------
 	CZZ* dvec = scheme.decrypt(secretKey, cprod);
@@ -383,11 +383,11 @@ void TestScheme::testProdBatch(long logN, long logq, long precisionBits, long de
 
 //-----------------------------------------
 
-void TestScheme::testInverseBatch(long logN, long logq, long precisionBits, long invSteps, long logSlots) {
+void TestScheme::testInverseBatch(long logN, long logQ, long logp, long invSteps, long logSlots) {
 	cout << "!!! START TEST INVERSE BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
@@ -400,13 +400,13 @@ void TestScheme::testInverseBatch(long logN, long logq, long precisionBits, long
 		RR angle = random_RR() / 20;
 		RR mr = cos(angle * 2 * Pi);
 		RR mi = sin(angle * 2 * Pi);
-		mvec[i] = EvaluatorUtils::evalCZZ(1 - mr, -mi, precisionBits);
-		minv[i] = EvaluatorUtils::evalCZZInv(mr, mi, precisionBits);
+		mvec[i] = EvaluatorUtils::evalCZZ(1 - mr, -mi, logp);
+		minv[i] = EvaluatorUtils::evalCZZInv(mr, mi, logp);
 	}
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logQ);
 	//-----------------------------------------
 	timeutils.start("Inverse batch");
-	Ciphertext cinv = algo.inverse(cipher, precisionBits, invSteps);
+	Ciphertext cinv = algo.inverse(cipher, logp, invSteps);
 	timeutils.stop("Inverse batch");
 	//-----------------------------------------
 	CZZ* dinv = scheme.decrypt(secretKey, cinv);
@@ -417,11 +417,11 @@ void TestScheme::testInverseBatch(long logN, long logq, long precisionBits, long
 
 //-----------------------------------------
 
-void TestScheme::testLogarithmBatch(long logN, long logq, long precisionBits, long degree, long logSlots) {
+void TestScheme::testLogarithmBatch(long logN, long logQ, long logp, long degree, long logSlots) {
 	cout << "!!! START TEST LOGARITHM BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
@@ -433,13 +433,13 @@ void TestScheme::testLogarithmBatch(long logN, long logq, long precisionBits, lo
 	for (long i = 0; i < slots; ++i) {
 		double mr = (double)rand() / RAND_MAX / 20;
 		double mi = (double)rand() / RAND_MAX / 20;
-		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
-		mlog[i] = EvaluatorUtils::evalCZZLog(1 + mr, mi, precisionBits);
+		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, logp);
+		mlog[i] = EvaluatorUtils::evalCZZLog(1 + mr, mi, logp);
 	}
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logQ);
 	//-----------------------------------------
 	timeutils.start(LOGARITHM + " batch");
-	Ciphertext clog = algo.function(cipher, LOGARITHM, precisionBits, degree);
+	Ciphertext clog = algo.function(cipher, LOGARITHM, logp, degree);
 	timeutils.stop(LOGARITHM + " batch");
 	//-----------------------------------------
 	CZZ* dlog = scheme.decrypt(secretKey, clog);
@@ -450,7 +450,7 @@ void TestScheme::testLogarithmBatch(long logN, long logq, long precisionBits, lo
 
 //-----------------------------------------
 
-void TestScheme::testExponentBatch(long logN, long logq, long precisionBits, long degree, long logSlots) {
+void TestScheme::testExponentBatch(long logN, long logq, long logp, long degree, long logSlots) {
 	cout << "!!! START TEST EXPONENT BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
@@ -466,13 +466,13 @@ void TestScheme::testExponentBatch(long logN, long logq, long precisionBits, lon
 	for (long i = 0; i < slots; ++i) {
 		RR mr = random_RR();
 		RR mi = random_RR();
-		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
-		mexp[i] = EvaluatorUtils::evalCZZExp(mr, mi, precisionBits);
+		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, logp);
+		mexp[i] = EvaluatorUtils::evalCZZExp(mr, mi, logp);
 	}
 	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
 	//-----------------------------------------
 	timeutils.start(EXPONENT + " batch");
-	Ciphertext cexp = algo.function(cipher, EXPONENT, precisionBits, degree);
+	Ciphertext cexp = algo.function(cipher, EXPONENT, logp, degree);
 	timeutils.stop(EXPONENT + " batch");
 	//-----------------------------------------
 	CZZ* dexp = scheme.decrypt(secretKey, cexp);
@@ -481,11 +481,11 @@ void TestScheme::testExponentBatch(long logN, long logq, long precisionBits, lon
 	cout << "!!! END TEST EXPONENT BATCH !!!" << endl;
 }
 
-void TestScheme::testExponentBatchLazy(long logN, long logq, long precisionBits, long degree, long logSlots) {
+void TestScheme::testExponentBatchLazy(long logN, long logQ, long logp, long degree, long logSlots) {
 	cout << "!!! START TEST EXPONENT LAZY !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
@@ -497,14 +497,14 @@ void TestScheme::testExponentBatchLazy(long logN, long logq, long precisionBits,
 	for (long i = 0; i < slots; ++i) {
 		RR mr = random_RR();
 		RR mi = random_RR();
-		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
-		mexp[i] = EvaluatorUtils::evalCZZExp(mr, mi, precisionBits);
+		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, logp);
+		mexp[i] = EvaluatorUtils::evalCZZExp(mr, mi, logp);
 	}
-	EvaluatorUtils::leftShiftAndEqual(mexp, slots, precisionBits);
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
+	EvaluatorUtils::leftShiftAndEqual(mexp, slots, logp);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logQ);
 	//-----------------------------------------
 	timeutils.start(EXPONENT + " lazy");
-	Ciphertext cexp = algo.functionLazy(cipher, EXPONENT, precisionBits, degree);
+	Ciphertext cexp = algo.functionLazy(cipher, EXPONENT, logp, degree);
 	timeutils.stop(EXPONENT + " lazy");
 	//-----------------------------------------
 	CZZ* dexp = scheme.decrypt(secretKey, cexp);
@@ -515,11 +515,11 @@ void TestScheme::testExponentBatchLazy(long logN, long logq, long precisionBits,
 
 //-----------------------------------------
 
-void TestScheme::testSigmoidBatch(long logN, long logq, long precisionBits, long degree, long logSlots) {
+void TestScheme::testSigmoidBatch(long logN, long logQ, long logp, long degree, long logSlots) {
 	cout << "!!! START TEST SIGMOID BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
@@ -531,13 +531,13 @@ void TestScheme::testSigmoidBatch(long logN, long logq, long precisionBits, long
 	for (long i = 0; i < slots; ++i) {
 		RR mr = random_RR();
 		RR mi = random_RR();
-		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
-		msig[i] = EvaluatorUtils::evalCZZSigmoid(mr, mi, precisionBits);
+		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, logp);
+		msig[i] = EvaluatorUtils::evalCZZSigmoid(mr, mi, logp);
 	}
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logQ);
 	//-----------------------------------------
 	timeutils.start(SIGMOID + " batch");
-	Ciphertext csig = algo.function(cipher, SIGMOID, precisionBits, degree);
+	Ciphertext csig = algo.function(cipher, SIGMOID, logp, degree);
 	timeutils.stop(SIGMOID + " batch");
 	//-----------------------------------------
 	CZZ* dsig = scheme.decrypt(secretKey, csig);
@@ -546,11 +546,11 @@ void TestScheme::testSigmoidBatch(long logN, long logq, long precisionBits, long
 	cout << "!!! END TEST SIGMOID BATCH !!!" << endl;
 }
 
-void TestScheme::testSigmoidBatchLazy(long logN, long logq, long precisionBits, long degree, long logSlots) {
+void TestScheme::testSigmoidBatchLazy(long logN, long logQ, long logp, long degree, long logSlots) {
 	cout << "!!! START TEST SIGMOID LAZY !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
@@ -562,14 +562,14 @@ void TestScheme::testSigmoidBatchLazy(long logN, long logq, long precisionBits, 
 	for (long i = 0; i < slots; ++i) {
 		RR mr = random_RR();
 		RR mi = random_RR();
-		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, precisionBits);
-		msig[i] = EvaluatorUtils::evalCZZSigmoid(mr, mi, precisionBits);
+		mvec[i] = EvaluatorUtils::evalCZZ(mr, mi, logp);
+		msig[i] = EvaluatorUtils::evalCZZSigmoid(mr, mi, logp);
 	}
-	EvaluatorUtils::leftShiftAndEqual(msig, slots, precisionBits);
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
+	EvaluatorUtils::leftShiftAndEqual(msig, slots, logp);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logQ);
 	//-----------------------------------------
 	timeutils.start(SIGMOID + " lazy");
-	Ciphertext csig = algo.functionLazy(cipher, SIGMOID, precisionBits, degree);
+	Ciphertext csig = algo.functionLazy(cipher, SIGMOID, logp, degree);
 	timeutils.stop(SIGMOID + " lazy");
 	//-----------------------------------------
 	CZZ* dsig = scheme.decrypt(secretKey, csig);
@@ -580,11 +580,11 @@ void TestScheme::testSigmoidBatchLazy(long logN, long logq, long precisionBits, 
 
 //-----------------------------------------
 
-void TestScheme::testFFTBatch(long logN, long logq, long precisionBits, long logSlots, long logfftdim) {
+void TestScheme::testFFTBatch(long logN, long logQ, long logp, long logSlots, long logfftdim) {
 	cout << "!!! START TEST FFT BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
@@ -598,8 +598,8 @@ void TestScheme::testFFTBatch(long logN, long logq, long precisionBits, long log
 	CZZ** mvec2 = new CZZ*[slots];
 
 	for (long i = 0; i < slots; ++i) {
-		mvec1[i] = EvaluatorUtils::evalRandCZZArray(fftdim, precisionBits);
-		mvec2[i] = EvaluatorUtils::evalRandCZZArray(fftdim, precisionBits);
+		mvec1[i] = EvaluatorUtils::evalRandCZZArray(fftdim, logp);
+		mvec2[i] = EvaluatorUtils::evalRandCZZArray(fftdim, logp);
 	}
 
 	Ciphertext* cvec1 = new Ciphertext[fftdim];
@@ -611,8 +611,8 @@ void TestScheme::testFFTBatch(long logN, long logq, long precisionBits, long log
 			mvals1[i] = mvec1[i][j];
 			mvals2[i] = mvec2[i][j];
 		}
-		cvec1[j] = scheme.encrypt(mvals1, slots, logq);
-		cvec2[j] = scheme.encrypt(mvals2, slots, logq);
+		cvec1[j] = scheme.encrypt(mvals1, slots, logQ);
+		cvec2[j] = scheme.encrypt(mvals2, slots, logQ);
 		delete[] mvals1;
 		delete[] mvals2;
 	}
@@ -622,7 +622,7 @@ void TestScheme::testFFTBatch(long logN, long logq, long precisionBits, long log
 		NumUtils::fft(mvec2[i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
 		for (long j = 0; j < fftdim; ++j) {
 			mvec1[i][j] *= mvec2[i][j];
-			mvec1[i][j] >>= precisionBits;
+			mvec1[i][j] >>= logp;
 		}
 		NumUtils::fftInv(mvec1[i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
 	}
@@ -636,7 +636,7 @@ void TestScheme::testFFTBatch(long logN, long logq, long precisionBits, long log
 	timeutils.stop("ciphers fft 2 batch");
 	//-----------------------------------------
 	timeutils.start("ciphers hadamard mult batch");
-	algo.multModSwitchAndEqualVec(cvec1, cvec2, precisionBits, fftdim);
+	algo.multModSwitchAndEqualVec(cvec1, cvec2, logp, fftdim);
 	timeutils.stop("ciphers hadamard mult batch");
 	//-----------------------------------------
 	delete[] cvec2;
@@ -658,11 +658,11 @@ void TestScheme::testFFTBatch(long logN, long logq, long precisionBits, long log
 	cout << "!!! END TEST FFT BATCH !!!" << endl;
 }
 
-void TestScheme::testFFTBatchLazy(long logN, long logq, long precisionBits, long logSlots, long logfftdim) {
+void TestScheme::testFFTBatchLazy(long logN, long logQ, long logp, long logSlots, long logfftdim) {
 	cout << "!!! START TEST FFT BATCH LAZY !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
@@ -676,8 +676,8 @@ void TestScheme::testFFTBatchLazy(long logN, long logq, long precisionBits, long
 	CZZ** mvec2 = new CZZ*[slots];
 
 	for (long i = 0; i < slots; ++i) {
-		mvec1[i] = EvaluatorUtils::evalRandCZZArray(fftdim, precisionBits);
-		mvec2[i] = EvaluatorUtils::evalRandCZZArray(fftdim, precisionBits);
+		mvec1[i] = EvaluatorUtils::evalRandCZZArray(fftdim, logp);
+		mvec2[i] = EvaluatorUtils::evalRandCZZArray(fftdim, logp);
 	}
 
 	Ciphertext* cvec1 = new Ciphertext[fftdim];
@@ -689,8 +689,8 @@ void TestScheme::testFFTBatchLazy(long logN, long logq, long precisionBits, long
 			mvals1[i] = mvec1[i][j];
 			mvals2[i] = mvec2[i][j];
 		}
-		cvec1[j] = scheme.encrypt(mvals1, slots, logq);
-		cvec2[j] = scheme.encrypt(mvals2, slots, logq);
+		cvec1[j] = scheme.encrypt(mvals1, slots, logQ);
+		cvec2[j] = scheme.encrypt(mvals2, slots, logQ);
 		delete[] mvals1;
 		delete[] mvals2;
 	}
@@ -700,7 +700,7 @@ void TestScheme::testFFTBatchLazy(long logN, long logq, long precisionBits, long
 		NumUtils::fft(mvec2[i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
 		for (long j = 0; j < fftdim; ++j) {
 			mvec1[i][j] *= mvec2[i][j];
-			mvec1[i][j] >>= precisionBits;
+			mvec1[i][j] >>= logp;
 		}
 		NumUtils::fftInvLazy(mvec1[i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
 	}
@@ -714,7 +714,7 @@ void TestScheme::testFFTBatchLazy(long logN, long logq, long precisionBits, long
 	timeutils.stop("ciphers fft 2");
 	//-----------------------------------------
 	timeutils.start("ciphers hadamard mult");
-	algo.multModSwitchAndEqualVec(cvec1, cvec2, precisionBits, fftdim);
+	algo.multModSwitchAndEqualVec(cvec1, cvec2, logp, fftdim);
 	timeutils.stop("ciphers hadamard mult");
 	//-----------------------------------------
 	delete[] cvec2;
@@ -736,11 +736,11 @@ void TestScheme::testFFTBatchLazy(long logN, long logq, long precisionBits, long
 	cout << "!!! END TEST FFT BATCH LAZY !!!" << endl;
 }
 
-void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logq, long precisionBits, long logSlots, long logfftdim, long logHdim) {
+void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logQ, long logp, long logSlots, long logfftdim, long logHdim) {
 	cout << "!!! START TEST FFT BATCH LAZY MULTIPLE HADAMARD !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
@@ -757,7 +757,7 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logq, long pre
 		mvecs[h] = new CZZ*[slots];
 
 		for (long i = 0; i < slots; ++i) {
-			mvecs[h][i] = EvaluatorUtils::evalRandCZZArray(fftdim, precisionBits);
+			mvecs[h][i] = EvaluatorUtils::evalRandCZZArray(fftdim, logp);
 		}
 
 		cvecs[h] = new Ciphertext[fftdim];
@@ -767,7 +767,7 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logq, long pre
 			for (long i = 0; i < slots; ++i) {
 				mvals[i] = mvecs[h][i][j];
 			}
-			cvecs[h][j] = scheme.encrypt(mvals, slots, logq);
+			cvecs[h][j] = scheme.encrypt(mvals, slots, logQ);
 			delete[] mvals;
 		}
 		for (long i = 0; i < slots; ++i) {
@@ -781,7 +781,7 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logq, long pre
 				long spow = 1 << s;
 				for (long h = 0; h < spow; ++h) {
 					mvecs[h][i][j] *= mvecs[h+spow][i][j];
-					mvecs[h][i][j] >>= precisionBits;
+					mvecs[h][i][j] >>= logp;
 				}
 			}
 		}
@@ -807,7 +807,7 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logq, long pre
 		long spow = 1 << s;
 		for (long h = 0; h < spow; ++h) {
 			timeutils.start("ciphers hadamard mult");
-			algo.multModSwitchAndEqualVec(cvecs[h], cvecs[h+spow], precisionBits, fftdim);
+			algo.multModSwitchAndEqualVec(cvecs[h], cvecs[h+spow], logp, fftdim);
 			timeutils.stop("ciphers hadamard mult");
 			delete[] cvecs[h+spow];
 		}
@@ -832,11 +832,11 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logq, long pre
 }
 
 void TestScheme::testBootstrap() {
-	cout << "!!! START TEST BOOTSTRAP ALL !!!" << endl;
-	long logq = 620;
+	cout << "!!! START TEST BOOTSTRAP !!!" << endl;
+	long logQ = 620;
 	long nu = 6;
 	long msgBits = 29;
-	long logq0 = msgBits + nu;
+	long logq = msgBits + nu;
 	long logN = 15;
 	long logT = 2;
 	long logI = 4;
@@ -845,195 +845,38 @@ void TestScheme::testBootstrap() {
 	long lkey = logSlots == logN - 1 ? logSlots : logSlots + 1;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logq);
+	Params params(logN, logQ);
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
-	timeutils.start("Boot Key generating");
+	timeutils.start("Key generating");
 	scheme.addConjKey(secretKey);
 	scheme.addLeftRotKeys(secretKey);
-	scheme.addBootKeys(secretKey, lkey, logq0 + logI);
-	timeutils.stop("Boot Key generated");
-	//-----------------------------------------
-	SetNumThreads(1);
-
-
-	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, msgBits);
-
-	//-----------------------------------------
-	timeutils.start("Encrypt batch");
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logq0);
-	timeutils.stop("Encrypt batch");
-
-	scheme.normalizeAndEqual(cipher);
-	cipher.cbits = logq;
-	cipher.mod = power2_ZZ(logq);
-
-	if(logSlots == params.logN - 1) {
-		Ciphertext cshift1 = scheme.multByMonomial(cipher, 2 * params.N - 1);
-		scheme.linearTransformAndEqual(cipher, params.N / 2);
-		scheme.linearTransformAndEqual(cshift1, params.N / 2);
-
-		Ciphertext clinEvenConj = scheme.conjugate(cipher);
-		scheme.addAndEqual(cipher, clinEvenConj);
-		scheme.reScaleByAndEqual(cipher, logq0 + logI + logSlots);
-
-		Ciphertext clinOddConj = scheme.conjugate(cshift1);
-		scheme.addAndEqual(cshift1, clinOddConj);
-		scheme.reScaleByAndEqual(cshift1, logq0 + logI + logSlots);
-
-		scheme.removeIpartAndEqual(cipher, logq0, logT, logI);
-		scheme.removeIpartAndEqual(cshift1, logq0, logT, logI);
-
-		scheme.linearTransformInvAndEqual(cipher, params.N / 2);
-		scheme.linearTransformInvAndEqual(cshift1, params.N / 2);
-
-		scheme.multByMonomialAndEqual(cshift1, 1);
-		scheme.addAndEqual(cipher, cshift1);
-		scheme.reScaleByAndEqual(cipher, logq0 + logI);
-	} else {
-		for (long i = logSlots; i < params.logN - 1; ++i) {
-			Ciphertext rot = scheme.leftRotateByPo2(cipher, i);
-			scheme.addAndEqual(cipher, rot);
-		}
-		scheme.reScaleByAndEqual(cipher, params.logN - 1 - logSlots);
-		scheme.linearTransformAndEqual(cipher, cipher.slots * 2);
-
-		Ciphertext cipherConj = scheme.conjugate(cipher);
-		scheme.addAndEqual(cipher, cipherConj);
-		scheme.reScaleByAndEqual(cipher, logq0 + logI + logSlots + 2);
-
-		scheme.removeIpartAndEqual(cipher, logq0, logT, logI);
-		scheme.linearTransformInvAndEqual(cipher, cipher.slots * 2);
-		scheme.reScaleByAndEqual(cipher, logq0 + logI);
-	}
-	CZZ* dvec = scheme.decrypt(secretKey, cipher);
-
-	StringUtils::showcompare(mvec, dvec, slots, "m");
-	cout << "!!! END TEST BOOTSRTAP ALL !!!" << endl;
-}
-
-void TestScheme::testBootstrapOneReal() {
-	cout << "!!! START TEST BOOTSTRAP ONE REAL !!!" << endl;
-	long logq = 620;
-	long logq0 = 29;
-	long logN = 15;
-	long logT = 2;
-	long nu = 6;
-	long msgBits = logq0 - nu;
-
-	long logSlots = 0;
-	long slots = 1;
-	//----------------------------------------
-	TimeUtils timeutils;
-	timeutils.start("scheme generation");
-	Params params(logN, logq);
-	Context context(params);
-	SecretKey secretKey(params);
-	Scheme scheme(secretKey, context);
-	SchemeAlgo algo(scheme);
-	timeutils.stop("scheme generation");
-	//-----------------------------------------
-	SetNumThreads(1);
-
-	CZZ* mvec = new CZZ[slots];
-	for (long i = 0; i < slots; ++i) {
-		ZZ m = RandomBits_ZZ(msgBits);
-		mvec[i].r = m;
-	}
-
-	//-----------------------------------------
-	timeutils.start("Encrypt batch");
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logq0);
-	timeutils.stop("Encrypt batch");
-
-	scheme.normalizeAndEqual(cipher);
-
-	cipher.cbits = logq;
-	cipher.mod = power2_ZZ(logq);
-
-	for (long i = logSlots; i < params.logN - 1; ++i) {
-		Ciphertext rot = scheme.leftRotateByPo2(cipher, i);
-		scheme.addAndEqual(cipher, rot);
-	}
-	Ciphertext cconj = scheme.conjugate(cipher);
-	scheme.addAndEqual(cipher, cconj);
-	scheme.reScaleByAndEqual(cipher, params.logN - logSlots);
-
-	scheme.removeIpartAndEqual(cipher, logq0, logT);
-
-
-	timeutils.start("Decrypt batch");
-	CZZ* dvec = scheme.decrypt(secretKey, cipher);
-	timeutils.stop("Decrypt batch");
-
-	StringUtils::showcompare(mvec, dvec, slots, "m");
-	cout << "!!! END TEST BOOTSRTAP ONE REAL !!!" << endl;
-}
-
-void TestScheme::testBoundOfI() {
-	cout << "!!! START TEST BOUND OF I !!!" << endl;
-	long logq = 200;
-	long logq0 = 40;
-	long logN = 11;
-	long nu = 5;
-	long msgBits = logq0 - nu;
-	long logSlots = logN - 1;
-	long slots = (1 << logSlots);
-
-	//-----------------------------------------
-	TimeUtils timeutils;
-	Params params(logN, logq);
-	Context context(params);
-	SecretKey secretKey(params);
-	Scheme scheme(secretKey, context);
-	SchemeAlgo algo(scheme);
+	scheme.addBootKeys(secretKey, lkey, logq + logI);
+	timeutils.stop("Key generated");
 	//-----------------------------------------
 	SetNumThreads(1);
 
 	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, msgBits);
 
-	//-----------------------------------------
 	timeutils.start("Encrypt batch");
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logq0);
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
 	timeutils.stop("Encrypt batch");
 
-	timeutils.start("Decrypt batch");
-	Plaintext msgSmall = scheme.decryptMsg(secretKey, cipher);
-	timeutils.stop("Decrypt batch");
+	cout << "cipher logq before: " << cipher.logq << endl;
 
-	for (long i = 0; i < params.N; ++i) {
-		msgSmall.mx.rep[i] = msgSmall.mx.rep[i] % msgSmall.mod;
-		if(NumBits(msgSmall.mx.rep[i]) == msgSmall.cbits) msgSmall.mx.rep[i] -= msgSmall.mod;
-	}
+	timeutils.start("Bootstrap");
+	scheme.bootstrapAndEqual(cipher, logq, logQ, logT, logI);
+	timeutils.stop("Bootstrap");
 
-	scheme.normalizeAndEqual(cipher);
+	cout << "cipher logq after: " << cipher.logq << endl;
 
-	cipher.cbits = logq;
-	cipher.mod = context.q;
+	CZZ* dvec = scheme.decrypt(secretKey, cipher);
 
-	timeutils.start("Decrypt batch");
-	Plaintext msgBig = scheme.decryptMsg(secretKey, cipher);
-	timeutils.stop("Decrypt batch");
+	StringUtils::showcompare(mvec, dvec, slots, "m");
 
-	for (long i = 0; i < params.N; ++i) {
-		msgBig.mx.rep[i] = msgBig.mx.rep[i] % msgBig.mod;
-		if(NumBits(msgBig.mx.rep[i]) == msgBig.cbits) msgBig.mx.rep[i] -= msgBig.mod;
-	}
-
-	ZZ q0 = power2_ZZ(logq0);
-	cout << msgBig.mx - msgSmall.mx << endl;
-	ZZX pdiv = (msgBig.mx - msgSmall.mx) / q0;
-	cout << pdiv << endl;
-	ZZ pmax = pdiv.rep[0];
-	for (int i = 1; i < deg(pdiv); ++i) {
-		if(abs(pmax) < abs(pdiv.rep[i])) {
-			pmax = pdiv.rep[i];
-		}
-	}
-
-	cout << pmax << endl;
-	cout << "!!! STOP TEST BOUND OF I !!!" << endl;
+	cout << "!!! END TEST BOOTSRTAP !!!" << endl;
 }
+

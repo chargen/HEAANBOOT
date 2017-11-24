@@ -12,12 +12,13 @@
 
 class BootKey {
 public:
-	long pBits;
 
-	ZZX* pvec;
-	ZZX* pvecInv;
+	long logp; ///< number of preicision bits used in evaluation polynomials
 
-	BootKey(Context& context, long pBits, long l);
+	ZZX* pvec; ///< encodings of "diagonal" values of linearization matrix
+	ZZX* pvecInv; ///< encodings of "diagonal" values of inverse linearization matrix
+
+	BootKey(Context& context, long logp, long logl);
 };
 
 #endif

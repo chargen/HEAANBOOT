@@ -2,19 +2,19 @@
 
 
 Context::Context(Params& params) :
-	logN(params.logN), logq(params.logq), sigma(params.sigma), h(params.h), N(params.N) {
+	logN(params.logN), logQ(params.logQ), sigma(params.sigma), h(params.h), N(params.N) {
 
 	M = N << 1;
-	logqq = 2 * logq;
-	q = power2_ZZ(logq);
-	qq = power2_ZZ(logqq);
+	logPQ = 2 * logQ;
+	Q = power2_ZZ(logQ);
+	PQ = power2_ZZ(logPQ);
 
 	rotGroup = new long[N / 2];
-	long tmp = 1;
+	long fivePows = 1;
 	for (long i = 0; i < N / 2; ++i) {
-		rotGroup[i] = tmp;
-		tmp *= 5;
-		tmp %= M;
+		rotGroup[i] = fivePows;
+		fivePows *= 5;
+		fivePows %= M;
 	}
 
 	ksiPowsr = new RR[M + 1];

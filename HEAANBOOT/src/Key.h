@@ -7,9 +7,12 @@ using namespace NTL;
 
 class Key {
 public:
+
 	ZZX ax;
 	ZZX bx;
+
 	Key(ZZX ax = ZZX::zero(), ZZX bx = ZZX::zero()) : ax(ax), bx(bx) {}
+
 };
 
 #endif

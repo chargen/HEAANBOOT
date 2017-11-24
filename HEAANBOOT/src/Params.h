@@ -11,25 +11,27 @@ using namespace NTL;
 class Params {
 public:
 
-	long logN; ///< N is a power of 2 that corresponds to the ring Z[X] / (X^N + 1)
-	long logq; ///< q corresponds to the highest modulus
-	double sigma; ///< sigma corresponds to standard deviation for error and secret key coefficients generation from Gaussian distribution
-	long h; ///< hamming weight of secret key
+	long logN; ///< log of N
+	long logQ; ///< Q corresponds to the highest modulus
+	double sigma; ///< standard deviation for Gaussian distribution
+	long h; ///< parameter for HWT distribution
 
-	long N;
+	long N; ///< N is a power-of-two that corresponds to the ring Z[X]/(X^N + 1)
+
 	/**
-	 *@param[in] N is a power of 2 that corresponds to the ring Z[X] / (X^N + 1)
-	 *@param[in] q is a power of 2 that corresponds to the highest modulus
-	 *@param[in] sigma corresponds to standard deviation for error and secret key coefficients generation from Gaussian distribution
+	 * @param[in] logN: log of N
+	 * @param[in] logQ: log of highest ciphertext modulus
+	 * @param[in] sigma: standard deviation for Gaussian distribution
+	 * @param[in] h: parameter for HWT distribution
 	 */
-	Params(long logN, long logq, double sigma = 3.2, long h = 64);
+	Params(long logN, long logQ, double sigma = 3.2, long h = 64);
 
 	/**
 	 * suggests logN value.
-	 * @param[in] lambda - security parameter
-	 * @param[in] logq value
+	 * @param[in] lambda: security parameter
+	 * @param[in] logQ: log of highest ciphertext modulus
 	 */
-	static long suggestlogN(long lambda, long logq);
+	static long suggestlogN(long lambda, long logQ);
 
 };
 
