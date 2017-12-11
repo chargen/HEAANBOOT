@@ -1,5 +1,7 @@
 #include "Scheme.h"
 
+#include <NTL/BasicThreadPool.h>
+
 //-----------------------------------------
 
 Scheme::Scheme(SecretKey& secretKey, Context& context) : context(context) {
@@ -677,32 +679,49 @@ void Scheme::linTransformAndEqual(Ciphertext& cipher) {
 	long k = 1 << logSlotsh;
 	long m = 1 << (logSlots - logSlotsh);
 
-	Ciphertext* encxrotvec = new Ciphertext[k];
-	encxrotvec[0] = cipher;
+	Ciphertext* rotvec = new Ciphertext[k];
+	rotvec[0] = cipher;
 
-	for (long i = 1; i < k; ++i) {
-		encxrotvec[i] = leftRotateFast(encxrotvec[0], i);
+	NTL_EXEC_RANGE(k-1, first, last);
+	for (long i = first; i < last; ++i) {
+		rotvec[i + 1] = leftRotateFast(rotvec[0], i + 1);
 	}
+	NTL_EXEC_RANGE_END;
 
 	BootKey bootKey = bootKeyMap.at(logSlots);
 
-	cipher = multByPoly(encxrotvec[0], bootKey.pvec[0]);
-	for (long j = 1; j < k; ++j) {
-		Ciphertext cij = multByPoly(encxrotvec[j], bootKey.pvec[j]);
-		addAndEqual(cipher, cij);
+	Ciphertext* tmpvec = new Ciphertext[k];
+
+	cipher = multByPoly(rotvec[0], bootKey.pvec[0]);
+
+	NTL_EXEC_RANGE(k, first, last);
+	for (long j = first; j < last; ++j) {
+		tmpvec[j] = multByPoly(rotvec[j], bootKey.pvec[j]);
 	}
+	NTL_EXEC_RANGE_END;
+
+	for (long j = 1; j < k; ++j) {
+		addAndEqual(tmpvec[0], tmpvec[j]);
+	}
+	cipher = tmpvec[0];
 
 	for (long i = 1; i < m; ++i) {
 		long ki = k * i;
-		Ciphertext ci0 = multByPoly(encxrotvec[0], bootKey.pvec[ki]);
-		for (long j = 1; j < k; ++j) {
-			Ciphertext cij = multByPoly(encxrotvec[j], bootKey.pvec[j + ki]);
-			addAndEqual(ci0, cij);
+		NTL_EXEC_RANGE(k, first, last);
+		for (long j = first; j < last; ++j) {
+			tmpvec[j] = multByPoly(rotvec[j], bootKey.pvec[j + ki]);
 		}
-		leftRotateAndEqualFast(ci0, ki);
-		addAndEqual(cipher, ci0);
+		NTL_EXEC_RANGE_END;
+
+		for (long j = 1; j < k; ++j) {
+			addAndEqual(tmpvec[0], tmpvec[j]);
+		}
+
+		leftRotateAndEqualFast(tmpvec[0], ki);
+		addAndEqual(cipher, tmpvec[0]);
 	}
-	delete[] encxrotvec;
+	delete[] rotvec;
+	delete[] tmpvec;
 }
 
 void Scheme::linTransformInvAndEqual(Ciphertext& cipher) {
@@ -711,32 +730,49 @@ void Scheme::linTransformInvAndEqual(Ciphertext& cipher) {
 	long k = 1 << logSlotsh;
 	long m = 1 << (logSlots - logSlotsh);
 
-	Ciphertext* encxrotvec = new Ciphertext[k];
-	encxrotvec[0] = cipher;
+	Ciphertext* rotvec = new Ciphertext[k];
+	rotvec[0] = cipher;
 
-	for (long i = 1; i < k; ++i) {
-		encxrotvec[i] = leftRotateFast(encxrotvec[0], i);
+	NTL_EXEC_RANGE(k-1, first, last);
+	for (long i = first; i < last; ++i) {
+		rotvec[i + 1] = leftRotateFast(rotvec[0], i + 1);
 	}
+	NTL_EXEC_RANGE_END;
 
 	BootKey bootKey = bootKeyMap.at(logSlots);
 
-	cipher = multByPoly(encxrotvec[0], bootKey.pvecInv[0]);
-	for (long j = 1; j < k; ++j) {
-		Ciphertext cij = multByPoly(encxrotvec[j], bootKey.pvecInv[j]);
-		addAndEqual(cipher, cij);
+	Ciphertext* tmpvec = new Ciphertext[k];
+
+	cipher = multByPoly(rotvec[0], bootKey.pvecInv[0]);
+
+	NTL_EXEC_RANGE(k, first, last);
+	for (long j = first; j < last; ++j) {
+		tmpvec[j] = multByPoly(rotvec[j], bootKey.pvecInv[j]);
 	}
+	NTL_EXEC_RANGE_END;
+
+	for (long j = 1; j < k; ++j) {
+		addAndEqual(tmpvec[0], tmpvec[j]);
+	}
+	cipher = tmpvec[0];
 
 	for (long i = 1; i < m; ++i) {
 		long ki = k * i;
-		Ciphertext ci0 = multByPoly(encxrotvec[0], bootKey.pvecInv[ki]);
-		for (long j = 1; j < k; ++j) {
-			Ciphertext cij = multByPoly(encxrotvec[j], bootKey.pvecInv[j + ki]);
-			addAndEqual(ci0, cij);
+		NTL_EXEC_RANGE(k, first, last);
+		for (long j = first; j < last; ++j) {
+			tmpvec[j] = multByPoly(rotvec[j], bootKey.pvecInv[j + ki]);
 		}
-		leftRotateAndEqualFast(ci0, ki);
-		addAndEqual(cipher, ci0);
+		NTL_EXEC_RANGE_END;
+
+		for (long j = 1; j < k; ++j) {
+			addAndEqual(tmpvec[0], tmpvec[j]);
+		}
+
+		leftRotateAndEqualFast(tmpvec[0], ki);
+		addAndEqual(cipher, tmpvec[0]);
 	}
-	delete[] encxrotvec;
+	delete[] rotvec;
+	delete[] tmpvec;
 }
 
 void Scheme::evaluateExp2piAndEqual(Ciphertext& cipher, long logp) {
