@@ -671,11 +671,11 @@ void Scheme::normalizeAndEqual(Ciphertext& cipher) {
 	}
 }
 
-Ciphertext Scheme::linearTransform(Ciphertext& cipher, long size) {
-	long logSize = log2(size);
-	long logSizeh = logSize / 2;
-	long k = 1 << logSizeh;
-	long m = 1 << (logSize - logSizeh);
+void Scheme::linTransformAndEqual(Ciphertext& cipher) {
+	long logSlots = log2(cipher.slots);
+	long logSlotsh = logSlots / 2;
+	long k = 1 << logSlotsh;
+	long m = 1 << (logSlots - logSlotsh);
 
 	Ciphertext* encxrotvec = new Ciphertext[k];
 	encxrotvec[0] = cipher;
@@ -684,74 +684,7 @@ Ciphertext Scheme::linearTransform(Ciphertext& cipher, long size) {
 		encxrotvec[i] = leftRotateFast(encxrotvec[0], i);
 	}
 
-	BootKey bootKey = bootKeyMap.at(logSize);
-	Ciphertext res = multByPoly(encxrotvec[0], bootKey.pvec[0]);
-	for (long j = 1; j < k; ++j) {
-		Ciphertext cij = multByPoly(encxrotvec[j], bootKey.pvec[j]);
-		addAndEqual(res, cij);
-	}
-
-	for (long i = 1; i < m; ++i) {
-		long ki = k * i;
-		Ciphertext ci0 = multByPoly(encxrotvec[0],bootKey.pvec[ki]);
-		for (long j = 1; j < k; ++j) {
-			Ciphertext cij = multByPoly(encxrotvec[j], bootKey.pvec[j + ki]);
-			addAndEqual(ci0, cij);
-		}
-		leftRotateAndEqualFast(ci0, ki);
-		addAndEqual(res, ci0);
-	}
-	delete[] encxrotvec;
-	return res;
-}
-
-Ciphertext Scheme::linearTransformInv(Ciphertext& cipher, long size) {
-	long logSize = log2(size);
-	long logSizeh = logSize / 2;
-	long k = 1 << logSizeh;
-	long m = 1 << (logSize - logSizeh);
-
-	Ciphertext* cipherRotVec = new Ciphertext[k];
-	cipherRotVec[0] = cipher;
-	for (long i = 1; i < k; ++i) {
-		cipherRotVec[i] = leftRotateFast(cipherRotVec[0], i);
-	}
-	BootKey bootKey = bootKeyMap.at(logSize);
-
-	Ciphertext res = multByPoly(cipherRotVec[0], bootKey.pvecInv[0]);
-
-	for (long j = 1; j < k; ++j) {
-		Ciphertext c0j = multByPoly(cipherRotVec[j], bootKey.pvecInv[j]);
-		addAndEqual(res, c0j);
-	}
-	for (long i = 1; i < m; ++i) {
-		long ki = k * i;
-		Ciphertext ci0 = multByPoly(cipherRotVec[0], bootKey.pvecInv[ki]);
-		for (long j = 1; j < k; ++j) {
-			Ciphertext cij = multByPoly(cipherRotVec[j], bootKey.pvecInv[j + ki]);
-			addAndEqual(ci0, cij);
-		}
-		leftRotateAndEqualFast(ci0, ki);
-		addAndEqual(res, ci0);
-	}
-	delete[] cipherRotVec;
-	return res;
-}
-
-void Scheme::linearTransformAndEqual(Ciphertext& cipher, long size) {
-	long logSize = log2(size);
-	long logSizeh = logSize / 2;
-	long k = 1 << logSizeh;
-	long m = 1 << (logSize - logSizeh);
-
-	Ciphertext* encxrotvec = new Ciphertext[k];
-	encxrotvec[0] = cipher;
-
-	for (long i = 1; i < k; ++i) {
-		encxrotvec[i] = leftRotateFast(encxrotvec[0], i);
-	}
-
-	BootKey bootKey = bootKeyMap.at(logSize);
+	BootKey bootKey = bootKeyMap.at(logSlots);
 
 	cipher = multByPoly(encxrotvec[0], bootKey.pvec[0]);
 	for (long j = 1; j < k; ++j) {
@@ -772,221 +705,132 @@ void Scheme::linearTransformAndEqual(Ciphertext& cipher, long size) {
 	delete[] encxrotvec;
 }
 
-void Scheme::linearTransformInvAndEqual(Ciphertext& cipher, long size) {
-	long logSize = log2(size);
-	long logSizeh = logSize / 2;
-	long k = 1 << logSizeh;
-	long m = 1 << (logSize - logSizeh);
+void Scheme::linTransformInvAndEqual(Ciphertext& cipher) {
+	long logSlots = log2(cipher.slots);
+	long logSlotsh = logSlots / 2;
+	long k = 1 << logSlotsh;
+	long m = 1 << (logSlots - logSlotsh);
 
-	Ciphertext* cipherRotVec = new Ciphertext[k];
-	cipherRotVec[0] = cipher;
+	Ciphertext* encxrotvec = new Ciphertext[k];
+	encxrotvec[0] = cipher;
+
 	for (long i = 1; i < k; ++i) {
-		cipherRotVec[i] = leftRotateFast(cipherRotVec[0], i);
+		encxrotvec[i] = leftRotateFast(encxrotvec[0], i);
 	}
-	BootKey bootKey = bootKeyMap.at(logSize);
 
-	cipher = multByPoly(cipherRotVec[0], bootKey.pvecInv[0]);
+	BootKey bootKey = bootKeyMap.at(logSlots);
 
+	cipher = multByPoly(encxrotvec[0], bootKey.pvecInv[0]);
 	for (long j = 1; j < k; ++j) {
-		Ciphertext c0j = multByPoly(cipherRotVec[j], bootKey.pvecInv[j]);
-		addAndEqual(cipher, c0j);
+		Ciphertext cij = multByPoly(encxrotvec[j], bootKey.pvecInv[j]);
+		addAndEqual(cipher, cij);
 	}
+
 	for (long i = 1; i < m; ++i) {
 		long ki = k * i;
-		Ciphertext ci0 = multByPoly(cipherRotVec[0], bootKey.pvecInv[ki]);
+		Ciphertext ci0 = multByPoly(encxrotvec[0], bootKey.pvecInv[ki]);
 		for (long j = 1; j < k; ++j) {
-			Ciphertext cij = multByPoly(cipherRotVec[j], bootKey.pvecInv[j + ki]);
+			Ciphertext cij = multByPoly(encxrotvec[j], bootKey.pvecInv[j + ki]);
 			addAndEqual(ci0, cij);
 		}
 		leftRotateAndEqualFast(ci0, ki);
 		addAndEqual(cipher, ci0);
 	}
-	delete[] cipherRotVec;
+	delete[] encxrotvec;
 }
 
-Ciphertext Scheme::evaluateSin2pix7(Ciphertext& cipher, long logp) {
-	Ciphertext cipher2 = square(cipher);
-	reScaleByAndEqual(cipher2, logp);
-	Ciphertext cipher4 = square(cipher2);
-	reScaleByAndEqual(cipher4, logp);
-	RR c = -4*Pi*Pi*Pi/3;
-	ZZ pc = EvaluatorUtils::evalZZ(c, logp);
-	Ciphertext tmp = multByConst(cipher, pc);
-	reScaleByAndEqual(tmp, logp);
-
-	c = -3/(2*Pi*Pi);
-	pc = EvaluatorUtils::evalZZ(c, logp);
-	Ciphertext cipher13 = addConst(cipher2, pc);
-	multAndEqual(cipher13, tmp);
-	reScaleByAndEqual(cipher13, logp);
-
-	c = -8*Pi*Pi*Pi*Pi*Pi*Pi*Pi/315;
-	pc = EvaluatorUtils::evalZZ(c, logp);
-	tmp = multByConst(cipher, pc);
-	reScaleByAndEqual(tmp, logp);
-
-	c = -21/(2*Pi*Pi);
-	pc = EvaluatorUtils::evalZZ(c, logp);
-	Ciphertext cipher57 = addConst(cipher2, pc);
-	multAndEqual(cipher57, tmp);
-	reScaleByAndEqual(cipher57, logp);
-	multAndEqual(cipher57, cipher4);
-	reScaleByAndEqual(cipher57, logp);
-
-	modDownByAndEqual(cipher13, logp);
-	addAndEqual(cipher57, cipher13);
-	return cipher57;
-}
-
-void Scheme::evaluateSin2pix7AndEqual(Ciphertext& cipher, long logp) {
-	Ciphertext cipher2 = square(cipher);
-	reScaleByAndEqual(cipher2, logp);
-	Ciphertext cipher4 = square(cipher2);
-	reScaleByAndEqual(cipher4, logp);
-	RR c = -4*Pi*Pi*Pi/3;
-	ZZ pc = EvaluatorUtils::evalZZ(c, logp);
-	Ciphertext tmp = multByConst(cipher, pc);
-	reScaleByAndEqual(tmp, logp);
-
-	c = -3/(2*Pi*Pi);
-	pc = EvaluatorUtils::evalZZ(c, logp);
-	Ciphertext cipher13 = addConst(cipher2, pc);
-	multAndEqual(cipher13, tmp);
-	reScaleByAndEqual(cipher13, logp);
-
-	c = -8*Pi*Pi*Pi*Pi*Pi*Pi*Pi/315;
-	pc = EvaluatorUtils::evalZZ(c, logp);
-	tmp = multByConst(cipher, pc);
-	reScaleByAndEqual(tmp, logp);
-
-	c = -21/(2*Pi*Pi);
-	pc = EvaluatorUtils::evalZZ(c, logp);
-	cipher = addConst(cipher2, pc);
-	multAndEqual(cipher, tmp);
-	reScaleByAndEqual(cipher, logp);
-	multAndEqual(cipher, cipher4);
-	reScaleByAndEqual(cipher, logp);
-
-	modDownByAndEqual(cipher13, logp);
-	addAndEqual(cipher, cipher13);
-}
-
-Ciphertext Scheme::evaluateCos2pix6(Ciphertext& cipher, long logp) {
+void Scheme::evaluateExp2piAndEqual(Ciphertext& cipher, long logp) {
 	Ciphertext cipher2 = square(cipher);
 	reScaleByAndEqual(cipher2, logp);
 
 	Ciphertext cipher4 = square(cipher2);
 	reScaleByAndEqual(cipher4, logp);
 
-	RR c = -1/(2*Pi*Pi);
+	RR c = 1/(2*Pi);
 	ZZ pc = EvaluatorUtils::evalZZ(c, logp);
-	Ciphertext cipher02 = addConst(cipher2, pc);
 
-	c = -2*Pi*Pi;
+	Ciphertext cipher01 = addConst(cipher, pc);
+
+	c = 2*Pi;
 	pc = EvaluatorUtils::evalZZ(c, logp);
-	multByConstAndEqual(cipher02, pc);
-	reScaleByAndEqual(cipher02, logp);
 
-	c = -15/(2*Pi*Pi);
+	multByConstAndEqual(cipher01, pc);
+	reScaleByAndEqual(cipher01, logp);
+
+	c = 3/(2*Pi);
 	pc = EvaluatorUtils::evalZZ(c, logp);
-	Ciphertext cipher46 = addConst(cipher2, pc);
+	Ciphertext cipher23 = addConst(cipher, pc);
 
-	c = -4*Pi*Pi*Pi*Pi*Pi*Pi/45;
+	c = 4*Pi*Pi*Pi/3;
 	pc = EvaluatorUtils::evalZZ(c, logp);
-	multByConstAndEqual(cipher46, pc);
-	reScaleByAndEqual(cipher46, logp);
+	multByConstAndEqual(cipher23, pc);
+	reScaleByAndEqual(cipher23, logp);
 
-	multAndEqual(cipher46, cipher4);
-	reScaleByAndEqual(cipher46, logp);
+	multAndEqual(cipher23, cipher2);
+	reScaleByAndEqual(cipher23, logp);
 
-	modDownByAndEqual(cipher02, logp);
-	addAndEqual(cipher46, cipher02);
-	return cipher46;
-}
+	addAndEqual(cipher23, cipher01);
 
-void Scheme::evaluateCos2pix6AndEqual(Ciphertext& cipher, long logp) {
-	Ciphertext cipher2 = square(cipher);
-	reScaleByAndEqual(cipher2, logp);
-
-	Ciphertext cipher4 = square(cipher2);
-	reScaleByAndEqual(cipher4, logp);
-
-	RR c = -1/(2*Pi*Pi);
-	ZZ pc = EvaluatorUtils::evalZZ(c, logp);
-	Ciphertext cipher02 = addConst(cipher2, pc);
-
-	c = -2*Pi*Pi;
+	c = 5/(2*Pi);
 	pc = EvaluatorUtils::evalZZ(c, logp);
-	multByConstAndEqual(cipher02, pc);
-	reScaleByAndEqual(cipher02, logp);
+	Ciphertext cipher45 = addConst(cipher, pc);
 
-	c = -15/(2*Pi*Pi);
+	c = 4*Pi*Pi*Pi*Pi*Pi/15;
 	pc = EvaluatorUtils::evalZZ(c, logp);
-	cipher = addConst(cipher2, pc);
+	multByConstAndEqual(cipher45, pc);
+	reScaleByAndEqual(cipher45, logp);
 
-	c = -4*Pi*Pi*Pi*Pi*Pi*Pi/45;
+	c = 7/(2*Pi);
+	pc = EvaluatorUtils::evalZZ(c, logp);
+	addConstAndEqual(cipher, pc);
+
+	c = 8*Pi*Pi*Pi*Pi*Pi*Pi*Pi/315;
 	pc = EvaluatorUtils::evalZZ(c, logp);
 	multByConstAndEqual(cipher, pc);
 	reScaleByAndEqual(cipher, logp);
 
+	multAndEqual(cipher, cipher2);
+	reScaleByAndEqual(cipher, logp);
+
+	modDownByAndEqual(cipher45, logp);
+	addAndEqual(cipher, cipher45);
+
 	multAndEqual(cipher, cipher4);
 	reScaleByAndEqual(cipher, logp);
 
-	modDownByAndEqual(cipher02, logp);
-	addAndEqual(cipher, cipher02);
-}
-
-Ciphertext Scheme::evaluateSin2x(Ciphertext& cSinx, Ciphertext& cCosx, long logp) {
-	Ciphertext res = mult(cSinx, cCosx);
-	doubleAndEqual(res);
-	reScaleByAndEqual(res, logp);
-	return res;
-}
-
-Ciphertext Scheme::evaluateCos2x(Ciphertext& cSinx, Ciphertext& cCosx, long logp) {
-	Ciphertext cSub = sub(cCosx, cSinx);
-	Ciphertext cAdd = add(cCosx, cSinx);
-	multAndEqual(cAdd, cSub);
-	reScaleByAndEqual(cAdd, logp);
-	return cAdd;
-}
-
-Ciphertext Scheme::removeIpart(Ciphertext& cipher, long logq, long logT, long logI) {
-	Ciphertext cms = reScaleBy(cipher, logT);
-
-	Ciphertext cipherSinx = evaluateSin2pix7(cms, logq + logI);
-	Ciphertext cipherCosx = evaluateCos2pix6(cms, logq + logI);
-
-	Ciphertext cipherSin2x, cipherCos2x;
-	for (long i = 0; i < logI + logT - 1; ++i) {
-		cipherSin2x = evaluateSin2x(cipherSinx, cipherCosx, logq + logI);
-		cipherCos2x = evaluateCos2x(cipherSinx, cipherCosx, logq + logI);
-		cipherSinx = cipherSin2x;
-		cipherCosx = cipherCos2x;
-	}
-	cipherSinx = evaluateSin2x(cipherSinx, cipherCosx, logq + logI);
-	ZZ temp = EvaluatorUtils::evalZZ(1/(2*Pi), logq + logI);
-	multByConstAndEqual(cipherSinx, temp);
-	reScaleByAndEqual(cipherSinx, logq + 2 * logI);
-	return cipherSinx;
+	modDownByAndEqual(cipher23, logp);
+	addAndEqual(cipher, cipher23);
 }
 
 void Scheme::removeIpartAndEqual(Ciphertext& cipher, long logq, long logT, long logI) {
-	Ciphertext cms = reScaleBy(cipher, logT);
 
-	Ciphertext cipherSinx = evaluateSin2pix7(cms, logq + logI);
-	Ciphertext cipherCosx = evaluateCos2pix6(cms, logq + logI);
+	Ciphertext conj = conjugate(cipher);
+	Ciphertext c1 = sub(cipher, conj);
+	Ciphertext c2 = add(cipher, conj);
+	imultAndEqual(c2);
 
-	Ciphertext cipherSin2x, cipherCos2x;
-	for (long i = 0; i < logI + logT - 1; ++i) {
-		cipherSin2x = evaluateSin2x(cipherSinx, cipherCosx, logq + logI);
-		cipherCos2x = evaluateCos2x(cipherSinx, cipherCosx, logq + logI);
-		cipherSinx = cipherSin2x;
-		cipherCosx = cipherCos2x;
+	reScaleByAndEqual(c1, logT + 1);
+	reScaleByAndEqual(c2, logT + 1);
+
+	evaluateExp2piAndEqual(c1, logq + logI);
+	evaluateExp2piAndEqual(c2, logq + logI);
+
+	for (long i = 0; i < logI + logT; ++i) {
+		squareAndEqual(c1);
+		squareAndEqual(c2);
+		reScaleByAndEqual(c1, logq + logI);
+		reScaleByAndEqual(c2, logq + logI);
 	}
-	cipher = evaluateSin2x(cipherSinx, cipherCosx, logq + logI);
 
-	ZZ temp = EvaluatorUtils::evalZZ(1/(2*Pi), logq + logI);
+	Ciphertext c1conj = conjugate(c1);
+	Ciphertext c2conj = conjugate(c2);
+
+	subAndEqual(c1, c1conj);
+	subAndEqual(c2, c2conj);
+	imultAndEqual(c2);
+
+	cipher = sub(c1, c2);
+	ZZ temp = EvaluatorUtils::evalZZ(1/(4*Pi), logq + logI);
 	multByConstAndEqual(cipher, temp);
 	reScaleByAndEqual(cipher, logq + 2 * logI);
 }
@@ -1002,52 +846,26 @@ void Scheme::bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long lo
 
 	modDownToAndEqual(cipher, logq);
 	normalizeAndEqual(cipher);
+
 	cipher.logq = logQ;
 	cipher.q = power2_ZZ(logQ);
 
-	if(logSlots == context.logN - 1) {
-		Ciphertext cshift1 = multByMonomial(cipher, 2 * context.N - 1);
-		linearTransformAndEqual(cipher, context.N / 2);
-		linearTransformAndEqual(cshift1, context.N / 2);
+	for (long i = logSlots; i < context.logN - 1; ++i) {
+		Ciphertext rot = leftRotateByPo2(cipher, i);
+		addAndEqual(cipher, rot);
+	}
 
-		Ciphertext clinEvenConj = conjugate(cipher);
-		addAndEqual(cipher, clinEvenConj);
-		reScaleByAndEqual(cipher, logq + logI + logSlots);
-
-		Ciphertext clinOddConj = conjugate(cshift1);
-		addAndEqual(cshift1, clinOddConj);
-		reScaleByAndEqual(cshift1, logq + logI + logSlots);
-
-		removeIpartAndEqual(cipher, logq, logT, logI);
-		removeIpartAndEqual(cshift1, logq, logT, logI);
-
-		linearTransformInvAndEqual(cipher, context.N / 2);
-		linearTransformInvAndEqual(cshift1, context.N / 2);
-
-		multByMonomialAndEqual(cshift1, 1);
-		addAndEqual(cipher, cshift1);
-		reScaleByAndEqual(cipher, logq + logI);
-	} else {
-		for (long i = logSlots; i < context.logN - 1; ++i) {
-			Ciphertext rot = leftRotateByPo2(cipher, i);
-			addAndEqual(cipher, rot);
-		}
-		if (logSlots == 0 && !cipher.isComplex) {
-				Ciphertext cconj = conjugate(cipher);
-				addAndEqual(cipher, cconj);
-				reScaleByAndEqual(cipher, context.logN - logSlots);
-				removeIpartAndEqual(cipher, logq, logT, logI);
-		} else {
-			reScaleByAndEqual(cipher, context.logN - 1 - logSlots);
-			linearTransformAndEqual(cipher, cipher.slots * 2);
-
+	if (logSlots == 0 && !cipher.isComplex) {
 			Ciphertext cconj = conjugate(cipher);
 			addAndEqual(cipher, cconj);
-			reScaleByAndEqual(cipher, logq + logI + logSlots + 2);
-
+			reScaleByAndEqual(cipher, context.logN - logSlots);
 			removeIpartAndEqual(cipher, logq, logT, logI);
-			linearTransformInvAndEqual(cipher, cipher.slots * 2);
-			reScaleByAndEqual(cipher, logq + logI);
-		}
+	} else {
+		reScaleByAndEqual(cipher, context.logN - 1 - logSlots);
+		linTransformAndEqual(cipher);
+		reScaleByAndEqual(cipher, logq + logI + logSlots);
+		removeIpartAndEqual(cipher, logq, logT, logI);
+		linTransformInvAndEqual(cipher);
+		reScaleByAndEqual(cipher, logq + logI);
 	}
 }

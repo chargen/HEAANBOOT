@@ -1,23 +1,15 @@
 #ifndef HEAAN_SCHEME_H_
 #define HEAAN_SCHEME_H_
 
-#include <NTL/RR.h>
-#include <NTL/ZZ.h>
-#include <NTL/ZZX.h>
-
-
 #include "Common.h"
-#include "CZZ.h"
-#include "SecretKey.h"
-#include "Ciphertext.h"
-#include "Plaintext.h"
-#include "Key.h"
-#include "Context.h"
 #include "BootKey.h"
-#include "EvaluatorUtils.h"
-#include "NumUtils.h"
-#include "Params.h"
-#include "Ring2Utils.h"
+#include "BootKey.h"
+#include "Ciphertext.h"
+#include "Context.h"
+#include "CZZ.h"
+#include "Key.h"
+#include "Plaintext.h"
+#include "SecretKey.h"
 
 using namespace std;
 using namespace NTL;
@@ -509,33 +501,17 @@ public:
 
 	void normalizeAndEqual(Ciphertext& cipher);
 
-	Ciphertext linearTransform(Ciphertext& cipher, long size);
+	void linTransformAndEqual(Ciphertext& cipher);
 
-	void linearTransformAndEqual(Ciphertext& cipher, long size);
+	void linTransformInvAndEqual(Ciphertext& cipher);
 
-	Ciphertext linearTransformInv(Ciphertext& cipher, long size);
-
-	void linearTransformInvAndEqual(Ciphertext& cipher, long size);
-
-	Ciphertext evaluateSin2pix7(Ciphertext& cipher, long logp);
-
-	void evaluateSin2pix7AndEqual(Ciphertext& cipher, long logp);
-
-	Ciphertext evaluateCos2pix6(Ciphertext& cipher, long logp);
-
-	void evaluateCos2pix6AndEqual(Ciphertext& cipher, long logp);
-
-	Ciphertext evaluateSin2x(Ciphertext& cSinx, Ciphertext& cCosx, long logp);
-
-	Ciphertext evaluateCos2x(Ciphertext& cSinx, Ciphertext& cCosx, long logp);
-
-	Ciphertext removeIpart(Ciphertext& cipher, long logq, long logT, long logI = 4);
+	void evaluateExp2piAndEqual(Ciphertext& cipher, long logp);
 
 	void removeIpartAndEqual(Ciphertext& cipher, long logq, long logT, long logI = 4);
 
-	Ciphertext bootstrap(Ciphertext& cipher, long logq, long logQ, long logT, long logI = 4);
-
 	void bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long logT, long logI = 4);
+
+	Ciphertext bootstrap(Ciphertext& cipher, long logq, long logQ, long logT, long logI = 4);
 
 };
 

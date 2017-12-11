@@ -842,7 +842,6 @@ void TestScheme::testBootstrap() {
 	long logI = 4;
 	long logSlots = 0;
 	long slots = (1 << logSlots);
-	long lkey = logSlots == logN - 1 ? logSlots : logSlots + 1;
 	//-----------------------------------------
 	TimeUtils timeutils;
 	Params params(logN, logQ);
@@ -854,7 +853,7 @@ void TestScheme::testBootstrap() {
 	timeutils.start("Key generating");
 	scheme.addConjKey(secretKey);
 	scheme.addLeftRotKeys(secretKey);
-	scheme.addBootKeys(secretKey, lkey, logq + logI);
+	scheme.addBootKeys(secretKey, logSlots, logq + logI);
 	timeutils.stop("Key generated");
 	//-----------------------------------------
 	SetNumThreads(1);
