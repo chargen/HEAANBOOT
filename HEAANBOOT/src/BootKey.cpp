@@ -18,14 +18,14 @@ BootKey::BootKey(Context& context, long logp, long logl) : logp(logp) {
 	CZZ* pdvals = new CZZ[dl];
 	for (long j = 0; j < l; ++j) {
 		for (long i = j; i < l; ++i) {
-			long deg =((2 * context.N - context.rotGroup[i]) * (i - j) * Noverl) % context.M;
+			long deg =((context.M - context.rotGroup[i]) * (i - j) * Noverl) % context.M;
 			CZZ tmp = EvaluatorUtils::evalCZZ(context.ksiPowsr[deg], context.ksiPowsi[deg], logp);
 			long idx = (context.rotGroup[i-j] % (2 * dl)  - 1) / 2;
 					pdvals[idx] = tmp;
 					pdvals[dl - idx - 1] = tmp.conjugate();
 		}
 		for (long i = 0; i < j; ++i) {
-			long deg =((2 * context.N - context.rotGroup[i]) * (l + i - j) * Noverl) % context.M;
+			long deg =((context.M - context.rotGroup[i]) * (l + i - j) * Noverl) % context.M;
 			CZZ tmp = EvaluatorUtils::evalCZZ(context.ksiPowsr[deg], context.ksiPowsi[deg], logp);
 			long idx = (context.rotGroup[l + i - j] % (2 * dl) - 1) / 2;
 			pdvals[idx] = tmp;

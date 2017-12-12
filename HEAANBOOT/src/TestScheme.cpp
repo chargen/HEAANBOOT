@@ -837,10 +837,10 @@ void TestScheme::testBootstrap() {
 	long nu = 6;
 	long msgBits = 29;
 	long logq = msgBits + nu;
-	long logN = 13;
+	long logN = 15;
 	long logT = 2;
 	long logI = 4;
-	long logSlots = 2;
+	long logSlots = 0;
 	long slots = (1 << logSlots);
 	//-----------------------------------------
 	TimeUtils timeutils;
@@ -856,7 +856,7 @@ void TestScheme::testBootstrap() {
 	scheme.addBootKeys(secretKey, logSlots, logq + logI);
 	timeutils.stop("Key generated");
 	//-----------------------------------------
-	SetNumThreads(4);
+	SetNumThreads(1);
 
 	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, msgBits);
 
@@ -878,4 +878,3 @@ void TestScheme::testBootstrap() {
 
 	cout << "!!! END TEST BOOTSRTAP !!!" << endl;
 }
-
