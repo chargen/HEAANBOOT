@@ -1,4 +1,5 @@
 #include "TestScheme.h"
+#include <vector>
 
 #include <NTL/BasicThreadPool.h>
 #include <NTL/RR.h>

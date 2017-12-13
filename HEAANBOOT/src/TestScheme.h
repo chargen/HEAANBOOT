@@ -255,11 +255,9 @@ public:
 	 */
 	static void testFFTBatchLazyMultipleHadamard(long logN, long logQ, long logp, long logSlots, long logfftdim, long logHdim);
 
-
 	//----------------------------------------------------------------------------------
 	//   BOOTSTRAPPING TESTS
 	//----------------------------------------------------------------------------------
-
 
 	static void testBootstrap();
 
