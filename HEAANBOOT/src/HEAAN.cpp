@@ -122,17 +122,19 @@ int main() {
 
 	/*
 	 * Params: logN, logQ, logp, logSlots, logFFTdim
-	 * Suggested: 13, 120, 50, 3, 4;
+	 * Suggested: 13, 100, 42, 3, 4;
 	 */
 
 //	TestScheme::testFFTBatch(13, 100, 42, 3, 4);
-//	TestScheme::testFFTBatchLazy(13, 120, 50, 3, 12);
+//	TestScheme::testFFTBatchLazy(13, 100, 42, 3, 4);
 
 	/*
 	 * Params: logN, logQ, logp, logSlots, logFFTdim, logHdim
-	 * Suggested: 13, 170, 50, 3, 4, 2;
+	 * Suggested: 13, 140, 42, 3, 3, 2;
 	 */
-//	TestScheme::testFFTBatchLazyMultipleHadamard(13, 122, 50, 3, 13, 1);
+//	TestScheme::testFFTBatchLazyMultipleHadamard(13, 140, 42, 3, 3, 2);
+
+	//-----------------------------------------
 
 //	TestScheme::testBootstrap();
 

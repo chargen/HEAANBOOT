@@ -109,7 +109,7 @@ void Scheme::addSortKeys(SecretKey& secretKey, long size) {
 	}
 }
 
-Plaintext Scheme::encode(CZZ*& vals, long slots, long logq, bool isComplex) {
+Plaintext Scheme::encode(CZZ* vals, long slots, long logq, bool isComplex) {
 	long doubleslots = slots << 1;
 	ZZ q = power2_ZZ(logq);
 	CZZ* gvals = new CZZ[doubleslots];
@@ -211,7 +211,7 @@ Plaintext Scheme::decryptMsg(SecretKey& secretKey, Ciphertext& cipher) {
 	return Plaintext(mx, cipher.q, cipher.logq, cipher.slots, cipher.isComplex);
 }
 
-Ciphertext Scheme::encrypt(CZZ*& vals, long slots, long logq, bool isComplex) {
+Ciphertext Scheme::encrypt(CZZ* vals, long slots, long logq, bool isComplex) {
 	Plaintext msg = encode(vals, slots, logq, isComplex);
 	return encryptMsg(msg);
 }
