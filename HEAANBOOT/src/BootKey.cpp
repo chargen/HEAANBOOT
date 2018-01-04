@@ -3,7 +3,6 @@
 BootKey::BootKey(Context& context, long logp, long logl) : logp(logp) {
 	ZZ p = power2_ZZ(logp);
 
-	ZZX ex;
 	long loglh = logl/2;
 	long l = 1 << logl;
 	long dl = l << 1;
