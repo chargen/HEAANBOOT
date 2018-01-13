@@ -4,8 +4,6 @@
 #include <NTL/ZZ.h>
 #include <NTL/ZZX.h>
 
-#include <fstream>
-
 using namespace std;
 using namespace NTL;
 
@@ -37,9 +35,9 @@ public:
 
 	Ciphertext(const Ciphertext& o) : ax(o.ax), bx(o.bx), q(o.q), logq(o.logq), slots(o.slots), isComplex(o.isComplex) {}
 
-	void Write(string filename);
+	void Write(long CiphertextID);
 
-	void Read(string filename);
+	void Read(long CiphertextID);
 
 };
 

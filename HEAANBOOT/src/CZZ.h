@@ -5,7 +5,6 @@
 
 #include "Common.h"
 
-
 using namespace std;
 using namespace NTL;
 

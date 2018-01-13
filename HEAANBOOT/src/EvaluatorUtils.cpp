@@ -1,5 +1,6 @@
 #include "EvaluatorUtils.h"
 
+
 double EvaluatorUtils::evalReal(const ZZ& x, const long logp) {
 	RR xp = to_RR(x);
 	xp.e -= logp;

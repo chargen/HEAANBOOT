@@ -1,20 +1,18 @@
 #include "Ciphertext.h"
 
-void Ciphertext::Write(string filename) {
+#include <NTL/tools.h>
+#include "Common.h"
+
+void Ciphertext::Write(long CiphertextID) {
 	ofstream myfile;
-	myfile.open("Ciphertext" + filename + ".txt");
+	myfile.open("Ciphertext" + to_string(CiphertextID) + ".txt");
 	myfile << "Ciphertext Information" << endl;
-	myfile << "filename = " << filename << endl;
+	myfile << "CiphertextID = " << CiphertextID << endl;
 	myfile << deg(ax) << endl;
 	myfile << deg(bx) << endl;
-	myfile << q << endl;
 	myfile << logq << endl;
 	myfile << slots << endl;
-	if(isComplex) {
-		myfile << "true" << endl;
-	} else {
-		myfile << "false" << endl;
-	}
+	myfile << isComplex << endl;
 	for(long i = 0; i < deg(ax) + 1; i++) {
 		myfile << ax[i] << endl;
 	}
@@ -24,8 +22,8 @@ void Ciphertext::Write(string filename) {
 	myfile.close();
 }
 
-void Ciphertext::Read(string filename) {
-	ifstream myfile("Ciphertext" + filename + ".txt");
+void Ciphertext::Read(long CiphertextID) {
+	ifstream myfile("Ciphertext" + to_string(CiphertextID) + ".txt");
 	if(myfile.is_open()) {
 		// kill previous memory
 		ax.kill();
@@ -49,21 +47,17 @@ void Ciphertext::Read(string filename) {
 
 		// read 5th line and get q
 		getline(myfile, line);
-		q = conv<ZZ>(line.c_str());
+		logq = atol(line.c_str());
 
-		// read 6th line and get logq
-		getline(myfile, line);
-		temp = atol(line.c_str());
-		logq = temp;
+		q = power2_ZZ(logq);
 
-		// read 7th line and get slots
+		// read 6th line and get slots
 		getline(myfile, line);
-		temp = atol(line.c_str());
-		slots = temp;
+		slots = atol(line.c_str());
 
-		// read 8th line and get isComplex
+		// read 7th line and get isComplex
 		getline(myfile, line);
-		isComplex = line == "true" ? true : false;
+		isComplex = atoi(line.c_str());
 
 		// read other lines and get ax and bx
 		for(long i = 0; i < deg(ax) + 1; i++) {

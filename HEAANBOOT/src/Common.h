@@ -9,6 +9,8 @@
 #include <stdexcept>
 #include <string>
 #include <cstdlib>
+#include <vector>
+#include <fstream>
 
 
 #endif

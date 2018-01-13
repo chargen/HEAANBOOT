@@ -5,7 +5,7 @@ Context::Context(Params& params) :
 	logN(params.logN), logQ(params.logQ), sigma(params.sigma), h(params.h), N(params.N) {
 
 	M = N << 1;
-	logPQ = 2 * logQ;
+	logPQ = logQ << 1;
 	Q = power2_ZZ(logQ);
 	PQ = power2_ZZ(logPQ);
 

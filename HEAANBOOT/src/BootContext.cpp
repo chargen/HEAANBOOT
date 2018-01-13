@@ -1,9 +1,18 @@
-#include "BootKey.h"
+#include "BootContext.h"
 
-BootKey::BootKey(Context& context, long logp, long logl) : logp(logp) {
+#include <NTL/ZZ.h>
+#include <NTL/ZZX.h>
+
+#include "CZZ.h"
+#include "EvaluatorUtils.h"
+#include "NumUtils.h"
+#include "Ring2Utils.h"
+
+
+BootContext::BootContext(Context& context, long logp, long logl) : logp(logp) {
 	ZZ p = power2_ZZ(logp);
 
-	long loglh = logl/2;
+	long loglh = logl / 2;
 	long l = 1 << logl;
 	long dl = l << 1;
 	long Noverl = context.N >> (logl + 1);

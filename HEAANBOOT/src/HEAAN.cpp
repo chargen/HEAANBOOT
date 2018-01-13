@@ -134,6 +134,8 @@ int main() {
 	 */
 //	TestScheme::testFFTBatchLazyMultipleHadamard(13, 140, 42, 3, 3, 2);
 
+//	TestScheme::testCiphertextWriteAndRead(15, 620, 30, 3);
+
 	//-----------------------------------------
 
 //	TestScheme::testBootstrap();

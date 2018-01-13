@@ -1,6 +1,7 @@
 #ifndef HEAAN_CONTEXT_H_
 #define HEAAN_CONTEXT_H_
 
+#include <NTL/ZZ.h>
 #include <NTL/RR.h>
 
 #include "Common.h"

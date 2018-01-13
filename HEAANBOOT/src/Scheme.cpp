@@ -1,6 +1,13 @@
 #include "Scheme.h"
 
 #include <NTL/BasicThreadPool.h>
+#include <NTL/RR.h>
+#include <NTL/ZZ.h>
+#include <NTL/ZZX.h>
+
+#include "EvaluatorUtils.h"
+#include "NumUtils.h"
+#include "Ring2Utils.h"
 
 //-----------------------------------------
 
@@ -80,7 +87,7 @@ void Scheme::addRightRotKeys(SecretKey& secretKey) {
 void Scheme::addBootKeys(SecretKey& secretKey, long logl, long logp) {
 
 	if(bootKeyMap.find(logl) == bootKeyMap.end()) {
-		bootKeyMap.insert(pair<long, BootKey>(logl, BootKey(context, logp, logl)));
+		bootKeyMap.insert(pair<long, BootContext>(logl, BootContext(context, logp, logl)));
 	}
 
 	long loglh = logl/2;
@@ -688,7 +695,7 @@ void Scheme::linTransformAndEqual(Ciphertext& cipher) {
 	}
 	NTL_EXEC_RANGE_END;
 
-	BootKey bootKey = bootKeyMap.at(logSlots);
+	BootContext bootKey = bootKeyMap.at(logSlots);
 
 	Ciphertext* tmpvec = new Ciphertext[k];
 
@@ -739,7 +746,7 @@ void Scheme::linTransformInvAndEqual(Ciphertext& cipher) {
 	}
 	NTL_EXEC_RANGE_END;
 
-	BootKey bootKey = bootKeyMap.at(logSlots);
+	BootContext bootKey = bootKeyMap.at(logSlots);
 
 	Ciphertext* tmpvec = new Ciphertext[k];
 

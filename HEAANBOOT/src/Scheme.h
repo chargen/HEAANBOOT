@@ -1,9 +1,8 @@
 #ifndef HEAAN_SCHEME_H_
 #define HEAAN_SCHEME_H_
 
+#include "BootContext.h"
 #include "Common.h"
-#include "BootKey.h"
-#include "BootKey.h"
 #include "Ciphertext.h"
 #include "Context.h"
 #include "CZZ.h"
@@ -25,7 +24,7 @@ public:
 
 	map<long, Key> keyMap; ///< contain Encryption, Multiplication and Conjugation keys, if generated
 	map<long, Key> leftRotKeyMap; ///< contain left rotation keys, if generated
-	map<long, BootKey> bootKeyMap; ///< contain bootstrapping keys, if generated
+	map<long, BootContext> bootKeyMap; ///< contain bootstrapping keys, if generated
 
 	Scheme(SecretKey& secretKey, Context& context);
 
