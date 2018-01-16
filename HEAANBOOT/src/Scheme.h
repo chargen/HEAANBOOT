@@ -24,7 +24,6 @@ public:
 
 	map<long, Key> keyMap; ///< contain Encryption, Multiplication and Conjugation keys, if generated
 	map<long, Key> leftRotKeyMap; ///< contain left rotation keys, if generated
-	map<long, BootContext> bootKeyMap; ///< contain bootstrapping keys, if generated
 
 	Scheme(SecretKey& secretKey, Context& context);
 
@@ -67,7 +66,7 @@ public:
 	/**
 	 * generates key for bootstrapping (keys are stored in leftRotKeyMap and bootKeyMap)
 	 */
-	void addBootKeys(SecretKey& secretKey, long logl, long logp);
+	void addBootKey(SecretKey& secretKey, long logl, long logp);
 
 	/**
 	 * generates keys for sorting (keys are stored in leftRotKeyMap)

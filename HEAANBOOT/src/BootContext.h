@@ -1,17 +1,23 @@
 #ifndef HEAAN_BOOTCONTEXT_H_
 #define HEAAN_BOOTCONTEXT_H_
 
-#include "Context.h"
+#include <NTL/ZZX.h>
+
+using namespace NTL;
 
 class BootContext {
-public:
 
-	long logp; ///< number of preicision bits used in evaluation polynomials
+public:
 
 	ZZX* pvec; ///< encodings of "diagonal" values of linearization matrix
 	ZZX* pvecInv; ///< encodings of "diagonal" values of inverse linearization matrix
 
-	BootContext(Context& context, long logp, long logl);
+	long logp; ///< number of preicision bits used in evaluation polynomials
+
+	BootContext(ZZX* pvec, ZZX* pvecInv, long logp);
+
+//	~BootContext();
+
 };
 
 #endif

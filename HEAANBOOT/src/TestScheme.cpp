@@ -618,13 +618,13 @@ void TestScheme::testFFTBatch(long logN, long logQ, long logp, long logSlots, lo
 	}
 
 	for (long i = 0; i < slots; ++i) {
-		NumUtils::fft(mvec1[i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
-		NumUtils::fft(mvec2[i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
+		context.fft(mvec1[i], fftdim);
+		context.fft(mvec2[i], fftdim);
 		for (long j = 0; j < fftdim; ++j) {
 			mvec1[i][j] *= mvec2[i][j];
 			mvec1[i][j] >>= logp;
 		}
-		NumUtils::fftInv(mvec1[i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
+		context.fftInv(mvec1[i], fftdim);
 	}
 	//-----------------------------------------
 	timeutils.start("ciphers fft 1 batch");
@@ -696,13 +696,13 @@ void TestScheme::testFFTBatchLazy(long logN, long logQ, long logp, long logSlots
 	}
 
 	for (long i = 0; i < slots; ++i) {
-		NumUtils::fft(mvec1[i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
-		NumUtils::fft(mvec2[i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
+		context.fft(mvec1[i], fftdim);
+		context.fft(mvec2[i], fftdim);
 		for (long j = 0; j < fftdim; ++j) {
 			mvec1[i][j] *= mvec2[i][j];
 			mvec1[i][j] >>= logp;
 		}
-		NumUtils::fftInvLazy(mvec1[i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
+		context.fftInvLazy(mvec1[i], fftdim);
 	}
 	//-----------------------------------------
 	timeutils.start("ciphers fft 1");
@@ -771,7 +771,7 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logQ, long log
 			delete[] mvals;
 		}
 		for (long i = 0; i < slots; ++i) {
-			NumUtils::fft(mvecs[h][i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
+			context.fft(mvecs[h][i], fftdim);
 		}
 	}
 
@@ -788,7 +788,7 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logQ, long log
 	}
 
 	for (long i = 0; i < slots; ++i) {
-		NumUtils::fftInvLazy(mvecs[0][i], fftdim, context.ksiPowsr, context.ksiPowsi, context.M);
+		context.fftInvLazy(mvecs[0][i], fftdim);
 	}
 
 	for (long h = 1; h < hdim; ++h) {
@@ -919,7 +919,7 @@ void TestScheme::testBootstrap() {
 	timeutils.start("Key generating");
 	scheme.addConjKey(secretKey);
 	scheme.addLeftRotKeys(secretKey);
-	scheme.addBootKeys(secretKey, logSlots, logq + logI);
+	scheme.addBootKey(secretKey, logSlots, logq + logI);
 	timeutils.stop("Key generated");
 	//-----------------------------------------
 	SetNumThreads(1);

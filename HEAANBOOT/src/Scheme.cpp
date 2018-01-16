@@ -84,11 +84,8 @@ void Scheme::addRightRotKeys(SecretKey& secretKey) {
 	}
 }
 
-void Scheme::addBootKeys(SecretKey& secretKey, long logl, long logp) {
-
-	if(bootKeyMap.find(logl) == bootKeyMap.end()) {
-		bootKeyMap.insert(pair<long, BootContext>(logl, BootContext(context, logp, logl)));
-	}
+void Scheme::addBootKey(SecretKey& secretKey, long logl, long logp) {
+	context.addBootContext(logl, logp);
 
 	long loglh = logl/2;
 	long k = 1 << loglh;
@@ -119,53 +116,46 @@ void Scheme::addSortKeys(SecretKey& secretKey, long size) {
 Plaintext Scheme::encode(CZZ* vals, long slots, long logq, bool isComplex) {
 	long doubleslots = slots << 1;
 	ZZ q = power2_ZZ(logq);
-	CZZ* gvals = new CZZ[doubleslots];
-	for (long i = 0; i < slots; ++i) {
-		long idx = (context.rotGroup[i] % (slots << 2) - 1) / 2;
-		gvals[idx] = vals[i] << context.logQ;
-		gvals[doubleslots - idx - 1] = vals[i].conjugate() << context.logQ;
+	CZZ* uvals = new CZZ[slots];
+	long i, j, idx;
+	for (i = 0; i < slots; ++i) {
+		uvals[i] = vals[i] << context.logQ;
 	}
-
 	ZZX mx;
 	mx.SetLength(context.N);
-	long idx = 0;
+
 	long gap = context.N / doubleslots;
 
-	NumUtils::fftSpecialInv(gvals, doubleslots, context.ksiPowsr, context.ksiPowsi, context.M);
+	context.fftSpecialInv(uvals, slots);
 
-	for (long i = 0; i < doubleslots; ++i) {
-		mx.rep[idx] = gvals[i].r;
-		idx += gap;
+	for (i = 0, j = context.Nh, idx = 0; i < slots; ++i, j += gap, idx += gap) {
+		mx[idx] = uvals[i].r;
+		mx[j] = uvals[i].i;
 	}
-	delete[] gvals;
+	delete[] uvals;
 	return Plaintext(mx, q, logq, slots, isComplex);
 }
 
 CZZ* Scheme::decode(Plaintext& msg) {
-	long doubleslots = msg.slots * 2;
-	CZZ* fftinv = new CZZ[doubleslots];
-
-	long idx = 0;
-	long gap = context.N / doubleslots;
-	for (long i = 0; i < doubleslots; ++i) {
-		ZZ tmp = msg.mx.rep[idx] % msg.q;
+	long i, idx;
+	long slots = msg.slots;
+	long gap = context.Nh / slots;
+	CZZ* res = new CZZ[slots];
+	for (i = 0, idx = 0; i < slots; ++i, idx += gap) {
+		ZZ tmp = msg.mx[idx] % msg.q;
+		ZZ tmpi = msg.mx[idx + context.Nh] % msg.q;
 		if(NumBits(tmp) == msg.logq) tmp -= msg.q;
-		fftinv[i] = CZZ(tmp, ZZ(0));
-		idx += gap;
+		if(NumBits(tmpi) == msg.logq) tmpi -= msg.q;
+		res[i] = CZZ(tmp, tmpi);
 	}
-	NumUtils::fftSpecial(fftinv, doubleslots, context.ksiPowsr, context.ksiPowsi, context.M);
-	CZZ* res = new CZZ[msg.slots];
-	for (long i = 0; i < msg.slots; ++i) {
-		long idx = (context.rotGroup[i] % (msg.slots << 2) - 1) / 2;
-		res[i] = fftinv[idx];
-	}
-	delete[] fftinv;
+	context.fftSpecial(res, slots);
 	return res;
 }
 
 Plaintext Scheme::encodeSingle(CZZ& val, long cbits, bool isComplex) {
 	ZZX mx;
 	mx.SetLength(context.N);
+
 	ZZ mod = power2_ZZ(cbits);
 	mx.rep[0] = val.r << context.logQ;
 	if(isComplex) {
@@ -695,7 +685,7 @@ void Scheme::linTransformAndEqual(Ciphertext& cipher) {
 	}
 	NTL_EXEC_RANGE_END;
 
-	BootContext bootKey = bootKeyMap.at(logSlots);
+	BootContext bootKey = context.bootKeyMap.at(logSlots);
 
 	Ciphertext* tmpvec = new Ciphertext[k];
 
@@ -746,7 +736,7 @@ void Scheme::linTransformInvAndEqual(Ciphertext& cipher) {
 	}
 	NTL_EXEC_RANGE_END;
 
-	BootContext bootKey = bootKeyMap.at(logSlots);
+	BootContext bootKey = context.bootKeyMap.at(logSlots);
 
 	Ciphertext* tmpvec = new Ciphertext[k];
 
