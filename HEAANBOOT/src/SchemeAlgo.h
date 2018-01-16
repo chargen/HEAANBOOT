@@ -247,14 +247,7 @@ public:
 	//----------------------------------------------------------------------------------
 
 
-	/**
-	 * Calculating pre fft of ciphertexts
-	 * @param[in] ciphers: [ciphertext(m_1), ciphertext(m_2),...,ciphertext(m_size)]
-	 * @param[in] size: array size (power-of-two)
-	 * @param[in] isForward: switching between fft and fft inverse
-	 * @return [ciphertext(fft_1), ... ,ciphertext(fft_size)]
-	 */
-	void fftRaw(Ciphertext* ciphers, const long size, const bool isForward);
+	void bitReverse(Ciphertext* ciphers, const long size);
 
 	/**
 	 * Calculating fft of ciphertexts
@@ -267,17 +260,17 @@ public:
 	 * Calculating fft inverse of ciphertexts
 	 * @param[in] ciphers: [ciphertext(m_1), ciphertext(m_2),...,ciphertext(m_size)]
 	 * @param[in] size: array size (power-of-two)
-	 * @return [ciphertext(fftinv_1), ... ,ciphertext(fftinv_size)]
+	 * @return [ciphertext(fftinv_1 * size), ... ,ciphertext(fftinv_size * size)] but saves level
 	 */
-	void fftInv(Ciphertext* ciphers, const long size);
+	void fftInvLazy(Ciphertext* ciphers, const long size);
 
 	/**
 	 * Calculating fft inverse of ciphertexts
 	 * @param[in] ciphers: [ciphertext(m_1), ciphertext(m_2),...,ciphertext(m_size)]
 	 * @param[in] size: array size (power-of-two)
-	 * @return [ciphertext(fftinv_1 * size), ... ,ciphertext(fftinv_size * size)] but saves level
+	 * @return [ciphertext(fftinv_1), ... ,ciphertext(fftinv_size)]
 	 */
-	void fftInvLazy(Ciphertext* ciphers, const long size);
+	void fftInv(Ciphertext* ciphers, const long size);
 
 };
 

@@ -497,16 +497,44 @@ public:
 	//----------------------------------------------------------------------------------
 
 
+	/**
+	 * part of bootstrapping procedure: normalizes coefficients of ax and bx in ciphertext
+	 * @param[in, out] cipher: ciphertext with ax, bx -> ciphertext with normalized ax, bx
+	 */
 	void normalizeAndEqual(Ciphertext& cipher);
 
+	/**
+	 * part of bootstrapping procedure: calculates special fft in encrypted form
+	 * @param[in, out] cipher: ciphertext(vecm) -> ciphertext(special fft of vecm)
+	 */
 	void linTransformAndEqual(Ciphertext& cipher);
 
+	/**
+	 * part of bootstrapping procedure: calculates special fft inverse in encrypted form
+	 * @param[in, out] cipher: ciphertext(vecm) -> ciphertext(special fft inverse of vecm)
+	 */
 	void linTransformInvAndEqual(Ciphertext& cipher);
 
+	/**
+	 * part of bootstrapping procedure: calculates exponent of ciphertext
+	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(exp(2pim))
+	 */
 	void evaluateExp2piAndEqual(Ciphertext& cipher, long logp);
 
+	/**
+	 * part of bootstrapping procedure: calculates squares of real and imaginary parts
+	 * @param[in, out] cipher: ciphertext(x + iy) -> ciphertext(x^T/p^{T-1} + i y^T/p^{T-1})
+	 */
 	void removeIpartAndEqual(Ciphertext& cipher, long logq, long logT, long logI = 4);
 
+	/**
+	 * full bootstrapping procedure
+	 * @param[in, out] cipher: ciphertext(x) in mod q-> ciphertext(x) in mod qq where Q > qq > q
+	 * @param[in] logq: log of q
+	 * @param[in] logQ: log of Q - max possible secure modulus
+	 * @param[in] logT: number of squaring steps in remove I part
+	 * @param[in] logI: for h = 64, logI by experiments is 4
+	 */
 	void bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long logT, long logI = 4);
 
 	Ciphertext bootstrap(Ciphertext& cipher, long logq, long logQ, long logT, long logI = 4);

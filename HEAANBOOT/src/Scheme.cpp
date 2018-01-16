@@ -685,7 +685,7 @@ void Scheme::linTransformAndEqual(Ciphertext& cipher) {
 	}
 	NTL_EXEC_RANGE_END;
 
-	BootContext bootKey = context.bootKeyMap.at(logSlots);
+	BootContext bootKey = context.bootContextMap.at(logSlots);
 
 	Ciphertext* tmpvec = new Ciphertext[k];
 
@@ -736,7 +736,7 @@ void Scheme::linTransformInvAndEqual(Ciphertext& cipher) {
 	}
 	NTL_EXEC_RANGE_END;
 
-	BootContext bootKey = context.bootKeyMap.at(logSlots);
+	BootContext bootKey = context.bootContextMap.at(logSlots);
 
 	Ciphertext* tmpvec = new Ciphertext[k];
 
@@ -868,12 +868,6 @@ void Scheme::removeIpartAndEqual(Ciphertext& cipher, long logq, long logT, long 
 	reScaleByAndEqual(cipher, logq + 2 * logI);
 }
 
-Ciphertext Scheme::bootstrap(Ciphertext& cipher, long logq, long logQ, long logT, long logI) {
-	Ciphertext tmp = cipher;
-	bootstrapAndEqual(tmp, logq, logQ, logT, logI);
-	return tmp;
-}
-
 void Scheme::bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long logT, long logI) {
 	long logSlots = log2(cipher.slots);
 
@@ -901,4 +895,10 @@ void Scheme::bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long lo
 		linTransformInvAndEqual(cipher);
 		reScaleByAndEqual(cipher, logq + logI);
 	}
+}
+
+Ciphertext Scheme::bootstrap(Ciphertext& cipher, long logq, long logQ, long logT, long logI) {
+	Ciphertext tmp = cipher;
+	bootstrapAndEqual(tmp, logq, logQ, logT, logI);
+	return tmp;
 }

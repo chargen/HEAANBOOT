@@ -14,9 +14,7 @@ public:
 
 	long logp; ///< number of preicision bits used in evaluation polynomials
 
-	BootContext(ZZX* pvec, ZZX* pvecInv, long logp);
-
-//	~BootContext();
+	BootContext(ZZX* pvec = NULL, ZZX* pvecInv = NULL, long logp = 0);
 
 };
 

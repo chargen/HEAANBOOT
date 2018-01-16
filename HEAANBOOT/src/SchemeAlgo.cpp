@@ -340,7 +340,7 @@ Ciphertext* SchemeAlgo::functionExtended(Ciphertext& cipher, string& funcName, c
 	return res;
 }
 
-void SchemeAlgo::fftRaw(Ciphertext* ciphers, const long size, const bool isForward) {
+void SchemeAlgo::bitReverse(Ciphertext* ciphers, const long size) {
 	for (long i = 1, j = 0; i < size; ++i) {
 		long bit = size >> 1;
 		for (; j >= bit; bit>>=1) {
@@ -351,9 +351,12 @@ void SchemeAlgo::fftRaw(Ciphertext* ciphers, const long size, const bool isForwa
 			swap(ciphers[i], ciphers[j]);
 		}
 	}
+}
 
+void SchemeAlgo::fft(Ciphertext* ciphers, const long size) {
+	bitReverse(ciphers, size);
 	for (long len = 2; len <= size; len <<= 1) {
-		long shift = isForward ? ((scheme.context.N / len) << 1) : ((scheme.context.N - scheme.context.N / len) << 1);
+		long shift = scheme.context.M / len;
 		for (long i = 0; i < size; i += len) {
 			NTL_EXEC_RANGE(len / 2, first, last);
 			for (long j = first; j < last; ++j) {
@@ -367,21 +370,30 @@ void SchemeAlgo::fftRaw(Ciphertext* ciphers, const long size, const bool isForwa
 	}
 }
 
-void SchemeAlgo::fft(Ciphertext* ciphers, const long size) {
-	fftRaw(ciphers, size, true);
+void SchemeAlgo::fftInvLazy(Ciphertext* ciphers, const long size) {
+	bitReverse(ciphers, size);
+	for (long len = 2; len <= size; len <<= 1) {
+		long shift = scheme.context.M - scheme.context.M / len;
+		for (long i = 0; i < size; i += len) {
+			NTL_EXEC_RANGE(len / 2, first, last);
+			for (long j = first; j < last; ++j) {
+				Ciphertext u = ciphers[i + j];
+				scheme.multByMonomialAndEqual(ciphers[i + j + len / 2], shift * j);
+				scheme.addAndEqual(ciphers[i + j], ciphers[i + j + len / 2]);
+				scheme.subAndEqual2(u, ciphers[i + j + len / 2]);
+			}
+			NTL_EXEC_RANGE_END;
+		}
+	}
 }
 
 void SchemeAlgo::fftInv(Ciphertext* ciphers, const long size) {
-	fftRaw(ciphers, size, false);
-	long logsize = log2((double)size);
+	fftInvLazy(ciphers, size);
 
+	long logsize = log2((double)size);
 	NTL_EXEC_RANGE(size, first, last);
 	for (long i = first; i < last; ++i) {
 		scheme.reScaleByAndEqual(ciphers[i], logsize);
 	}
 	NTL_EXEC_RANGE_END;
-}
-
-void SchemeAlgo::fftInvLazy(Ciphertext* ciphers, const long size) {
-	return fftRaw(ciphers, size, false);
 }

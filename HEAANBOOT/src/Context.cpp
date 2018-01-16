@@ -36,59 +36,59 @@ Context::Context(Params& params) :
 	taylorCoeffsMap.insert(pair<string, double*>(SIGMOID, new double[11]{1./2,1./4,0,-1./48,0,1./480,0,-17./80640,0,31./1451520,0}));
 }
 
-void Context::addBootContext(long logl, long logp) {
-	if(bootKeyMap.find(logl) == bootKeyMap.end()) {
+void Context::addBootContext(long logSlots, long logp) {
+	if(bootContextMap.find(logSlots) == bootContextMap.end()) {
 		ZZ p = power2_ZZ(logp);
 
-		long loglh = logl/2;
-		long l = 1 << logl;
-		long Noverl = N >> (logl + 1);
+		long logSlotsh = logSlots/2;
+		long slots = 1 << logSlots;
+		long gap = Nh >> logSlots;
 
-		long lk = 1 << loglh;
-		long lm = 1 << (logl - loglh);
+		long lk = 1 << logSlotsh;
+		long lm = 1 << (logSlots - logSlotsh);
 
-		long i, j, idx, jdx;
+		long i, j, idx, jdx, deg;
 
-		ZZX* pvec = new ZZX[l];
-		ZZX* pvecInv = new ZZX[l];
+		ZZX* pvec = new ZZX[slots];
+		ZZX* pvecInv = new ZZX[slots];
 
-		for (i = 0; i < l; ++i) {
+		for (i = 0; i < slots; ++i) {
 			pvec[i].SetLength(N);
 			pvecInv[i].SetLength(N);
 		}
 
-		CZZ* pvals = new CZZ[l];
-		for (j = 0; j < l; ++j) {
-			for (i = j; i < l; ++i) {
-				long deg =((M - rotGroup[i]) * (i - j) * Noverl) % M;
+		CZZ* pvals = new CZZ[slots];
+		for (j = 0; j < slots; ++j) {
+			for (i = j; i < slots; ++i) {
+				deg =((M - rotGroup[i]) * (i - j) * gap) % M;
 				pvals[i] = EvaluatorUtils::evalCZZ(ksiPowsr[deg], ksiPowsi[deg], logp);
 			}
 			for (i = 0; i < j; ++i) {
-				long deg =((M - rotGroup[i]) * (l + i - j) * Noverl) % M;
+				deg =((M - rotGroup[i]) * (slots + i - j) * gap) % M;
 				pvals[i] = EvaluatorUtils::evalCZZ(ksiPowsr[deg], ksiPowsi[deg], logp);
 			}
 
-			fftSpecialInv(pvals, l);
+			fftSpecialInv(pvals, slots);
 
-			for (i = 0, idx = 0, jdx = Nh; i < l; ++i, idx += Noverl, jdx += Noverl) {
+			for (i = 0, idx = 0, jdx = Nh; i < slots; ++i, idx += gap, jdx += gap) {
 				pvec[j].rep[idx] = pvals[i].r;
 				pvec[j].rep[jdx] = pvals[i].i;
 			}
 		}
 
-		for (j = 0; j < l; ++j) {
-			for (i = j; i < l; ++i) {
-				long deg = (rotGroup[i - j] * i * Noverl) % M;
+		for (j = 0; j < slots; ++j) {
+			for (i = j; i < slots; ++i) {
+				deg = (rotGroup[i - j] * i * gap) % M;
 				pvals[i] = EvaluatorUtils::evalCZZ(ksiPowsr[deg], ksiPowsi[deg], logp);
 			}
 			for (i = 0; i < j; ++i) {
-				long deg = (rotGroup[l + i - j] * i * Noverl) % M;
+				deg = (rotGroup[slots + i - j] * i * gap) % M;
 				pvals[i] = EvaluatorUtils::evalCZZ(ksiPowsr[deg], ksiPowsi[deg], logp);
 			}
 
-			fftSpecialInv(pvals, l);
+			fftSpecialInv(pvals, slots);
 
-			for (i = 0, idx = 0, jdx = Nh; i < l; ++i, idx += Noverl, jdx += Noverl) {
+			for (i = 0, idx = 0, jdx = Nh; i < slots; ++i, idx += gap, jdx += gap) {
 				pvecInv[j].rep[idx] = pvals[i].r;
 				pvecInv[j].rep[jdx] = pvals[i].i;
 			}
@@ -98,16 +98,12 @@ void Context::addBootContext(long logl, long logp) {
 
 		for (i = 1; i < lm; ++i) {
 			for (j = 0; j < lk; ++j) {
-				 Ring2Utils::inpowerAndEqual(pvec[j + lk * i], rotGroup[l - lk * i], p, N);
-				 Ring2Utils::inpowerAndEqual(pvecInv[j + lk * i], rotGroup[l - lk * i], p, N);
+				 Ring2Utils::inpowerAndEqual(pvec[j + lk * i], rotGroup[slots - lk * i], p, N);
+				 Ring2Utils::inpowerAndEqual(pvecInv[j + lk * i], rotGroup[slots - lk * i], p, N);
 			}
 		}
 
-		cout << "x" << endl;
-		BootContext bootContext(pvec, pvecInv, logp);
-		cout << "y" << endl;
-		bootKeyMap.insert(pair<long, BootContext>(logl, bootContext));
-		cout << "z" << endl;
+		bootContextMap.insert(pair<long, BootContext>(logSlots, BootContext(pvec, pvecInv, logp)));
 	}
 }
 

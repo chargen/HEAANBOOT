@@ -307,6 +307,13 @@ public:
 	 */
 	static ZZX inpower(ZZX& p, const long pow, ZZ& mod, const long degree);
 
+	/**
+	 * changing p(X) to p(X^pow) in Z_q[X] / (X^N + 1)
+	 * @param[in, out ] p(X) -> p(X^pow) in Z_q[X] / (X^N + 1)
+	 * @param[in] power pow
+	 * @param[in] mod q
+	 * @param[in] degree N
+	 */
 	static void inpowerAndEqual(ZZX& p, const long pow, ZZ& mod, const long degree);
 
 };
