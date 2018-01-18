@@ -36,11 +36,53 @@ Context::Context(Params& params) :
 	taylorCoeffsMap.insert(pair<string, double*>(SIGMOID, new double[11]{1./2,1./4,0,-1./48,0,1./480,0,-17./80640,0,31./1451520,0}));
 }
 
+ZZX Context::encodeLarge(CZZ* vals, long slots) {
+	CZZ* uvals = new CZZ[slots];
+	long i, j, idx;
+	for (i = 0; i < slots; ++i) {
+		uvals[i] = vals[i] << logQ;
+	}
+	ZZX mx;
+	mx.SetLength(N);
+
+	long gap = Nh / slots;
+
+	fftSpecialInv(uvals, slots);
+
+	for (i = 0, j = Nh, idx = 0; i < slots; ++i, j += gap, idx += gap) {
+		mx[idx] = uvals[i].r;
+		mx[j] = uvals[i].i;
+	}
+	delete[] uvals;
+	return mx;
+}
+
+ZZX Context::encodeSmall(CZZ* vals, long slots) {
+	CZZ* uvals = new CZZ[slots];
+	long i, j, idx;
+	for (i = 0; i < slots; ++i) {
+		uvals[i] = vals[i];
+	}
+	ZZX mx;
+	mx.SetLength(N);
+
+	long gap = Nh / slots;
+
+	fftSpecialInv(uvals, slots);
+
+	for (i = 0, j = Nh, idx = 0; i < slots; ++i, j += gap, idx += gap) {
+		mx[idx] = uvals[i].r;
+		mx[j] = uvals[i].i;
+	}
+	delete[] uvals;
+	return mx;
+}
+
 void Context::addBootContext(long logSlots, long logp) {
 	if(bootContextMap.find(logSlots) == bootContextMap.end()) {
 		ZZ p = power2_ZZ(logp);
 
-		long logSlotsh = logSlots/2;
+		long logSlotsh = logSlots / 2;
 		long slots = 1 << logSlots;
 		long gap = Nh >> logSlots;
 
@@ -60,7 +102,7 @@ void Context::addBootContext(long logSlots, long logp) {
 		CZZ* pvals = new CZZ[slots];
 		for (j = 0; j < slots; ++j) {
 			for (i = j; i < slots; ++i) {
-				deg =((M - rotGroup[i]) * (i - j) * gap) % M;
+				deg = ((M - rotGroup[i]) * (i - j) * gap) % M;
 				pvals[i] = EvaluatorUtils::evalCZZ(ksiPowsr[deg], ksiPowsi[deg], logp);
 			}
 			for (i = 0; i < j; ++i) {

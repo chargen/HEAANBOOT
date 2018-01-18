@@ -199,10 +199,25 @@ public:
 
 	/**
 	 * constant addition
+	 * @param[in] cipher: ciphertext(m)
+	 * @param[in] cnst: constant
+	 * @return ciphertext(m + constant)
+	 */
+	Ciphertext addConst(Ciphertext& cipher, CZZ& cnst);
+
+	/**
+	 * constant addition
 	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m + constant)
 	 * @param[in] cnst: constant
 	 */
 	void addConstAndEqual(Ciphertext& cipher, ZZ& cnst);
+
+	/**
+	 * constant addition
+	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m + constant)
+	 * @param[in] cnst: constant
+	 */
+	void addConstAndEqual(Ciphertext& cipher, CZZ& cnst);
 
 	/**
 	 * substraction of ciphertexts
@@ -281,10 +296,25 @@ public:
 
 	/**
 	 * constant multiplication
+	 * @param[in] cipher: ciphertext(m)
+	 * @param[in] cnst: constant
+	 * @return ciphertext(m * constant)
+	 */
+	Ciphertext multByConst(Ciphertext& cipher, CZZ& cnst);
+
+	/**
+	 * constant multiplication
 	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m * constant)
 	 * @param[in] cnst: constant
 	 */
 	void multByConstAndEqual(Ciphertext& cipher, ZZ& cnst);
+
+	/**
+	 * constant multiplication
+	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m * constant)
+	 * @param[in] cnst: constant
+	 */
+	void multByConstAndEqual(Ciphertext& cipher, CZZ& cnst);
 
 	/**
 	 * polynomial multiplication

@@ -944,3 +944,34 @@ void TestScheme::testBootstrap() {
 
 	cout << "!!! END TEST BOOTSRTAP !!!" << endl;
 }
+
+void TestScheme::test() {
+	long logN = 16;
+	long logQ = 1200;
+	long logp = 30;
+	long logSlots = 3;
+	cout << "!!! START TEST !!!" << endl;
+	//-----------------------------------------
+	TimeUtils timeutils;
+	Params params(logN, logQ);
+	Context context(params);
+	SecretKey secretKey(params);
+	Scheme scheme(secretKey, context);
+	SchemeAlgo algo(scheme);
+	//-----------------------------------------
+	CZZ x = EvaluatorUtils::evalRandCZZ(logp);
+	long slots = (1 << logSlots);
+	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, logp);
+	//-----------------------------------------
+	timeutils.start("Encrypt batch");
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logQ);
+	timeutils.stop("Encrypt batch");
+	//-----------------------------------------
+	timeutils.start("Decrypt batch");
+	CZZ* dvec = scheme.decrypt(secretKey, cipher);
+	timeutils.stop("Decrypt batch");
+	//-----------------------------------------
+	StringUtils::showcompare(mvec, dvec, slots, "val");
+	//-----------------------------------------
+	cout << "!!! END TEST !!!" << endl;
+}

@@ -12,5 +12,4 @@
 #include <vector>
 #include <fstream>
 
-
 #endif

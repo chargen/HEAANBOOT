@@ -50,6 +50,10 @@ public:
 	 */
 	void addBootContext(long logSlots, long logp);
 
+	ZZX encodeLarge(CZZ* vals, long slots);
+
+	ZZX encodeSmall(CZZ* vals, long slots);
+
 	/**
 	 * reverse bits for fft calculations
 	 * @param[in, out] vals: array of values

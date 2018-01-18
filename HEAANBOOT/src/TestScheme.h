@@ -270,6 +270,8 @@ public:
 
 	static void testBootstrap();
 
+	static void test();
+
 };
 
 #endif

@@ -132,12 +132,21 @@ int main() {
 	 * Params: logN, logQ, logp, logSlots, logFFTdim, logHdim
 	 * Suggested: 13, 140, 42, 3, 3, 2;
 	 */
+
 //	TestScheme::testFFTBatchLazyMultipleHadamard(13, 140, 42, 3, 3, 2);
+
+	/*
+	 * Params: logN, logQ, logp, logSlots
+	 * Suggested: 13, 65, 30, 3
+	 */
+
 //	TestScheme::testCiphertextWriteAndRead(15, 620, 30, 3);
 
 	//-----------------------------------------
 
 //	TestScheme::testBootstrap();
+
+//	TestScheme::test();
 
 	return 0;
 }
