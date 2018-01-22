@@ -14,10 +14,10 @@ O_SRCS :=
 S_UPPER_SRCS := 
 CC_DEPS := 
 C++_DEPS := 
-EXECUTABLES := 
 OBJS := 
 C_UPPER_DEPS := 
 CXX_DEPS := 
+ARCHIVES := 
 C_DEPS := 
 CPP_DEPS := 
 

@@ -946,7 +946,7 @@ void TestScheme::testBootstrap() {
 }
 
 void TestScheme::test() {
-	long logN = 16;
+	long logN = 6;
 	long logQ = 1200;
 	long logp = 30;
 	long logSlots = 3;
@@ -960,12 +960,28 @@ void TestScheme::test() {
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	CZZ x = EvaluatorUtils::evalRandCZZ(logp);
+	ZZ p = power2_ZZ(logp);
+	CZZ cp;
+	cp.r = p;
 	long slots = (1 << logSlots);
-	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, logp);
+	CZZ* mvec = new CZZ[slots];
+	for (long i = 0; i < slots / 4; ++i) {
+		mvec[4 * i] = cp;
+		mvec[4 * i + 1] = cp;
+		mvec[4 * i + 2] = -cp;
+		mvec[4 * i + 3] = -cp;
+//		mvec[2 * i + 1] = -cp;
+	}
 	//-----------------------------------------
 	timeutils.start("Encrypt batch");
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logQ);
+	Plaintext ptxt = scheme.encode(mvec, slots, logQ);
+	ZZX mx = ptxt.mx;
+	for (long i = 0; i < context.N; ++i) {
+		mx.rep[i] >>= context.logQ;
+	}
+	cout << mx << endl;
 	timeutils.stop("Encrypt batch");
+	Ciphertext cipher = scheme.encryptMsg(ptxt);
 	//-----------------------------------------
 	timeutils.start("Decrypt batch");
 	CZZ* dvec = scheme.decrypt(secretKey, cipher);
