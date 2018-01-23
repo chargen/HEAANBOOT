@@ -109,7 +109,7 @@ void Context::addBootContext(long logSlots, long logp) {
 					deg =((M - rotGroup[i + pos - slots]) * i * gap) % M;
 					pvals[i] = EvaluatorUtils::evalCZZ(ksiPowsr[deg], ksiPowsi[deg], dlogp);
 				}
-				EvaluatorUtils::leftRotateAndEqual(pvals, slots, ki);
+				EvaluatorUtils::rightRotateAndEqual(pvals, slots, ki);
 				fftSpecialInv(pvals, slots);
 				pvec[pos].SetLength(N);
 				for (i = 0, jdx = Nh, idx = 0; i < slots; ++i, jdx += gap, idx += gap) {
@@ -125,7 +125,7 @@ void Context::addBootContext(long logSlots, long logp) {
 					deg = (rotGroup[i] * (i + pos - slots) * gap) % M;
 					pvals[i] = EvaluatorUtils::evalCZZ(ksiPowsr[deg], ksiPowsi[deg], dlogp);
 				}
-				EvaluatorUtils::leftRotateAndEqual(pvals, slots, ki);
+				EvaluatorUtils::rightRotateAndEqual(pvals, slots, ki);
 				fftSpecialInv(pvals, slots);
 				pvecInv[pos].SetLength(N);
 				for (i = 0, jdx = Nh, idx = 0; i < slots; ++i, jdx += gap, idx += gap) {

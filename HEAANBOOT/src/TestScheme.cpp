@@ -903,10 +903,10 @@ void TestScheme::testBootstrap() {
 	long nu = 6;
 	long msgBits = 29;
 	long logq = msgBits + nu;
-	long logN = 15;
+	long logN = 12;
 	long logT = 2;
 	long logI = 4;
-	long logSlots = 0;
+	long logSlots = 5;
 	long slots = (1 << logSlots);
 	//-----------------------------------------
 	TimeUtils timeutils;

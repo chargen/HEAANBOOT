@@ -551,18 +551,11 @@ public:
 	 */
 	void evaluateExp2piAndEqual(Ciphertext& cipher, long logp);
 
-	void evaluateSin2pix7AndEqual(Ciphertext& cipher, long logp);
-
-	void evaluateCos2pix6AndEqual(Ciphertext& cipher, long logp);
-
-	void evaluateSinCos2xAndEqual(Ciphertext& cSinx, Ciphertext& cCosx, long logp);
 	/**
 	 * part of bootstrapping procedure: calculates squares of real and imaginary parts
 	 * @param[in, out] cipher: ciphertext(x + iy) -> ciphertext(x^T/p^{T-1} + i y^T/p^{T-1})
 	 */
 	void removeIpartExpAndEqual(Ciphertext& cipher, long logq, long logT, long logI = 4);
-
-	void removeIpartSinCosAndEqual(Ciphertext& cipher, long logq, long logT, long logI = 4);
 	/**
 	 * full bootstrapping procedure
 	 * @param[in, out] cipher: ciphertext(x) in mod q-> ciphertext(x) in mod qq where Q > qq > q
@@ -573,7 +566,6 @@ public:
 	 */
 	void bootstrapExpAndEqual(Ciphertext& cipher, long logq, long logQ, long logT, long logI = 4);
 
-	void bootstrapSinCosAndEqual(Ciphertext& cipher, long logq, long logQ, long logT, long logI = 4);
 };
 
 #endif
