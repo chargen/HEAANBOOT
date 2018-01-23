@@ -9,7 +9,7 @@ int main() {
 	 * Suggested: 13, 65, 30, 3
 	 */
 
-//	TestScheme::testEncodeBatch(16, 1200, 30, 3);
+//	TestScheme::testEncodeBatch(13, 150, 30, 3);
 
 	/*
 	 * Params: logN, logQ, logp, logSlots

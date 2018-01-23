@@ -8,6 +8,7 @@
 #include "EvaluatorUtils.h"
 #include "NumUtils.h"
 #include "Ring2Utils.h"
+#include "StringUtils.h"
 
 //-----------------------------------------
 
@@ -84,12 +85,12 @@ void Scheme::addRightRotKeys(SecretKey& secretKey) {
 	}
 }
 
-void Scheme::addBootKey(SecretKey& secretKey, long logl, long logp) {
-	context.addBootContext(logl, logp);
+void Scheme::addBootKey(SecretKey& secretKey, long logSlots, long logp) {
+	context.addBootContext(logSlots, logp);
 
-	long loglh = logl/2;
-	long k = 1 << loglh;
-	long m = 1 << (logl - loglh);
+	long logk = logSlots / 2;
+	long k = 1 << logk;
+	long m = 1 << (logSlots - logk);
 
 	for (long i = 1; i < k; ++i) {
 		if(leftRotKeyMap.find(i) == leftRotKeyMap.end()) {
@@ -124,6 +125,7 @@ CZZ* Scheme::decode(Plaintext& msg) {
 	long slots = msg.slots;
 	long gap = context.Nh / slots;
 	CZZ* res = new CZZ[slots];
+
 	for (i = 0, idx = 0; i < slots; ++i, idx += gap) {
 		ZZ tmp = msg.mx[idx] % msg.q;
 		ZZ tmpi = msg.mx[idx + context.Nh] % msg.q;
@@ -704,49 +706,45 @@ void Scheme::normalizeAndEqual(Ciphertext& cipher) {
 }
 
 void Scheme::linTransformAndEqual(Ciphertext& cipher) {
-	long logSlots = log2(cipher.slots);
-	long logSlotsh = logSlots / 2;
-	long k = 1 << logSlotsh;
-	long m = 1 << (logSlots - logSlotsh);
+	long slots = cipher.slots;
+	long logSlots = log2(slots);
+	long logk = logSlots / 2;
+	long k = 1 << logk;
 
+	long ki, j;
 	Ciphertext* rotvec = new Ciphertext[k];
 	rotvec[0] = cipher;
 
-	NTL_EXEC_RANGE(k-1, first, last);
-	for (long i = first; i < last; ++i) {
-		rotvec[i + 1] = leftRotateFast(rotvec[0], i + 1);
+	NTL_EXEC_RANGE(k - 1, first, last);
+	for (j = first; j < last; ++j) {
+		rotvec[j + 1] = leftRotateFast(rotvec[0], j + 1);
 	}
 	NTL_EXEC_RANGE_END;
 
-	BootContext bootKey = context.bootContextMap.at(logSlots);
+	BootContext bootContext = context.bootContextMap.at(logSlots);
 
 	Ciphertext* tmpvec = new Ciphertext[k];
 
-	cipher = multByPoly(rotvec[0], bootKey.pvec[0]);
-
 	NTL_EXEC_RANGE(k, first, last);
-	for (long j = first; j < last; ++j) {
-		tmpvec[j] = multByPoly(rotvec[j], bootKey.pvec[j]);
+	for (j = first; j < last; ++j) {
+		tmpvec[j] = multByPoly(rotvec[j], bootContext.pvec[j]);
 	}
 	NTL_EXEC_RANGE_END;
 
-	for (long j = 1; j < k; ++j) {
+	for (j = 1; j < k; ++j) {
 		addAndEqual(tmpvec[0], tmpvec[j]);
 	}
 	cipher = tmpvec[0];
 
-	for (long i = 1; i < m; ++i) {
-		long ki = k * i;
+	for (ki = k; ki < slots; ki += k) {
 		NTL_EXEC_RANGE(k, first, last);
-		for (long j = first; j < last; ++j) {
-			tmpvec[j] = multByPoly(rotvec[j], bootKey.pvec[j + ki]);
+		for (j = first; j < last; ++j) {
+			tmpvec[j] = multByPoly(rotvec[j], bootContext.pvec[j + ki]);
 		}
 		NTL_EXEC_RANGE_END;
-
-		for (long j = 1; j < k; ++j) {
+		for (j = 1; j < k; ++j) {
 			addAndEqual(tmpvec[0], tmpvec[j]);
 		}
-
 		leftRotateAndEqualFast(tmpvec[0], ki);
 		addAndEqual(cipher, tmpvec[0]);
 	}
@@ -755,46 +753,44 @@ void Scheme::linTransformAndEqual(Ciphertext& cipher) {
 }
 
 void Scheme::linTransformInvAndEqual(Ciphertext& cipher) {
-	long logSlots = log2(cipher.slots);
-	long logSlotsh = logSlots / 2;
-	long k = 1 << logSlotsh;
-	long m = 1 << (logSlots - logSlotsh);
+	long slots = cipher.slots;
+	long logSlots = log2(slots);
+	long logk = logSlots / 2;
+	long k = 1 << logk;
 
+	long ki, j;
 	Ciphertext* rotvec = new Ciphertext[k];
 	rotvec[0] = cipher;
 
 	NTL_EXEC_RANGE(k-1, first, last);
-	for (long i = first; i < last; ++i) {
-		rotvec[i + 1] = leftRotateFast(rotvec[0], i + 1);
+	for (j = first; j < last; ++j) {
+		rotvec[j + 1] = leftRotateFast(rotvec[0], j + 1);
 	}
 	NTL_EXEC_RANGE_END;
 
-	BootContext bootKey = context.bootContextMap.at(logSlots);
+	BootContext bootContext = context.bootContextMap.at(logSlots);
 
 	Ciphertext* tmpvec = new Ciphertext[k];
 
-	cipher = multByPoly(rotvec[0], bootKey.pvecInv[0]);
-
 	NTL_EXEC_RANGE(k, first, last);
-	for (long j = first; j < last; ++j) {
-		tmpvec[j] = multByPoly(rotvec[j], bootKey.pvecInv[j]);
+	for (j = first; j < last; ++j) {
+		tmpvec[j] = multByPoly(rotvec[j], bootContext.pvecInv[j]);
 	}
 	NTL_EXEC_RANGE_END;
 
-	for (long j = 1; j < k; ++j) {
+	for (j = 1; j < k; ++j) {
 		addAndEqual(tmpvec[0], tmpvec[j]);
 	}
 	cipher = tmpvec[0];
 
-	for (long i = 1; i < m; ++i) {
-		long ki = k * i;
+	for (ki = k; ki < slots; ki+=k) {
 		NTL_EXEC_RANGE(k, first, last);
-		for (long j = first; j < last; ++j) {
-			tmpvec[j] = multByPoly(rotvec[j], bootKey.pvecInv[j + ki]);
+		for (j = first; j < last; ++j) {
+			tmpvec[j] = multByPoly(rotvec[j], bootContext.pvecInv[j + ki]);
 		}
 		NTL_EXEC_RANGE_END;
 
-		for (long j = 1; j < k; ++j) {
+		for (j = 1; j < k; ++j) {
 			addAndEqual(tmpvec[0], tmpvec[j]);
 		}
 
@@ -868,8 +864,101 @@ void Scheme::evaluateExp2piAndEqual(Ciphertext& cipher, long logp) {
 	addAndEqual(cipher, cipher23);
 }
 
-void Scheme::removeIpartAndEqual(Ciphertext& cipher, long logq, long logT, long logI) {
+void Scheme::evaluateSin2pix7AndEqual(Ciphertext& cipher, long logp) {
+	Ciphertext cipher2 = square(cipher);
+	reScaleByAndEqual(cipher2, logp);
+	Ciphertext cipher4 = square(cipher2);
+	reScaleByAndEqual(cipher4, logp);
+	RR c = -4*Pi*Pi*Pi/3;
+	ZZ pc = EvaluatorUtils::evalZZ(c, logp);
+	Ciphertext tmp = multByConst(cipher, pc);
+	reScaleByAndEqual(tmp, logp);
 
+	c = -3/(2*Pi*Pi);
+	pc = EvaluatorUtils::evalZZ(c, logp);
+	Ciphertext cipher13 = addConst(cipher2, pc);
+	multAndEqual(cipher13, tmp);
+	reScaleByAndEqual(cipher13, logp);
+
+	c = -8*Pi*Pi*Pi*Pi*Pi*Pi*Pi/315;
+	pc = EvaluatorUtils::evalZZ(c, logp);
+	tmp = multByConst(cipher, pc);
+	reScaleByAndEqual(tmp, logp);
+
+	c = -21/(2*Pi*Pi);
+	pc = EvaluatorUtils::evalZZ(c, logp);
+	cipher = addConst(cipher2, pc);
+	multAndEqual(cipher, tmp);
+	reScaleByAndEqual(cipher, logp);
+	multAndEqual(cipher, cipher4);
+	reScaleByAndEqual(cipher, logp);
+
+	modDownByAndEqual(cipher13, logp);
+	addAndEqual(cipher, cipher13);
+}
+
+void Scheme::evaluateCos2pix6AndEqual(Ciphertext& cipher, long logp) {
+	Ciphertext cipher2 = square(cipher);
+	reScaleByAndEqual(cipher2, logp);
+
+	Ciphertext cipher4 = square(cipher2);
+	reScaleByAndEqual(cipher4, logp);
+
+	RR c = -1/(2*Pi*Pi);
+	ZZ pc = EvaluatorUtils::evalZZ(c, logp);
+	Ciphertext cipher02 = addConst(cipher2, pc);
+
+	c = -2*Pi*Pi;
+	pc = EvaluatorUtils::evalZZ(c, logp);
+	multByConstAndEqual(cipher02, pc);
+	reScaleByAndEqual(cipher02, logp);
+
+	c = -15/(2*Pi*Pi);
+	pc = EvaluatorUtils::evalZZ(c, logp);
+	cipher = addConst(cipher2, pc);
+
+	c = -4*Pi*Pi*Pi*Pi*Pi*Pi/45;
+	pc = EvaluatorUtils::evalZZ(c, logp);
+	multByConstAndEqual(cipher, pc);
+	reScaleByAndEqual(cipher, logp);
+
+	multAndEqual(cipher, cipher4);
+	reScaleByAndEqual(cipher, logp);
+
+	modDownByAndEqual(cipher02, logp);
+	addAndEqual(cipher, cipher02);
+}
+
+void Scheme::evaluateSinCos2xAndEqual(Ciphertext& cSinx, Ciphertext& cCosx, long logp) {
+	Ciphertext cSub = sub(cCosx, cSinx);
+	Ciphertext cAdd = add(cCosx, cSinx);
+	multAndEqual(cSinx, cCosx);
+	cCosx = mult(cAdd, cSub);
+	doubleAndEqual(cSinx);
+	reScaleByAndEqual(cCosx, logp);
+	reScaleByAndEqual(cSinx, logp);
+}
+
+void Scheme::removeIpartSinCosAndEqual(Ciphertext& cipher, long logq, long logT, long logI) {
+	Ciphertext cipherSinx = reScaleBy(cipher, logT);
+
+	Ciphertext cipherCosx = cipherSinx;
+	evaluateSin2pix7AndEqual(cipherSinx, logq + logI);
+	evaluateCos2pix6AndEqual(cipherCosx, logq + logI);
+
+	for (long i = 0; i < logI + logT - 1; ++i) {
+		evaluateSinCos2xAndEqual(cipherSinx, cipherCosx, logq + logI);
+	}
+	cipher = mult(cipherSinx, cipherCosx);
+	doubleAndEqual(cipher);
+	reScaleByAndEqual(cipher, logq + logI);
+
+	ZZ temp = EvaluatorUtils::evalZZ(1/(2*Pi), logq + logI);
+	multByConstAndEqual(cipher, temp);
+	reScaleByAndEqual(cipher, logq + 2 * logI);
+}
+
+void Scheme::removeIpartExpAndEqual(Ciphertext& cipher, long logq, long logT, long logI) {
 	Ciphertext conj = conjugate(cipher);
 	Ciphertext c1 = sub(cipher, conj);
 	Ciphertext c2 = add(cipher, conj);
@@ -896,12 +985,12 @@ void Scheme::removeIpartAndEqual(Ciphertext& cipher, long logq, long logT, long 
 	imultAndEqual(c2);
 
 	cipher = sub(c1, c2);
-	ZZ temp = EvaluatorUtils::evalZZ(1/(4*Pi), logq + logI);
+	ZZ temp = EvaluatorUtils::evalZZ(1/(2*Pi), logq + logI);
 	multByConstAndEqual(cipher, temp);
-	reScaleByAndEqual(cipher, logq + 2 * logI);
+	reScaleByAndEqual(cipher, logq + 2 * logI + 1);
 }
 
-void Scheme::bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long logT, long logI) {
+void Scheme::bootstrapExpAndEqual(Ciphertext& cipher, long logq, long logQ, long logT, long logI) {
 	long logSlots = log2(cipher.slots);
 
 	modDownToAndEqual(cipher, logq);
@@ -919,19 +1008,13 @@ void Scheme::bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long lo
 			Ciphertext cconj = conjugate(cipher);
 			addAndEqual(cipher, cconj);
 			reScaleByAndEqual(cipher, context.logN - logSlots);
-			removeIpartAndEqual(cipher, logq, logT, logI);
+			removeIpartExpAndEqual(cipher, logq, logT, logI);
 	} else {
 		reScaleByAndEqual(cipher, context.logN - 1 - logSlots);
 		linTransformAndEqual(cipher);
 		reScaleByAndEqual(cipher, logq + logI + logSlots);
-		removeIpartAndEqual(cipher, logq, logT, logI);
+		removeIpartExpAndEqual(cipher, logq, logT, logI);
 		linTransformInvAndEqual(cipher);
 		reScaleByAndEqual(cipher, logq + logI);
 	}
-}
-
-Ciphertext Scheme::bootstrap(Ciphertext& cipher, long logq, long logQ, long logT, long logI) {
-	Ciphertext tmp = cipher;
-	bootstrapAndEqual(tmp, logq, logQ, logT, logI);
-	return tmp;
 }

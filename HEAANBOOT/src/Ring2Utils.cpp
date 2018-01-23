@@ -254,8 +254,3 @@ ZZX Ring2Utils::inpower(ZZX& p, const long pow, ZZ& mod, const long degree) {
 	inpower(res, p, pow, mod, degree);
 	return res;
 }
-
-void Ring2Utils::inpowerAndEqual(ZZX& p, const long pow, ZZ& mod, const long degree) {
-	ZZX res = p;
-	inpower(p, res, pow, mod, degree);
-}
