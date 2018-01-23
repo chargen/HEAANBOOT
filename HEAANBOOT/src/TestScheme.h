@@ -9,6 +9,7 @@ public:
 	//   STANDARD TESTS
 	//----------------------------------------------------------------------------------
 
+	static void testEncodeSingleReal(long logN, long logQ, long logp, bool isComplex);
 
 	/**
 	 * Testing encoding and decoding timing of the ciphertext
@@ -269,6 +270,8 @@ public:
 	//----------------------------------------------------------------------------------
 
 	static void testBootstrap();
+
+	static void testBootstrapSingleReal();
 
 	static void test();
 

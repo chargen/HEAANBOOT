@@ -248,11 +248,15 @@ public:
 	 */
 	Ciphertext imult(Ciphertext& cipher);
 
+	Ciphertext idiv(Ciphertext& cipher);
+
 	/**
 	 * multiplication by i (imaginary unit) in ciphertext
 	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(i * m)
 	 */
 	void imultAndEqual(Ciphertext& cipher);
+
+	void idivAndEqual(Ciphertext& cipher);
 
 	/**
 	 * multiplication of ciphertexts. This algorithm contain relinearization.
@@ -555,7 +559,8 @@ public:
 	 * part of bootstrapping procedure: calculates squares of real and imaginary parts
 	 * @param[in, out] cipher: ciphertext(x + iy) -> ciphertext(x^T/p^{T-1} + i y^T/p^{T-1})
 	 */
-	void removeIpartExpAndEqual(Ciphertext& cipher, long logq, long logT, long logI = 4);
+	void removeIpartAndEqual(Ciphertext& cipher, long logq, long logT, long logI = 4);
+
 	/**
 	 * full bootstrapping procedure
 	 * @param[in, out] cipher: ciphertext(x) in mod q-> ciphertext(x) in mod qq where Q > qq > q
@@ -564,7 +569,7 @@ public:
 	 * @param[in] logT: number of squaring steps in remove I part
 	 * @param[in] logI: for h = 64, logI by experiments is 4
 	 */
-	void bootstrapExpAndEqual(Ciphertext& cipher, long logq, long logQ, long logT, long logI = 4);
+	void bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long logT, long logI = 4);
 
 };
 

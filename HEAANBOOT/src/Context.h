@@ -28,6 +28,7 @@ public:
 
 	long N; ///< N is a power-of-two that corresponds to the ring Z[X]/(X^N + 1)
 	long Nh; ///< Nh = N/2
+	long logNh;
 	long M; ///< M = 2N
 	long logPQ; ///< log of PQ
 

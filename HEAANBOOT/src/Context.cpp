@@ -8,6 +8,7 @@ Context::Context(Params& params) :
 	logN(params.logN), logQ(params.logQ), sigma(params.sigma), h(params.h), N(params.N) {
 
 	Nh = N >> 1;
+	logNh = logN - 1;
 	M = N << 1;
 	logPQ = logQ << 1;
 	Q = power2_ZZ(logQ);
@@ -40,7 +41,7 @@ Context::Context(Params& params) :
 
 ZZX Context::encodeLarge(CZZ* vals, long slots) {
 	CZZ* uvals = new CZZ[slots];
-	long i, j, idx;
+	long i, jdx, idx;
 	for (i = 0; i < slots; ++i) {
 		uvals[i] = vals[i] << logQ;
 	}
@@ -51,9 +52,9 @@ ZZX Context::encodeLarge(CZZ* vals, long slots) {
 
 	fftSpecialInv(uvals, slots);
 
-	for (i = 0, j = Nh, idx = 0; i < slots; ++i, j += gap, idx += gap) {
+	for (i = 0, jdx = Nh, idx = 0; i < slots; ++i, jdx += gap, idx += gap) {
 		mx.rep[idx] = uvals[i].r;
-		mx.rep[j] = uvals[i].i;
+		mx.rep[jdx] = uvals[i].i;
 	}
 	delete[] uvals;
 	return mx;
@@ -83,39 +84,93 @@ ZZX Context::encodeSmall(CZZ* vals, long slots) {
 void Context::addBootContext(long logSlots, long logp) {
 	if(bootContextMap.find(logSlots) == bootContextMap.end()) {
 		ZZ p = power2_ZZ(logp);
-
 		long dlogp = logp << 1;
-		long slots = 1 << logSlots;
 
+		long slots = 1 << logSlots;
+		long dslots = slots << 1;
 
 		long logk = logSlots >> 1;
 		long k = 1 << logk;
-
 		long i, pos,  ki, jdx, idx, deg;
-
 		long gap = Nh >> logSlots;
 
-		ZZX* pvec = new ZZX[slots];
 		ZZX* pvecInv = new ZZX[slots];
+		ZZX* pvec = new ZZX[slots];
+		CZZ* pvals = new CZZ[dslots];
+		ZZX p1, p2;
+		ZZ c = EvaluatorUtils::evalZZ(0.25/Pi, dlogp);
 
-		CZZ* pvals = new CZZ[slots];
+		if(logSlots < logNh) {
+			long dgap = gap >> 1;
+			for (ki = 0; ki < slots; ki += k) {
+				for (pos = ki; pos < ki + k; ++pos) {
+					for (i = 0; i < slots - pos; ++i) {
+						deg = ((M - rotGroup[i + pos]) * i * gap) % M;
+						pvals[i] = EvaluatorUtils::evalCZZ(ksiPowsr[deg], ksiPowsi[deg], dlogp);
+						pvals[i + slots].r = -pvals[i].i;
+						pvals[i + slots].i = pvals[i].r;
+					}
+					for (i = slots - pos; i < slots; ++i) {
+						deg =((M - rotGroup[i + pos - slots]) * i * gap) % M;
+						pvals[i] = EvaluatorUtils::evalCZZ(ksiPowsr[deg], ksiPowsi[deg], dlogp);
+						pvals[i + slots].r = -pvals[i].i;
+						pvals[i + slots].i = pvals[i].r;
+					}
+					EvaluatorUtils::rightRotateAndEqual(pvals, dslots, ki);
+					fftSpecialInv(pvals, dslots);
+					pvec[pos].SetLength(N);
+					for (i = 0, jdx = Nh, idx = 0; i < dslots; ++i, jdx += dgap, idx += dgap) {
+						pvec[pos].rep[idx] = pvals[i].r >> logp;
+						pvec[pos].rep[jdx] = pvals[i].i >> logp;
+					}
+				}
+			}
+			for (i = 0; i < slots; ++i) {
+				pvals[i] = CZZ();
+				pvals[i + slots] = CZZ(ZZ::zero(), -c);
+			}
+			p1.SetLength(N);
+			fftSpecialInv(pvals, dslots);
+			for (i = 0, jdx = Nh, idx = 0; i < dslots; ++i, jdx += dgap, idx += dgap) {
+				p1.rep[idx] = pvals[i].r >> logp;
+				p1.rep[jdx] = pvals[i].i >> logp;
+			}
+
+			for (i = 0; i < slots; ++i) {
+				pvals[i] = CZZ(c);
+				pvals[i + slots] = CZZ();
+			}
+
+			p2.SetLength(N);
+			fftSpecialInv(pvals, dslots);
+			for (i = 0, jdx = Nh, idx = 0; i < dslots; ++i, jdx += dgap, idx += dgap) {
+				p2.rep[idx] = pvals[i].r >> logp;
+				p2.rep[jdx] = pvals[i].i >> logp;
+			}
+		} else {
+			for (ki = 0; ki < slots; ki += k) {
+				for (pos = ki; pos < ki + k; ++pos) {
+					for (i = 0; i < slots - pos; ++i) {
+						deg = ((M - rotGroup[i + pos]) * i * gap) % M;
+						pvals[i] = EvaluatorUtils::evalCZZ(ksiPowsr[deg], ksiPowsi[deg], dlogp);
+					}
+					for (i = slots - pos; i < slots; ++i) {
+						deg =((M - rotGroup[i + pos - slots]) * i * gap) % M;
+						pvals[i] = EvaluatorUtils::evalCZZ(ksiPowsr[deg], ksiPowsi[deg], dlogp);
+					}
+					EvaluatorUtils::rightRotateAndEqual(pvals, slots, ki);
+					fftSpecialInv(pvals, slots);
+					pvec[pos].SetLength(N);
+					for (i = 0, jdx = Nh, idx = 0; i < slots; ++i, jdx += gap, idx += gap) {
+						pvec[pos].rep[idx] = pvals[i].r >> logp;
+						pvec[pos].rep[jdx] = pvals[i].i >> logp;
+					}
+				}
+			}
+		}
+
 		for (ki = 0; ki < slots; ki += k) {
 			for (pos = ki; pos < ki + k; ++pos) {
-				for (i = 0; i < slots - pos; ++i) {
-					deg = ((M - rotGroup[i + pos]) * i * gap) % M;
-					pvals[i] = EvaluatorUtils::evalCZZ(ksiPowsr[deg], ksiPowsi[deg], dlogp);
-				}
-				for (i = slots - pos; i < slots; ++i) {
-					deg =((M - rotGroup[i + pos - slots]) * i * gap) % M;
-					pvals[i] = EvaluatorUtils::evalCZZ(ksiPowsr[deg], ksiPowsi[deg], dlogp);
-				}
-				EvaluatorUtils::rightRotateAndEqual(pvals, slots, ki);
-				fftSpecialInv(pvals, slots);
-				pvec[pos].SetLength(N);
-				for (i = 0, jdx = Nh, idx = 0; i < slots; ++i, jdx += gap, idx += gap) {
-					pvec[pos].rep[idx] = pvals[i].r >> logp;
-					pvec[pos].rep[jdx] = pvals[i].i >> logp;
-				}
 
 				for (i = 0; i < slots - pos; ++i) {
 					deg = (rotGroup[i] * (i + pos) * gap) % M;
@@ -134,10 +189,14 @@ void Context::addBootContext(long logSlots, long logp) {
 				}
 			}
 		}
+
+		c >>= logp;
+
 		delete[] pvals;
-		bootContextMap.insert(pair<long, BootContext>(logSlots, BootContext(pvec, pvecInv, logp)));
+		bootContextMap.insert(pair<long, BootContext>(logSlots, BootContext(pvec, pvecInv, p1, p2, c, logp)));
 	}
 }
+
 
 void Context::bitReverse(CZZ* vals, const long size) {
 	for (long i = 1, j = 0; i < size; ++i) {

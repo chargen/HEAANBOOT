@@ -48,6 +48,30 @@ void TestScheme::testEncodeBatch(long logN, long logQ, long logp, long logSlots)
 	cout << "!!! END TEST ENCODE BATCH !!!" << endl;
 }
 
+void TestScheme::testEncodeSingleReal(long logN, long logQ, long logp, bool isComplex) {
+	cout << "!!! START TEST ENCODE SINGLE !!!" << endl;
+	//-----------------------------------------
+	TimeUtils timeutils;
+	Params params(logN, logQ);
+	Context context(params);
+	SecretKey secretKey(params);
+	Scheme scheme(secretKey, context);
+	//-----------------------------------------
+	CZZ mval = isComplex ? EvaluatorUtils::evalRandCZZ(logp) : EvaluatorUtils::evalRandCZZ0(logp);
+	//-----------------------------------------
+	timeutils.start("Encrypt batch");
+	Ciphertext cipher = scheme.encryptSingle(mval, logQ, isComplex);
+	timeutils.stop("Encrypt batch");
+	//-----------------------------------------
+	timeutils.start("Decrypt batch");
+	CZZ dval = scheme.decryptSingle(secretKey, cipher);
+	timeutils.stop("Decrypt batch");
+	//-----------------------------------------
+	StringUtils::showcompare(mval, dval, "val");
+	//-----------------------------------------
+	cout << "!!! END TEST ENCODE SINGLE !!!" << endl;
+}
+
 //-----------------------------------------
 
 void TestScheme::testConjugateBatch(long logN, long logQ, long logp, long logSlots) {
@@ -57,7 +81,6 @@ void TestScheme::testConjugateBatch(long logN, long logQ, long logp, long logSlo
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
-	SchemeAlgo algo(scheme);
 	scheme.addConjKey(secretKey);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
@@ -86,7 +109,6 @@ void TestScheme::testimultBatch(long logN, long logQ, long logp, long logSlots) 
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
-	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
 	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, logp);
@@ -116,7 +138,6 @@ void TestScheme::testRotateByPo2Batch(long logN, long logQ, long logp, long logR
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
-	SchemeAlgo algo(scheme);
 	scheme.addLeftRotKeys(secretKey);
 	//-----------------------------------------
 	long slots = (1 << logSlots);
@@ -153,7 +174,6 @@ void TestScheme::testRotateBatch(long logN, long logQ, long logp, long rotSlots,
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
-	SchemeAlgo algo(scheme);
 	scheme.addLeftRotKeys(secretKey);
 	scheme.addRightRotKeys(secretKey);
 	//-----------------------------------------
@@ -903,10 +923,10 @@ void TestScheme::testBootstrap() {
 	long nu = 6;
 	long msgBits = 29;
 	long logq = msgBits + nu;
-	long logN = 12;
+	long logN = 15;
 	long logT = 2;
 	long logI = 4;
-	long logSlots = 5;
+	long logSlots = 3;
 	long slots = (1 << logSlots);
 	//-----------------------------------------
 	TimeUtils timeutils;
@@ -914,11 +934,8 @@ void TestScheme::testBootstrap() {
 	Context context(params);
 	SecretKey secretKey(params);
 	Scheme scheme(secretKey, context);
-	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	timeutils.start("Key generating");
-	scheme.addConjKey(secretKey);
-	scheme.addLeftRotKeys(secretKey);
 	scheme.addBootKey(secretKey, logSlots, logq + logI);
 	timeutils.stop("Key generated");
 	//-----------------------------------------
@@ -932,14 +949,54 @@ void TestScheme::testBootstrap() {
 
 	cout << "cipher logq before: " << cipher.logq << endl;
 	timeutils.start("Bootstrap");
-	scheme.bootstrapExpAndEqual(cipher, logq, logQ, logT, logI);
+	scheme.bootstrapAndEqual(cipher, logq, logQ, logT, logI);
 	timeutils.stop("Bootstrap");
 	cout << "cipher logq after: " << cipher.logq << endl;
 
 	CZZ* dvec = scheme.decrypt(secretKey, cipher);
-	StringUtils::showcompare(mvec, dvec, slots, "m");
+	StringUtils::showcompare(mvec, dvec, slots, "boot");
 
 	cout << "!!! END TEST BOOTSRTAP !!!" << endl;
+}
+
+void TestScheme::testBootstrapSingleReal() {
+	cout << "!!! START TEST BOOTSTRAP SINGLE REAL !!!" << endl;
+	long logQ = 620;
+	long nu = 6;
+	long msgBits = 29;
+	long logq = msgBits + nu;
+	long logN = 15;
+	long logT = 2;
+	long logI = 4;
+	//-----------------------------------------
+	TimeUtils timeutils;
+	Params params(logN, logQ);
+	Context context(params);
+	SecretKey secretKey(params);
+	Scheme scheme(secretKey, context);
+	//-----------------------------------------
+	timeutils.start("Key generating");
+	scheme.addBootKey(secretKey, 0, logq + logI);
+	timeutils.stop("Key generated");
+	//-----------------------------------------
+	SetNumThreads(1);
+
+	CZZ mval = EvaluatorUtils::evalRandCZZ0(msgBits);
+
+	timeutils.start("Encrypt single real");
+	Ciphertext cipher = scheme.encryptSingle(mval, logq, false);
+	timeutils.stop("Encrypt single real");
+
+	cout << "cipher logq before: " << cipher.logq << endl;
+	timeutils.start("Bootstrap single real");
+	scheme.bootstrapAndEqual(cipher, logq, logQ, logT, logI);
+	timeutils.stop("Bootstrap single real");
+	cout << "cipher logq after: " << cipher.logq << endl;
+
+	CZZ dval = scheme.decryptSingle(secretKey, cipher);
+	StringUtils::showcompare(mval, dval, "boot");
+
+	cout << "!!! END TEST BOOTSRTAP SINGLE REAL !!!" << endl;
 }
 
 void TestScheme::test() {

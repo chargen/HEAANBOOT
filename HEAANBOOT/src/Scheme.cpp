@@ -68,7 +68,7 @@ void Scheme::addLeftRotKey(SecretKey& secretKey, long rot) {
 }
 
 void Scheme::addLeftRotKeys(SecretKey& secretKey) {
-	for (long i = 0; i < context.logN - 1; ++i) {
+	for (long i = 0; i < context.logNh; ++i) {
 		long idx = 1 << i;
 		if(leftRotKeyMap.find(idx) == leftRotKeyMap.end()) {
 			addLeftRotKey(secretKey, idx);
@@ -77,7 +77,7 @@ void Scheme::addLeftRotKeys(SecretKey& secretKey) {
 }
 
 void Scheme::addRightRotKeys(SecretKey& secretKey) {
-	for (long i = 0; i < context.logN - 1; ++i) {
+	for (long i = 0; i < context.logNh; ++i) {
 		long idx = context.N/2 - (1 << i);
 		if(leftRotKeyMap.find(idx) == leftRotKeyMap.end()) {
 			addLeftRotKey(secretKey, idx);
@@ -87,6 +87,9 @@ void Scheme::addRightRotKeys(SecretKey& secretKey) {
 
 void Scheme::addBootKey(SecretKey& secretKey, long logSlots, long logp) {
 	context.addBootContext(logSlots, logp);
+
+	addConjKey(secretKey);
+	addLeftRotKeys(secretKey);
 
 	long logk = logSlots / 2;
 	long k = 1 << logk;
@@ -282,14 +285,26 @@ void Scheme::subAndEqual2(Ciphertext& cipher1, Ciphertext& cipher2) {
 
 Ciphertext Scheme::imult(Ciphertext& cipher) {
 	ZZX bxres, axres;
-	Ring2Utils::multByMonomial(axres, cipher.ax, context.N / 2, context.N);
-	Ring2Utils::multByMonomial(bxres, cipher.bx, context.N / 2, context.N);
+	Ring2Utils::multByMonomial(axres, cipher.ax, context.Nh, context.N);
+	Ring2Utils::multByMonomial(bxres, cipher.bx, context.Nh, context.N);
+	return Ciphertext(axres, bxres, cipher.q, cipher.logq, cipher.slots, cipher.isComplex);
+}
+
+Ciphertext Scheme::idiv(Ciphertext& cipher) {
+	ZZX bxres, axres;
+	Ring2Utils::multByMonomial(axres, cipher.ax, 3 * context.Nh, context.N);
+	Ring2Utils::multByMonomial(bxres, cipher.bx, 3 * context.Nh, context.N);
 	return Ciphertext(axres, bxres, cipher.q, cipher.logq, cipher.slots, cipher.isComplex);
 }
 
 void Scheme::imultAndEqual(Ciphertext& cipher) {
-	Ring2Utils::multByMonomialAndEqual(cipher.ax, context.N / 2, context.N);
-	Ring2Utils::multByMonomialAndEqual(cipher.bx, context.N / 2, context.N);
+	Ring2Utils::multByMonomialAndEqual(cipher.ax, context.Nh, context.N);
+	Ring2Utils::multByMonomialAndEqual(cipher.bx, context.Nh, context.N);
+}
+
+void Scheme::idivAndEqual(Ciphertext& cipher) {
+	Ring2Utils::multByMonomialAndEqual(cipher.ax, 3 * context.Nh, context.N);
+	Ring2Utils::multByMonomialAndEqual(cipher.bx, 3 * context.Nh, context.N);
 }
 
 Ciphertext Scheme::mult(Ciphertext& cipher1, Ciphertext& cipher2) {
@@ -864,39 +879,72 @@ void Scheme::evaluateExp2piAndEqual(Ciphertext& cipher, long logp) {
 	addAndEqual(cipher, cipher23);
 }
 
-void Scheme::removeIpartExpAndEqual(Ciphertext& cipher, long logq, long logT, long logI) {
-	Ciphertext conj = conjugate(cipher);
-	Ciphertext c1 = sub(cipher, conj);
-	Ciphertext c2 = add(cipher, conj);
-	imultAndEqual(c2);
+void Scheme::removeIpartAndEqual(Ciphertext& cipher, long logq, long logT, long logI) {
+	long slots = cipher.slots;
+	long logSlots = log2(slots);
+	BootContext bootContext = context.bootContextMap.at(logSlots);
+	if(logSlots == 0 && !cipher.isComplex) {
+		imultAndEqual(cipher);
+		reScaleByAndEqual(cipher, logT);
+		evaluateExp2piAndEqual(cipher, logq + logI);
+		for (long i = 0; i < logI + logT; ++i) {
+			squareAndEqual(cipher);
+			reScaleByAndEqual(cipher, logq + logI);
+		}
+		Ciphertext tmp = conjugate(cipher);
+		subAndEqual(cipher, tmp);
+		idivAndEqual(cipher);
+		multByConstAndEqual(cipher, bootContext.c);
+	} else if(logSlots < context.logNh) {
+		Ciphertext tmp = conjugate(cipher);
+		subAndEqual(cipher, tmp);
+		reScaleByAndEqual(cipher, logT + 1);
+		evaluateExp2piAndEqual(cipher, logq + logI);
+		for (long i = 0; i < logI + logT; ++i) {
+			squareAndEqual(cipher);
+			reScaleByAndEqual(cipher, logq + logI);
+		}
+		tmp = conjugate(cipher);
+		subAndEqual(cipher, tmp);
 
-	reScaleByAndEqual(c1, logT + 1);
-	reScaleByAndEqual(c2, logT + 1);
+		tmp = multByPoly(cipher, bootContext.p1);
+		Ciphertext tmprot = leftRotateFast(tmp, slots);
+		addAndEqual(tmp, tmprot);
+		multByPolyAndEqual(cipher, bootContext.p2);
+		tmprot = leftRotateFast(cipher, slots);
+		addAndEqual(cipher, tmprot);
+		addAndEqual(cipher, tmp);
+	} else {
+		Ciphertext tmp = conjugate(cipher);
+		Ciphertext c2 = sub(cipher, tmp);
+		addAndEqual(cipher, tmp);
+		imultAndEqual(cipher);
 
-	evaluateExp2piAndEqual(c1, logq + logI);
-	evaluateExp2piAndEqual(c2, logq + logI);
+		reScaleByAndEqual(cipher, logT + 1);
+		reScaleByAndEqual(c2, logT + 1);
 
-	for (long i = 0; i < logI + logT; ++i) {
-		squareAndEqual(c1);
-		squareAndEqual(c2);
-		reScaleByAndEqual(c1, logq + logI);
-		reScaleByAndEqual(c2, logq + logI);
+		evaluateExp2piAndEqual(c2, logq + logI);
+		evaluateExp2piAndEqual(cipher, logq + logI);
+
+		for (long i = 0; i < logI + logT; ++i) {
+			squareAndEqual(c2);
+			squareAndEqual(cipher);
+			reScaleByAndEqual(c2, logq + logI);
+			reScaleByAndEqual(cipher, logq + logI);
+		}
+
+		tmp = conjugate(c2);
+		subAndEqual(c2, tmp);
+		tmp = conjugate(cipher);
+		subAndEqual(cipher, tmp);
+		imultAndEqual(cipher);
+		subAndEqual2(c2, cipher);
+		multByConstAndEqual(cipher, bootContext.c);
 	}
-
-	Ciphertext c1conj = conjugate(c1);
-	Ciphertext c2conj = conjugate(c2);
-
-	subAndEqual(c1, c1conj);
-	subAndEqual(c2, c2conj);
-	imultAndEqual(c2);
-
-	cipher = sub(c1, c2);
-	ZZ temp = EvaluatorUtils::evalZZ(1/(2*Pi), logq + logI);
-	multByConstAndEqual(cipher, temp);
-	reScaleByAndEqual(cipher, logq + 2 * logI + 1);
+	reScaleByAndEqual(cipher, logq + 2 * logI);
 }
 
-void Scheme::bootstrapExpAndEqual(Ciphertext& cipher, long logq, long logQ, long logT, long logI) {
+void Scheme::bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long logT, long logI) {
 	long logSlots = log2(cipher.slots);
 
 	modDownToAndEqual(cipher, logq);
@@ -905,7 +953,7 @@ void Scheme::bootstrapExpAndEqual(Ciphertext& cipher, long logq, long logQ, long
 	cipher.logq = logQ;
 	cipher.q = power2_ZZ(logQ);
 
-	for (long i = logSlots; i < context.logN - 1; ++i) {
+	for (long i = logSlots; i < context.logNh; ++i) {
 		Ciphertext rot = leftRotateByPo2(cipher, i);
 		addAndEqual(cipher, rot);
 	}
@@ -914,12 +962,12 @@ void Scheme::bootstrapExpAndEqual(Ciphertext& cipher, long logq, long logQ, long
 			Ciphertext cconj = conjugate(cipher);
 			addAndEqual(cipher, cconj);
 			reScaleByAndEqual(cipher, context.logN - logSlots);
-			removeIpartExpAndEqual(cipher, logq, logT, logI);
+			removeIpartAndEqual(cipher, logq, logT, logI);
 	} else {
-		reScaleByAndEqual(cipher, context.logN - 1 - logSlots);
+		reScaleByAndEqual(cipher, context.logNh - logSlots);
 		linTransformAndEqual(cipher);
 		reScaleByAndEqual(cipher, logq + logI + logSlots);
-		removeIpartExpAndEqual(cipher, logq, logT, logI);
+		removeIpartAndEqual(cipher, logq, logT, logI);
 		linTransformInvAndEqual(cipher);
 		reScaleByAndEqual(cipher, logq + logI);
 	}

@@ -8,8 +8,13 @@ int main() {
 	 * Params: logN, logQ, logp, logSlots
 	 * Suggested: 13, 65, 30, 3
 	 */
-
 //	TestScheme::testEncodeBatch(13, 150, 30, 3);
+
+	/*
+	 * Params: logN, logQ, logp, isComplex
+	 * Suggested: 13, 65, 30, 3
+	 */
+//	TestScheme::testEncodeSingleReal(13, 150, 30, false);
 
 	/*
 	 * Params: logN, logQ, logp, logSlots
@@ -145,6 +150,8 @@ int main() {
 	//-----------------------------------------
 
 //	TestScheme::testBootstrap();
+
+//	TestScheme::testBootstrapSingleReal();
 
 //	TestScheme::test();
 
