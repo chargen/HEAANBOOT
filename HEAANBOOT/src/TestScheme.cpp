@@ -942,9 +942,30 @@ void TestScheme::testBootstrap(long logN, long logq, long logQ, long logSlots, l
 	timeutils.stop("Encrypt batch");
 
 	cout << "cipher logq before: " << cipher.logq << endl;
-	timeutils.start("Bootstrap");
-	scheme.bootstrapAndEqual(cipher, logq, logQ, logT, logI);
-	timeutils.stop("Bootstrap");
+	timeutils.start("Lin Transformation");
+	scheme.modDownToAndEqual(cipher, logq);
+	scheme.normalizeAndEqual(cipher);
+
+	cipher.logq = logQ;
+	cipher.q = power2_ZZ(logQ);
+
+	for (long i = logSlots; i < context.logNh; ++i) {
+		Ciphertext rot = scheme.leftRotateByPo2(cipher, i);
+		scheme.addAndEqual(cipher, rot);
+	}
+	scheme.reScaleByAndEqual(cipher, context.logNh - logSlots);
+	scheme.linTransformAndEqual(cipher);
+	scheme.reScaleByAndEqual(cipher, logq + logI + logSlots);
+	timeutils.stop("Lin Transformation");
+
+	timeutils.start("remove I part");
+	scheme.removeIpartAndEqual(cipher, logq, logT, logI);
+	timeutils.stop("remove I part");
+
+	timeutils.start("Lin Transformation Inv");
+	scheme.linTransformInvAndEqual(cipher);
+	scheme.reScaleByAndEqual(cipher, logq + logI);
+	timeutils.stop("Lin Transformation Inv");
 	cout << "cipher logq after: " << cipher.logq << endl;
 
 	CZZ* dvec = scheme.decrypt(secretKey, cipher);
@@ -954,46 +975,6 @@ void TestScheme::testBootstrap(long logN, long logq, long logQ, long logSlots, l
 }
 
 void TestScheme::testBootstrapSingleReal(long logN, long logq, long logQ, long nu, long logT) {
-	cout << "!!! START TEST BOOTSTRAP SINGLE REAL !!!" << endl;
-	long logp = logq - nu;
-	long logI = 4;
-	//-----------------------------------------
-	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
-	Scheme scheme(secretKey, context);
-	//-----------------------------------------
-	timeutils.start("Key generating");
-	scheme.addBootKey(secretKey, 0, logq + logI);
-	timeutils.stop("Key generated");
-	//-----------------------------------------
-	SetNumThreads(1);
-
-	CZZ mval = EvaluatorUtils::evalRandCZZ0(logp);
-
-	timeutils.start("Encrypt single real");
-	Ciphertext cipher = scheme.encryptSingle(mval, logq, false);
-	timeutils.stop("Encrypt single real");
-
-	cout << "cipher logq before: " << cipher.logq << endl;
-	timeutils.start("Bootstrap single real");
-	scheme.bootstrapAndEqual(cipher, logq, logQ, logT, logI);
-	timeutils.stop("Bootstrap single real");
-	cout << "cipher logq after: " << cipher.logq << endl;
-
-	CZZ dval = scheme.decryptSingle(secretKey, cipher);
-	StringUtils::showcompare(mval, dval, "boot");
-
-	cout << "!!! END TEST BOOTSRTAP SINGLE REAL !!!" << endl;
-}
-
-void TestScheme::test() {
-	long logN = 15;
-	long logq = 29;
-	long logQ = 620;
-	long nu = 6;
-	long logT = 2;
 	cout << "!!! START TEST BOOTSTRAP SINGLE REAL !!!" << endl;
 	long logp = logq - nu;
 	long logI = 4;
@@ -1031,9 +1012,9 @@ void TestScheme::test() {
 	scheme.reScaleByAndEqual(cipher, context.logN);
 	timeutils.stop("CoeffToSlots");
 
-	timeutils.start("removeIpart");
+	timeutils.start("remove I part");
 	scheme.removeIpartAndEqual(cipher, logq, logT, logI);
-	timeutils.stop("removeIpart");
+	timeutils.stop("remove I part");
 
 	cout << "cipher logq after: " << cipher.logq << endl;
 
@@ -1041,4 +1022,8 @@ void TestScheme::test() {
 	StringUtils::showcompare(mval, dval, "boot");
 
 	cout << "!!! END TEST BOOTSRTAP SINGLE REAL !!!" << endl;
+
+}
+
+void TestScheme::test() {
 }

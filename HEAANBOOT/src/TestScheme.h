@@ -12,7 +12,7 @@ public:
 	/**
 	 * Testing encoding and decoding timing of the ciphertext
 	 * c(m_1, ..., m_slots)
-	 * number of levels switched: 0
+	 * number of modulus bits down: 0
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -23,7 +23,7 @@ public:
 	/**
 	 * Testing encoding and decoding timing of the ciphertext of single value
 	 * c(m_1)
-	 * number of levels switched: 0
+	 * number of modulus bits down: 0
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -34,7 +34,7 @@ public:
 	/**
 	 * Testing conjugation timing of the ciphertext
 	 * c(m_1, ..., m_slots) -> c(conjugate(m_1), ...,conjugate(m_slots))
-	 * number of levels switched: 0
+	 * number of modulus bits down: 0
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -45,7 +45,7 @@ public:
 	/**
 	 * Testing multiplication by i (imaginary 1) timing of the ciphertext
 	 * c(m_1, ..., m_slots) -> c(i * m_1, ...,i * m_slots)
-	 * number of levels switched: 0
+	 * number of modulus bits down: 0
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -55,7 +55,7 @@ public:
 
 	/**
 	 * Testing left rotation timing in the ciphertext
-	 * number of levels switched: 0
+	 * number of modulus bits down: 0
 	 * c(m_1, ..., m_slots) -> c(m_(rotslots+1), m_(rotslots+2), ... m_(rotslots-1))
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
@@ -69,7 +69,7 @@ public:
 	/**
 	 * Testing left rotation timing in the ciphertext
 	 * c(m_1, ..., m_slots) -> c(m_(rotslots+1), m_(rotslots+2), ... m_(rotslots-1))
-	 * number of levels switched: 0
+	 * number of modulus bits down: 0
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -82,7 +82,7 @@ public:
 	/**
 	 * Testing slot summation timing in the ciphertext
 	 * c(m_1, ..., m_slots) -> c(sum(m_i), sum(m_i), ..., sum(m_i))
-	 * number of levels switched: 0
+	 * number of modulus bits down: 0
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -99,7 +99,7 @@ public:
 	/**
 	 * Testing power of 2 timing of the ciphertext
 	 * c(m_1, ..., m_slots) -> c(m_1^degree/p^{degree-1}, ..., m_slots^degree/p^{degree-1})
-	 * number of levels switched: logDegree
+	 * number of modulus bits down: logDegree * logp
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -111,7 +111,7 @@ public:
 	/**
 	 * Testing power timing of the ciphertext
 	 * c(m_1, ..., m_slots) -> c(m_1^degree/p^{degree-1}, ..., m_slots^degree/p^{degree-1})
-	 * number of levels switched: ceil(log(degree))
+	 * number of modulus bits down: ceil(log(degree)) * logp
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -123,7 +123,7 @@ public:
 	/**
 	 * Testing product timing of ciphertexts
 	 * array of c_i(m_1, ..., m_slots) -> c(prod_i(m_1), ..., prod_i(m_slots))
-	 * number of levels switched: logDegree
+	 * number of modulus bits down: logDegree * logp
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -135,7 +135,7 @@ public:
 	/**
 	 * Testing product timing of ciphertexts
 	 * array of c_i(m_1, ..., m_slots) -> c(prod_i(m_1), ..., prod_i(m_slots))
-	 * number of levels switched: ceil(log(degree))
+	 * number of modulus bits down: ceil(log(degree)) * logp
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -153,7 +153,7 @@ public:
 	/**
 	 * Testing inverse timing of ciphertext
 	 * c(m_1, ..., m_slots) -> c(p^2/m_1, ..., p^2/m_slots)
-	 * number of levels switched: invSteps
+	 * number of modulus bits down: invSteps * logp
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -165,7 +165,7 @@ public:
 	/**
 	 * Testing logarithm timing of ciphertext using Taylor series approximation
 	 * c(m_1, ..., m_slots) -> c(log(m_1), ..., log(m_slots))
-	 * number of levels switched: ceil(log(degree))
+	 * number of modulus bits down: ceil(log(degree)) * logp
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -177,7 +177,7 @@ public:
 	/**
 	 * Testing exponent timing of ciphertext using Taylor series approximation
 	 * c(m_1, ..., m_slots) -> c(exp(m_1/p) * p, ..., exp(m_slots/p) * p)
-	 * number of levels switched: ceil(log(degree))
+	 * number of modulus bits down: ceil(log(degree)) * logp
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -189,7 +189,7 @@ public:
 	/**
 	 * Testing exponent timing of ciphertext using Taylor series approximation
 	 * c(m_1, ..., m_slots) -> c(exp(m_1/p) * p^2, ..., exp(m_slots/p) * p^2)
-	 * number of levels switched: ceil(log(degree)) - 1
+	 * number of modulus bits down: (ceil(log(degree)) - 1) * logp
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -201,7 +201,7 @@ public:
 	/**
 	 * Testing sigmoid timing of ciphertext using Taylor series approximation
 	 * c(m_1, ..., m_slots) -> c(sigmoid(m_1/p) * p, ..., sigmoid(m_slots/p) * p)
-	 * number of levels switched: ceil(log(degree))
+	 * number of modulus bits down: ceil(log(degree)) * logp
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -213,7 +213,7 @@ public:
 	/**
 	 * Testing sigmoid timing of ciphertext using Taylor series approximation
 	 * c(m_1, ..., m_slots) -> c(sigmoid(m_1/p) * p^2, ..., sigmoid(m_slots/p) * p^2)
-	 * number of levels switched: ceil(log(degree)) - 1
+	 * number of modulus bits down: (ceil(log(degree)) - 1) * logp
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -231,7 +231,7 @@ public:
 	/**
 	 * Testing full fft pipeline timing of two ciphertext arrays
 	 * fftinv( mult ( fft(c_1, ..., c_slots), fft(c_1, ..., c_slots) ) )
-	 * number of levels switched: 2
+	 * number of modulus bits: 2 * logp
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -243,7 +243,7 @@ public:
 	/**
 	 * Testing full fft pipeline timing of two ciphertext arrays
 	 * fftinvlazy( mult ( fft(c_1, ..., c_slots), fft(c_1, ..., c_slots) ) )
-	 * number of levels switched: 1
+	 * number of modulus bits down: logp
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -255,7 +255,7 @@ public:
 	/**
 	 * Testing full fft pipeline timing of several ciphertext arrays with multiple hadamard multipications
 	 * fftinvlazy( mult ( fft(c_1, ..., c_slots), fft(c_1, ..., c_slots) ) )
-	 * number of levels switched: 1
+	 * number of modulus bits down: logp
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logQ: input parameter for Params class
 	 * @param[in] logp: log of precision
@@ -280,7 +280,7 @@ public:
 
 	/**
 	 * Testing bootstrapping procedure
-	 * number of levels up: depends on parameters
+	 * number of modulus bits up: depends on parameters
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logq: log of initial modulus
 	 * @param[in] logQ: input parameter for Params class
@@ -292,7 +292,7 @@ public:
 
 	/**
 	 * Testing bootstrapping procedure for single real value
-	 * number of levels up: depends on parameters
+	 * number of modulus bits up: depends on parameters
 	 * @param[in] logN: input parameter for Params class
 	 * @param[in] logq: log of initial modulus
 	 * @param[in] logQ: input parameter for Params class
