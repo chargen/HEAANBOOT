@@ -3,7 +3,10 @@
 
 #include <NTL/ZZX.h>
 
+#include "Common.h"
+
 using namespace NTL;
+using namespace std;
 
 /**
  * Key is an RLWE instance (ax, bx = mx + ex - ax * sx) in ring Z_q[X] / (X^N + 1);
@@ -15,6 +18,16 @@ public:
 	ZZX bx;
 
 	Key(ZZX ax = ZZX::zero(), ZZX bx = ZZX::zero()) : ax(ax), bx(bx) {}
+
+	/**
+	 * Writing Key to the file by ID
+	 */
+	void Write(long keyID);
+
+	/**
+	 * Reading Key from the file by ID
+	 */
+	void Read(long keyID);
 
 };
 

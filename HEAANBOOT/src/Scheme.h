@@ -248,6 +248,11 @@ public:
 	 */
 	Ciphertext imult(Ciphertext& cipher);
 
+	/**
+	 * division by i (imaginary unit) in ciphertext
+	 * @param[in] cipher: ciphertext(m)
+	 * @return ciphertext(m / i)
+	 */
 	Ciphertext idiv(Ciphertext& cipher);
 
 	/**
@@ -256,6 +261,10 @@ public:
 	 */
 	void imultAndEqual(Ciphertext& cipher);
 
+	/**
+	 * division by i (imaginary unit) in ciphertext
+	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m / i)
+	 */
 	void idivAndEqual(Ciphertext& cipher);
 
 	/**
@@ -556,8 +565,8 @@ public:
 	void evaluateExp2piAndEqual(Ciphertext& cipher, long logp);
 
 	/**
-	 * part of bootstrapping procedure: calculates squares of real and imaginary parts
-	 * @param[in, out] cipher: ciphertext(x + iy) -> ciphertext(x^T/p^{T-1} + i y^T/p^{T-1})
+	 * part of bootstrapping procedure: removes qI parts from cipher
+	 * @param[in, out] cipher: ciphertext(x + qI + i(y + qJ)) -> ciphertext(x + iy)
 	 */
 	void removeIpartAndEqual(Ciphertext& cipher, long logq, long logT, long logI = 4);
 

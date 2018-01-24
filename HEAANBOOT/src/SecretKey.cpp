@@ -4,11 +4,11 @@ SecretKey::SecretKey(Params& params) {
 	NumUtils::sampleHWT(sx, params.N, params.h);
 }
 
-void SecretKey::Write(long SecretKeyID) {
+void SecretKey::Write(long secretKeyID) {
 	ofstream myfile;
-	myfile.open("SecretKey" + to_string(SecretKeyID) + ".txt");
+	myfile.open("SecretKey" + to_string(secretKeyID) + ".txt");
 	myfile << "SecretKey Data" << endl;
-	myfile << "ID = " << SecretKeyID << endl;
+	myfile << "ID = " << secretKeyID << endl;
 	myfile << deg(sx) << endl;
 	for(long i = 0; i < deg(sx) + 1; i++) {
 		myfile << sx[i] << endl;
@@ -16,8 +16,8 @@ void SecretKey::Write(long SecretKeyID) {
 	myfile.close();
 }
 
-void SecretKey::Read(long SecretKeyID) {
-	ifstream myfile("SecretKey" + to_string(SecretKeyID) + ".txt");
+void SecretKey::Read(long secretKeyID) {
+	ifstream myfile("SecretKey" + to_string(secretKeyID) + ".txt");
 	if(myfile.is_open()) {
 		// kill previous memory
 		sx.kill();

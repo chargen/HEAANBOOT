@@ -8,9 +8,9 @@
 #include "Params.h"
 #include "NumUtils.h"
 
-
 using namespace std;
 using namespace NTL;
+
 
 class SecretKey {
 public:
@@ -19,9 +19,9 @@ public:
 
 	SecretKey(Params& params);
 
-	void Write(long SecretKeyID);
+	void Write(long secretKeyID);
 
-	void Read(long SecretKeyID);
+	void Read(long secretKeyID);
 };
 
 #endif

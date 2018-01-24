@@ -3,11 +3,11 @@
 #include <NTL/tools.h>
 #include "Common.h"
 
-void Ciphertext::Write(long CiphertextID) {
+void Ciphertext::Write(long ciphertextID) {
 	ofstream myfile;
-	myfile.open("Ciphertext" + to_string(CiphertextID) + ".txt");
+	myfile.open("Ciphertext" + to_string(ciphertextID) + ".txt");
 	myfile << "Ciphertext Information" << endl;
-	myfile << "CiphertextID = " << CiphertextID << endl;
+	myfile << "CiphertextID = " << ciphertextID << endl;
 	myfile << deg(ax) << endl;
 	myfile << deg(bx) << endl;
 	myfile << logq << endl;
@@ -22,8 +22,8 @@ void Ciphertext::Write(long CiphertextID) {
 	myfile.close();
 }
 
-void Ciphertext::Read(long CiphertextID) {
-	ifstream myfile("Ciphertext" + to_string(CiphertextID) + ".txt");
+void Ciphertext::Read(long ciphertextID) {
+	ifstream myfile("Ciphertext" + to_string(ciphertextID) + ".txt");
 	if(myfile.is_open()) {
 		// kill previous memory
 		ax.kill();

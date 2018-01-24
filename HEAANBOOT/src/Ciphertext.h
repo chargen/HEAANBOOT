@@ -42,12 +42,12 @@ public:
 	/**
 	 * Writing Ciphertext to the file by ID
 	 */
-	void Write(long CiphertextID);
+	void Write(long ciphertextID);
 
 	/**
 	 * Reading Ciphertext from the file by ID
 	 */
-	void Read(long CiphertextID);
+	void Read(long ciphertextID);
 
 };
 

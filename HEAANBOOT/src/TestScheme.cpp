@@ -48,7 +48,7 @@ void TestScheme::testEncodeBatch(long logN, long logQ, long logp, long logSlots)
 	cout << "!!! END TEST ENCODE BATCH !!!" << endl;
 }
 
-void TestScheme::testEncodeSingleReal(long logN, long logQ, long logp, bool isComplex) {
+void TestScheme::testEncodeSingle(long logN, long logQ, long logp, bool isComplex) {
 	cout << "!!! START TEST ENCODE SINGLE !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
@@ -917,16 +917,10 @@ void TestScheme::testCiphertextWriteAndRead(long logN, long logQ, long logp, lon
 	cout << "!!! END TEST WRITE AND READ !!!" << endl;
 }
 
-void TestScheme::testBootstrap() {
+void TestScheme::testBootstrap(long logN, long logq, long logQ, long logSlots, long nu, long logT) {
 	cout << "!!! START TEST BOOTSTRAP !!!" << endl;
-	long logQ = 620;
-	long nu = 6;
-	long msgBits = 29;
-	long logq = msgBits + nu;
-	long logN = 15;
-	long logT = 2;
+	long logp = logq - nu;
 	long logI = 4;
-	long logSlots = 3;
 	long slots = (1 << logSlots);
 	//-----------------------------------------
 	TimeUtils timeutils;
@@ -941,7 +935,7 @@ void TestScheme::testBootstrap() {
 	//-----------------------------------------
 	SetNumThreads(1);
 
-	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, msgBits);
+	CZZ* mvec = EvaluatorUtils::evalRandCZZArray(slots, logp);
 
 	timeutils.start("Encrypt batch");
 	Ciphertext cipher = scheme.encrypt(mvec, slots, logq);
@@ -959,14 +953,9 @@ void TestScheme::testBootstrap() {
 	cout << "!!! END TEST BOOTSRTAP !!!" << endl;
 }
 
-void TestScheme::testBootstrapSingleReal() {
+void TestScheme::testBootstrapSingleReal(long logN, long logq, long logQ, long nu, long logT) {
 	cout << "!!! START TEST BOOTSTRAP SINGLE REAL !!!" << endl;
-	long logQ = 620;
-	long nu = 6;
-	long msgBits = 29;
-	long logq = msgBits + nu;
-	long logN = 15;
-	long logT = 2;
+	long logp = logq - nu;
 	long logI = 4;
 	//-----------------------------------------
 	TimeUtils timeutils;
@@ -981,7 +970,7 @@ void TestScheme::testBootstrapSingleReal() {
 	//-----------------------------------------
 	SetNumThreads(1);
 
-	CZZ mval = EvaluatorUtils::evalRandCZZ0(msgBits);
+	CZZ mval = EvaluatorUtils::evalRandCZZ0(logp);
 
 	timeutils.start("Encrypt single real");
 	Ciphertext cipher = scheme.encryptSingle(mval, logq, false);
@@ -1000,4 +989,56 @@ void TestScheme::testBootstrapSingleReal() {
 }
 
 void TestScheme::test() {
+	long logN = 15;
+	long logq = 29;
+	long logQ = 620;
+	long nu = 6;
+	long logT = 2;
+	cout << "!!! START TEST BOOTSTRAP SINGLE REAL !!!" << endl;
+	long logp = logq - nu;
+	long logI = 4;
+	//-----------------------------------------
+	TimeUtils timeutils;
+	Params params(logN, logQ);
+	Context context(params);
+	SecretKey secretKey(params);
+	Scheme scheme(secretKey, context);
+	//-----------------------------------------
+	timeutils.start("Key generating");
+	scheme.addBootKey(secretKey, 0, logq + logI);
+	timeutils.stop("Key generated");
+	//-----------------------------------------
+	SetNumThreads(1);
+
+	CZZ mval = EvaluatorUtils::evalRandCZZ0(logp);
+
+	timeutils.start("Encrypt single real");
+	Ciphertext cipher = scheme.encryptSingle(mval, logq, false);
+	timeutils.stop("Encrypt single real");
+
+	cout << "cipher logq before: " << cipher.logq << endl;
+
+	timeutils.start("CoeffToSlots");
+	scheme.normalizeAndEqual(cipher);
+	cipher.logq = logQ;
+	cipher.q = power2_ZZ(logQ);
+	for (long i = 0; i < context.logNh; ++i) {
+		Ciphertext rot = scheme.leftRotateByPo2(cipher, i);
+		scheme.addAndEqual(cipher, rot);
+	}
+	Ciphertext cconj = scheme.conjugate(cipher);
+	scheme.addAndEqual(cipher, cconj);
+	scheme.reScaleByAndEqual(cipher, context.logN);
+	timeutils.stop("CoeffToSlots");
+
+	timeutils.start("removeIpart");
+	scheme.removeIpartAndEqual(cipher, logq, logT, logI);
+	timeutils.stop("removeIpart");
+
+	cout << "cipher logq after: " << cipher.logq << endl;
+
+	CZZ dval = scheme.decryptSingle(secretKey, cipher);
+	StringUtils::showcompare(mval, dval, "boot");
+
+	cout << "!!! END TEST BOOTSRTAP SINGLE REAL !!!" << endl;
 }

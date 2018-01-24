@@ -28,7 +28,7 @@ public:
 
 	long N; ///< N is a power-of-two that corresponds to the ring Z[X]/(X^N + 1)
 	long Nh; ///< Nh = N/2
-	long logNh;
+	long logNh; ///< logNh = logN - 1
 	long M; ///< M = 2N
 	long logPQ; ///< log of PQ
 
@@ -51,8 +51,18 @@ public:
 	 */
 	void addBootContext(long logSlots, long logp);
 
+	/**
+	 * encoding of values to polynomial, with bigger coefficients (used in Scheme.encode method)
+	 * @param[in] vals: array of values
+	 * @param[in] slots: size of array
+	 */
 	ZZX encodeLarge(CZZ* vals, long slots);
 
+	/**
+	 * encoding of values to polynomial
+	 * @param[in] vals: array of values
+	 * @param[in] slots: size of array
+	 */
 	ZZX encodeSmall(CZZ* vals, long slots);
 
 	/**

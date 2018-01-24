@@ -149,11 +149,25 @@ int main() {
 
 	//-----------------------------------------
 
-//	TestScheme::testBootstrap();
+	/*
+	 * Params: logN, logQ, logq, logSlots, nu, logT
+	 * Suggested: 15, 29, 620, 3, 6, 2
+	 * Suggested: 15, 37, 620, 3, 10, 3
+	 * Suggested: 16, 41, 1240, 3, 10, 3
+	 * Suggested: 16, 54, 1240, 3, 15, 5
+	 */
+//	TestScheme::testBootstrap(15, 29, 620, 3, 6, 2);
 
-//	TestScheme::testBootstrapSingleReal();
+	/*
+	 * Params: logN, logq, logQ, nu, logT
+	 * Suggested: 15, 29, 620, 6, 2
+	 * Suggested: 15, 37, 620, 10, 3
+	 * Suggested: 16, 41, 1240, 10, 3
+	 * Suggested: 16, 54, 1240, 15, 5
+	 */
+//	TestScheme::testBootstrapSingleReal(15, 29, 620, 6, 2);
 
-//	TestScheme::test();
+	TestScheme::test();
 
 	return 0;
 }

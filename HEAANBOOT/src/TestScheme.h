@@ -9,8 +9,6 @@ public:
 	//   STANDARD TESTS
 	//----------------------------------------------------------------------------------
 
-	static void testEncodeSingleReal(long logN, long logQ, long logp, bool isComplex);
-
 	/**
 	 * Testing encoding and decoding timing of the ciphertext
 	 * c(m_1, ..., m_slots)
@@ -21,6 +19,17 @@ public:
 	 * @param[in] logSlots: log of number of slots
 	 */
 	static void testEncodeBatch(long logN, long logQ, long logp, long logSlots);
+
+	/**
+	 * Testing encoding and decoding timing of the ciphertext of single value
+	 * c(m_1)
+	 * number of levels switched: 0
+	 * @param[in] logN: input parameter for Params class
+	 * @param[in] logQ: input parameter for Params class
+	 * @param[in] logp: log of precision
+	 * @param[in] isComplex: is value real or complex
+	 */
+	static void testEncodeSingle(long logN, long logQ, long logp, bool isComplex);
 
 	/**
 	 * Testing conjugation timing of the ciphertext
@@ -269,9 +278,28 @@ public:
 	//   BOOTSTRAPPING TESTS
 	//----------------------------------------------------------------------------------
 
-	static void testBootstrap();
+	/**
+	 * Testing bootstrapping procedure
+	 * number of levels up: depends on parameters
+	 * @param[in] logN: input parameter for Params class
+	 * @param[in] logq: log of initial modulus
+	 * @param[in] logQ: input parameter for Params class
+	 * @param[in] logSlots: log of number of slots
+	 * @param[in] nu: auxiliary parameter, corresonds to message bits (message bits is logq - nu)
+	 * @param[in] logT: auxiliary parameter, corresponds to number of iterations in removeIpart (num of iterations is logI + logT)
+	 */
+	static void testBootstrap(long logN, long logq, long logQ, long logSlots, long nu, long logT);
 
-	static void testBootstrapSingleReal();
+	/**
+	 * Testing bootstrapping procedure for single real value
+	 * number of levels up: depends on parameters
+	 * @param[in] logN: input parameter for Params class
+	 * @param[in] logq: log of initial modulus
+	 * @param[in] logQ: input parameter for Params class
+	 * @param[in] nu: auxiliary parameter, corresonds to message bits (message bits is logq - nu)
+	 * @param[in] logT: auxiliary parameter, corresponds to number of iterations in removeIpart (num of iterations is logI + logT)
+	 */
+	static void testBootstrapSingleReal(long logN, long logq, long logQ, long nu, long logT);
 
 	static void test();
 
