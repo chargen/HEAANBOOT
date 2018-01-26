@@ -14,7 +14,7 @@ int main() {
 	 * Params: logN, logQ, logp, isComplex
 	 * Suggested: 13, 65, 30, 3
 	 */
-//	TestScheme::testEncodeSingleReal(13, 150, 30, false);
+//	TestScheme::testEncodeSingle(13, 150, 30, false);
 
 	/*
 	 * Params: logN, logQ, logp, logSlots
@@ -150,13 +150,13 @@ int main() {
 	//-----------------------------------------
 
 	/*
-	 * Params: logN, logQ, logq, logSlots, nu, logT
+	 * Params: logN, logq, logQ, logSlots, nu, logT
 	 * Suggested: 15, 29, 620, 3, 6, 2
 	 * Suggested: 15, 37, 620, 3, 10, 3
 	 * Suggested: 16, 41, 1240, 3, 10, 3
 	 * Suggested: 16, 54, 1240, 3, 15, 5
 	 */
-//	TestScheme::testBootstrap(15, 29, 620, 3, 6, 2);
+	TestScheme::testBootstrap(15, 29, 620, 3, 6, 2);
 
 	/*
 	 * Params: logN, logq, logQ, nu, logT
@@ -167,7 +167,7 @@ int main() {
 	 */
 //	TestScheme::testBootstrapSingleReal(15, 29, 620, 6, 2);
 
-	TestScheme::test();
+//	TestScheme::test();
 
 	return 0;
 }

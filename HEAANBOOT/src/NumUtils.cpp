@@ -9,15 +9,15 @@ void NumUtils::sampleGauss(ZZX& res, const long size, const double stdev) {
 	for (long i = 0; i < size; i+=2) {
 		double r1 = (1 + RandomBnd(bignum)) / ((double)bignum + 1);
 		double r2 = (1 + RandomBnd(bignum)) / ((double)bignum + 1);
-		double theta=2 * Pi * r1;
+		double theta = 2 * Pi * r1;
 		double rr= sqrt(-2.0 * log(r2)) * stdev;
 		assert(rr < 8 * stdev); // sanity-check, no more than 8 standard deviations
 		// Generate two Gaussians RV's, rounded to integers
 		long x1 = (long) floor(rr * cos(theta) + 0.5);
-		SetCoeff(res, i, x1);
+		res.rep[i] = x1;
 		if(i + 1 < size) {
 			long x2 = (long) floor(rr * sin(theta) + 0.5);
-			SetCoeff(res, i + 1, x2);
+			res.rep[i + 1] = x2;
 		}
 	}
 }

@@ -237,6 +237,7 @@ void Ring2Utils::conjugateAndEqual(ZZX& p, const long degree) {
 }
 
 void Ring2Utils::inpower(ZZX& res, ZZX& p, const long pow, ZZ& mod, const long degree) {
+	res.kill();
 	res.SetLength(degree);
 	for (long i = 0; i < degree; ++i) {
 		long ipow = i * pow;

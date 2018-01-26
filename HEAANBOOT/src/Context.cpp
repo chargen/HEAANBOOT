@@ -43,7 +43,8 @@ ZZX Context::encodeLarge(CZZ* vals, long slots) {
 	CZZ* uvals = new CZZ[slots];
 	long i, jdx, idx;
 	for (i = 0; i < slots; ++i) {
-		uvals[i] = vals[i] << logQ;
+		uvals[i].r = vals[i].r << logQ;
+		uvals[i].i = vals[i].i << logQ;
 	}
 	ZZX mx;
 	mx.SetLength(N);
@@ -64,7 +65,8 @@ ZZX Context::encodeSmall(CZZ* vals, long slots) {
 	CZZ* uvals = new CZZ[slots];
 	long i, jdx, idx;
 	for (i = 0; i < slots; ++i) {
-		uvals[i] = vals[i] << logQ;
+		uvals[i].r = vals[i].r << logQ;
+		uvals[i].i = vals[i].i << logQ;
 	}
 	ZZX mx;
 	mx.SetLength(N);
@@ -224,8 +226,8 @@ void Context::fft(CZZ* vals, const long size) {
 				RR tmp1 = to_RR(v.r) * (ksiPowsr[idx] + ksiPowsi[idx]);
 				RR tmpr = tmp1 - to_RR(v.r + v.i) * ksiPowsi[idx];
 				RR tmpi = tmp1 + to_RR(v.i - v.r) * ksiPowsr[idx];
-				v.r = to_ZZ(tmpr);
-				v.i = to_ZZ(tmpi);
+				RoundToZZ(v.r, tmpr);
+				RoundToZZ(v.i, tmpi);
 				vals[i + j] = u + v;
 				vals[i + j + lenh] = u - v;
 			}
@@ -246,8 +248,8 @@ void Context::fftInvLazy(CZZ* vals, const long size) {
 				RR tmp1 = to_RR(v.r) * (ksiPowsr[idx] + ksiPowsi[idx]);
 				RR tmpr = tmp1 - to_RR(v.r + v.i) * ksiPowsi[idx];
 				RR tmpi = tmp1 + to_RR(v.i - v.r) * ksiPowsr[idx];
-				v.r = to_ZZ(tmpr);
-				v.i = to_ZZ(tmpi);
+				RoundToZZ(v.r, tmpr);
+				RoundToZZ(v.i, tmpi);
 				vals[i + j] = u + v;
 				vals[i + j + lenh] = u - v;
 			}
@@ -275,9 +277,8 @@ void Context::fftSpecial(CZZ* vals, const long size) {
 				RR tmp1 = to_RR(v.r) * (ksiPowsr[idx] + ksiPowsi[idx]);
 				RR tmpr = tmp1 - to_RR(v.r + v.i) * ksiPowsi[idx];
 				RR tmpi = tmp1 + to_RR(v.i - v.r) * ksiPowsr[idx];
-				v.r = to_ZZ(tmpr);
-				v.i = to_ZZ(tmpi);
-
+				RoundToZZ(v.r, tmpr);
+				RoundToZZ(v.i, tmpi);
 				vals[i + j] = u + v;
 				vals[i + j + lenh] = u - v;
 			}
@@ -297,8 +298,8 @@ void Context::fftSpecialInvLazy(CZZ* vals, const long size) {
 				RR tmp1 = to_RR(v.r) * (ksiPowsr[idx] + ksiPowsi[idx]);
 				RR tmpr = tmp1 - to_RR(v.r + v.i) * ksiPowsi[idx];
 				RR tmpi = tmp1 + to_RR(v.i - v.r) * ksiPowsr[idx];
-				v.r = to_ZZ(tmpr);
-				v.i = to_ZZ(tmpi);
+				RoundToZZ(v.r, tmpr);
+				RoundToZZ(v.i, tmpi);
 
 				vals[i + j] = u;
 				vals[i + j + lenh] = v;
