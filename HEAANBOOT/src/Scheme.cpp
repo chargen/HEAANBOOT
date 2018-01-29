@@ -825,65 +825,65 @@ void Scheme::linTransformInvAndEqual(Ciphertext& cipher) {
 
 void Scheme::evaluateExp2piAndEqual(Ciphertext& cipher, long logp) {
 	Ciphertext cipher2 = square(cipher);
-	reScaleByAndEqual(cipher2, logp);
+	reScaleByAndEqual(cipher2, logp); // cipher2.logq : logq - logp
 
 	Ciphertext cipher4 = square(cipher2);
-	reScaleByAndEqual(cipher4, logp);
+	reScaleByAndEqual(cipher4, logp); // cipher4.logq : logq -2logp
 
 	RR c = 1/(2*Pi);
 	ZZ pc = EvaluatorUtils::evalZZ(c, logp);
 
-	Ciphertext cipher01 = addConst(cipher, pc);
+	Ciphertext cipher01 = addConst(cipher, pc); // cipher01.logq : logq
 
 	c = 2*Pi;
 	pc = EvaluatorUtils::evalZZ(c, logp);
 
 	multByConstAndEqual(cipher01, pc);
-	reScaleByAndEqual(cipher01, logp);
+	reScaleByAndEqual(cipher01, logp); // cipher01.logq : logq - logp
 
 	c = 3/(2*Pi);
 	pc = EvaluatorUtils::evalZZ(c, logp);
-	Ciphertext cipher23 = addConst(cipher, pc);
+	Ciphertext cipher23 = addConst(cipher, pc); // cipher23.logq : logq
 
 	c = 4*Pi*Pi*Pi/3;
 	pc = EvaluatorUtils::evalZZ(c, logp);
 	multByConstAndEqual(cipher23, pc);
-	reScaleByAndEqual(cipher23, logp);
+	reScaleByAndEqual(cipher23, logp); // cipher23.logq : logq - logp
 
 	multAndEqual(cipher23, cipher2);
-	reScaleByAndEqual(cipher23, logp);
+	reScaleByAndEqual(cipher23, logp); // cipher23.logq : logq - 2logp
 
-	addAndEqual(cipher23, cipher01);
+	addAndEqual(cipher23, cipher01); // cipher23.logq : logq - 2logp
 
 	c = 5/(2*Pi);
 	pc = EvaluatorUtils::evalZZ(c, logp);
-	Ciphertext cipher45 = addConst(cipher, pc);
+	Ciphertext cipher45 = addConst(cipher, pc); // cipher45.logq : logq
 
 	c = 4*Pi*Pi*Pi*Pi*Pi/15;
 	pc = EvaluatorUtils::evalZZ(c, logp);
 	multByConstAndEqual(cipher45, pc);
-	reScaleByAndEqual(cipher45, logp);
+	reScaleByAndEqual(cipher45, logp); // cipher45.logq : logq - logp
 
 	c = 7/(2*Pi);
 	pc = EvaluatorUtils::evalZZ(c, logp);
-	addConstAndEqual(cipher, pc);
+	addConstAndEqual(cipher, pc); // cipher.logq : logq
 
 	c = 8*Pi*Pi*Pi*Pi*Pi*Pi*Pi/315;
 	pc = EvaluatorUtils::evalZZ(c, logp);
 	multByConstAndEqual(cipher, pc);
-	reScaleByAndEqual(cipher, logp);
+	reScaleByAndEqual(cipher, logp); // cipher.logq : logq - logp
 
 	multAndEqual(cipher, cipher2);
-	reScaleByAndEqual(cipher, logp);
+	reScaleByAndEqual(cipher, logp); // cipher.logq : logq - 2logp
 
-	modDownByAndEqual(cipher45, logp);
-	addAndEqual(cipher, cipher45);
+	modDownByAndEqual(cipher45, logp); // cipher45.logq : logq - 2logp
+	addAndEqual(cipher, cipher45); // cipher.logq : logq - 2logp
 
 	multAndEqual(cipher, cipher4);
-	reScaleByAndEqual(cipher, logp);
+	reScaleByAndEqual(cipher, logp); // cipher.logq : logq - 3logp
 
 	modDownByAndEqual(cipher23, logp);
-	addAndEqual(cipher, cipher23);
+	addAndEqual(cipher, cipher23); // cipher.logq : logq - 3logp
 }
 
 void Scheme::removeIpartAndEqual(Ciphertext& cipher, long logq, long logT, long logI) {
@@ -892,8 +892,8 @@ void Scheme::removeIpartAndEqual(Ciphertext& cipher, long logq, long logT, long 
 	BootContext bootContext = context.bootContextMap.at(logSlots);
 	if(logSlots == 0 && !cipher.isComplex) {
 		imultAndEqual(cipher);
-		reScaleByAndEqual(cipher, logT);
-		evaluateExp2piAndEqual(cipher, logq + logI);
+		reScaleByAndEqual(cipher, logT); // bitDown: logT
+		evaluateExp2piAndEqual(cipher, logq + logI); // bitDown: logT + 3(logq + logI)
 		for (long i = 0; i < logI + logT; ++i) {
 			squareAndEqual(cipher);
 			reScaleByAndEqual(cipher, logq + logI);
@@ -902,11 +902,12 @@ void Scheme::removeIpartAndEqual(Ciphertext& cipher, long logq, long logT, long 
 		subAndEqual(cipher, tmp);
 		idivAndEqual(cipher);
 		multByConstAndEqual(cipher, bootContext.c);
+		// bitDown: logT + 3(logq + logI) + (logI + logT)(logq + logI)
 	} else if(logSlots < context.logNh) {
 		Ciphertext tmp = conjugate(cipher);
 		subAndEqual(cipher, tmp);
-		reScaleByAndEqual(cipher, logT + 1);
-		evaluateExp2piAndEqual(cipher, logq + logI);
+		reScaleByAndEqual(cipher, logT + 1); // bitDown: logT + 1
+		evaluateExp2piAndEqual(cipher, logq + logI); // bitDown: logT + 1 + 3(logq + logI)
 		for (long i = 0; i < logI + logT; ++i) {
 			squareAndEqual(cipher);
 			reScaleByAndEqual(cipher, logq + logI);
@@ -921,25 +922,22 @@ void Scheme::removeIpartAndEqual(Ciphertext& cipher, long logq, long logT, long 
 		tmprot = leftRotateFast(cipher, slots);
 		addAndEqual(cipher, tmprot);
 		addAndEqual(cipher, tmp);
+		// bitDown: logT + 1 + 3(logq + logI) + (logI + logT)(logq + logI)
 	} else {
 		Ciphertext tmp = conjugate(cipher);
 		Ciphertext c2 = sub(cipher, tmp);
 		addAndEqual(cipher, tmp);
 		imultAndEqual(cipher);
-
-		reScaleByAndEqual(cipher, logT + 1);
-		reScaleByAndEqual(c2, logT + 1);
-
-		evaluateExp2piAndEqual(c2, logq + logI);
-		evaluateExp2piAndEqual(cipher, logq + logI);
-
+		reScaleByAndEqual(cipher, logT + 1); // cipher bitDown: logT + 1
+		reScaleByAndEqual(c2, logT + 1); // c2 bitDown: logT + 1
+		evaluateExp2piAndEqual(cipher, logq + logI); // cipher bitDown: logT + 1 + 3(logq + logI)
+		evaluateExp2piAndEqual(c2, logq + logI); // c2 bitDown: logT + 1 + 3(logq + logI)
 		for (long i = 0; i < logI + logT; ++i) {
 			squareAndEqual(c2);
 			squareAndEqual(cipher);
 			reScaleByAndEqual(c2, logq + logI);
 			reScaleByAndEqual(cipher, logq + logI);
 		}
-
 		tmp = conjugate(c2);
 		subAndEqual(c2, tmp);
 		tmp = conjugate(cipher);
@@ -947,8 +945,11 @@ void Scheme::removeIpartAndEqual(Ciphertext& cipher, long logq, long logT, long 
 		imultAndEqual(cipher);
 		subAndEqual2(c2, cipher);
 		multByConstAndEqual(cipher, bootContext.c);
+		// bitDown: logT + 1 + 3(logq + logI) + (logI + logT)(logq + logI)
 	}
 	reScaleByAndEqual(cipher, logq + 2 * logI);
+	// if (logSlots == 0 && !cipher.isComplex) bitDown: logT + 3(logq + logI) + (logI + logT)(logq + logI) + logq + 2logI
+	// else bitDown: logT + 1 + 3(logq + logI) + (logI + logT)(logq + logI) + logq + 2logI
 }
 
 void Scheme::bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long logT, long logI) {
@@ -968,14 +969,14 @@ void Scheme::bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long lo
 	if (logSlots == 0 && !cipher.isComplex) {
 			Ciphertext cconj = conjugate(cipher);
 			addAndEqual(cipher, cconj);
-			reScaleByAndEqual(cipher, context.logN - logSlots);
-			removeIpartAndEqual(cipher, logq, logT, logI);
+			reScaleByAndEqual(cipher, context.logN - logSlots); // bitDown: context.logN - logSlots
+			removeIpartAndEqual(cipher, logq, logT, logI); // bitDown: context.logN - logSlots + (logq + logI + 4) * logq + (logq + logI + 5) * logI + logT
 	} else {
-		reScaleByAndEqual(cipher, context.logNh - logSlots);
+		reScaleByAndEqual(cipher, context.logNh - logSlots); // bitDown: context.logNh - logSlots
 		linTransformAndEqual(cipher);
-		reScaleByAndEqual(cipher, logq + logI + logSlots);
-		removeIpartAndEqual(cipher, logq, logT, logI);
+		reScaleByAndEqual(cipher, logq + logI + logSlots); // bitDown: context.logNh + logq + logI
+		removeIpartAndEqual(cipher, logq, logT, logI); // bitDown: context.logNh + (logI + logT + 5) * logq + (logI + logT + 6) * logI + logT + 1
 		linTransformInvAndEqual(cipher);
-		reScaleByAndEqual(cipher, logq + logI);
+		reScaleByAndEqual(cipher, logq + logI); // bitDown: context.logNh + (logI + logT + 6) * logq + (logI + logT + 7) * logI + logT + 1
 	}
 }
