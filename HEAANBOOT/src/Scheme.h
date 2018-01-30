@@ -550,25 +550,25 @@ public:
 	 * part of bootstrapping procedure: calculates special fft in encrypted form
 	 * @param[in, out] cipher: ciphertext(vecm) -> ciphertext(special fft of vecm)
 	 */
-	void linTransformAndEqual(Ciphertext& cipher);
+	void coeffToSlotAndEqual(Ciphertext& cipher);
 
 	/**
 	 * part of bootstrapping procedure: calculates special fft inverse in encrypted form
 	 * @param[in, out] cipher: ciphertext(vecm) -> ciphertext(special fft inverse of vecm)
 	 */
-	void linTransformInvAndEqual(Ciphertext& cipher);
+	void slotToCoeffAndEqual(Ciphertext& cipher);
 
 	/**
 	 * part of bootstrapping procedure: calculates exponent of ciphertext
 	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(exp(2pim))
 	 */
-	void evaluateExp2piAndEqual(Ciphertext& cipher, long logp);
+	void exp2piAndEqual(Ciphertext& cipher, long logp);
 
 	/**
 	 * part of bootstrapping procedure: removes qI parts from cipher
 	 * @param[in, out] cipher: ciphertext(x + qI + i(y + qJ)) -> ciphertext(x + iy)
 	 */
-	void removeIpartAndEqual(Ciphertext& cipher, long logq, long logT, long logI = 4);
+	void evalExpAndEqual(Ciphertext& cipher, long logT, long logI = 4);
 
 	/**
 	 * full bootstrapping procedure

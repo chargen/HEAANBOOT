@@ -16,6 +16,13 @@ public:
 
 	/**
 	 * prints in console array
+	 * @param[in] vals: double array
+	 * @param[in] size: array size
+	 */
+	static void show(double* vals, long size);
+
+	/**
+	 * prints in console array
 	 * @param[in] vals: long array
 	 * @param[in] size: array size
 	 */

@@ -942,30 +942,32 @@ void TestScheme::testBootstrap(long logN, long logq, long logQ, long logSlots, l
 	timeutils.stop("Encrypt batch");
 
 	cout << "cipher logq before: " << cipher.logq << endl;
-	timeutils.start("Lin Transformation");
 	scheme.modDownToAndEqual(cipher, logq);
 	scheme.normalizeAndEqual(cipher);
 
 	cipher.logq = logQ;
 	cipher.q = power2_ZZ(logQ);
 
+	timeutils.start("SubSum");
 	for (long i = logSlots; i < context.logNh; ++i) {
 		Ciphertext rot = scheme.leftRotateByPo2(cipher, i);
 		scheme.addAndEqual(cipher, rot);
 	}
-	scheme.reScaleByAndEqual(cipher, context.logNh - logSlots);
-	scheme.linTransformAndEqual(cipher);
-	scheme.reScaleByAndEqual(cipher, logq + logI + logSlots);
-	timeutils.stop("Lin Transformation");
+	scheme.reScaleByAndEqual(cipher, context.logNh);
+	timeutils.stop("SubSum");
 
-	timeutils.start("remove I part");
-	scheme.removeIpartAndEqual(cipher, logq, logT, logI);
-	timeutils.stop("remove I part");
+	timeutils.start("CoeffToSlot");
+	scheme.coeffToSlotAndEqual(cipher);
+	timeutils.stop("CoeffToSlot");
 
-	timeutils.start("Lin Transformation Inv");
-	scheme.linTransformInvAndEqual(cipher);
-	scheme.reScaleByAndEqual(cipher, logq + logI);
-	timeutils.stop("Lin Transformation Inv");
+	timeutils.start("EvalExp");
+	scheme.evalExpAndEqual(cipher, logT, logI);
+	timeutils.stop("EvalExp");
+
+	timeutils.start("SlotToCoeff");
+	scheme.slotToCoeffAndEqual(cipher);
+	timeutils.stop("SlotToCoeff");
+
 	cout << "cipher logq after: " << cipher.logq << endl;
 
 	CZZ* dvec = scheme.decrypt(secretKey, cipher);
@@ -999,10 +1001,11 @@ void TestScheme::testBootstrapSingleReal(long logN, long logq, long logQ, long n
 
 	cout << "cipher logq before: " << cipher.logq << endl;
 
-	timeutils.start("CoeffToSlots");
 	scheme.normalizeAndEqual(cipher);
 	cipher.logq = logQ;
 	cipher.q = power2_ZZ(logQ);
+
+	timeutils.start("SubSum + CoeffToSlot");
 	for (long i = 0; i < context.logNh; ++i) {
 		Ciphertext rot = scheme.leftRotateByPo2(cipher, i);
 		scheme.addAndEqual(cipher, rot);
@@ -1010,11 +1013,11 @@ void TestScheme::testBootstrapSingleReal(long logN, long logq, long logQ, long n
 	Ciphertext cconj = scheme.conjugate(cipher);
 	scheme.addAndEqual(cipher, cconj);
 	scheme.reScaleByAndEqual(cipher, context.logN);
-	timeutils.stop("CoeffToSlots");
+	timeutils.stop("SubSum + CoeffToSlot");
 
-	timeutils.start("remove I part");
-	scheme.removeIpartAndEqual(cipher, logq, logT, logI);
-	timeutils.stop("remove I part");
+	timeutils.start("EvalExp");
+	scheme.evalExpAndEqual(cipher, logT, logI);
+	timeutils.stop("EvalExp");
 
 	cout << "cipher logq after: " << cipher.logq << endl;
 
