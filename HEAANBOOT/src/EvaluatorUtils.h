@@ -117,7 +117,7 @@ public:
 	 * @param[in] logp: log of precision
 	 * @return x << logp
 	 */
-	static ZZ evalZZ(const double& x, const long logp);
+	static ZZ evalZZ(const double x, const long logp);
 
 	/**
 	 * evaluates value x << logp
@@ -134,7 +134,7 @@ public:
 	 * @param[in] logp: log of precision
 	 * @return Z[i] value (xr + i * xi) << logp
 	 */
-	static CZZ evalCZZ(const double& xr, const double& xi, const long logp);
+	static CZZ evalCZZ(const double xr, const double xi, const long logp);
 
 	/**
 	 * evaluates Z[i] value (xr + i * xi) << logp
@@ -151,7 +151,7 @@ public:
 	 * @param[in] logp: log of precision
 	 * @return Z value xr << logp
 	 */
-	static CZZ evalCZZ0(const double& xr, const long logp);
+	static CZZ evalCZZ0(const double xr, const long logp);
 
 	/**
 	 * evaluates Z value xr << logp as CZZ value
@@ -264,7 +264,7 @@ public:
 	 * @param[in] logp: log of precision
 	 * @return Z[i] value (xr + i * xi)^d << logp
 	 */
-	static CZZ evalCZZPow(const double& xr, const double& xi, const long degree, const long logp);
+	static CZZ evalCZZPow(const double xr, const double xi, const long degree, const long logp);
 
 	/**
 	 * evaluates Z[i] value (xr + i * xi)^d << logp
@@ -284,7 +284,7 @@ public:
 	 * @param[in] logp: log of precision
 	 * @return Z[i] value (xr + i * xi)^d << logp
 	 */
-	static CZZ evalCZZPow2(const double& xr, const double& xi, const long logDegree, const long logp);
+	static CZZ evalCZZPow2(const double xr, const double xi, const long logDegree, const long logp);
 
 	/**
 	 * evaluates Z[i] value (xr + i * xi)^d << logp
@@ -304,7 +304,7 @@ public:
 	 * @param[in] logp: log of precision
 	 * @return array of Z[i] values (xr + i * xi)^j << logp for j=1,...,d
 	 */
-	static CZZ* evalCZZPowArray(const double& xr, const double& xi, const long degree, const long logp);
+	static CZZ* evalCZZPowArray(const double xr, const double xi, const long degree, const long logp);
 
 	/**
 	 * evaluates array of Z[i] values (xr + i * xi)^j << logp for j=1,...,d
@@ -324,7 +324,7 @@ public:
 	 * @param[in] logp: log of precision
 	 * @return array of Z[i] values (xr + i * xi)^j << logp for j=1,2,2^2,...,d
 	 */
-	static CZZ* evalCZZPow2Array(const double& xr, const double& xi, const long logDegree, const long logp);
+	static CZZ* evalCZZPow2Array(const double xr, const double xi, const long logDegree, const long logp);
 
 	/**
 	 * evaluates array of Z[i] values (xr + i * xi)^j << logp for j=1,2,2^2,...,d
@@ -349,7 +349,7 @@ public:
 	 * @param[in] logp: log of precision
 	 * @return Z[i] value 1 / (xr + i * xi) << (2 * logp)
 	 */
-	static CZZ evalCZZInv(const double& xr, const double& xi, const long logp);
+	static CZZ evalCZZInv(const double xr, const double xi, const long logp);
 
 	/**
 	 * evaluates Z[i] value 1 / (xr + i * xi) << (2 * logp)
@@ -367,7 +367,7 @@ public:
 	 * @param[in] logp: log of precision
 	 * @return Z[i] value log(xr + i * xi) << logp
 	 */
-	static CZZ evalCZZLog(const double& xr, const double& xi, const long logp);
+	static CZZ evalCZZLog(const double xr, const double xi, const long logp);
 
 	/**
 	 * evaluates Z[i] value exp(xr + i * xi) << logp
@@ -376,7 +376,7 @@ public:
 	 * @param[in] logp: log of precision
 	 * @return Z[i] value exp(xr + i * xi) << logp
 	 */
-	static CZZ evalCZZExp(const double& xr, const double& xi, const long logp);
+	static CZZ evalCZZExp(const double xr, const double xi, const long logp);
 
 	/**
 	 * evaluates Z[i] value exp(xr + i * xi) << logp
@@ -394,7 +394,7 @@ public:
 	 * @param[in] logp: log of precision
 	 * @return Z[i] value sigmoid(xr + i * xi) << logp
 	 */
-	static CZZ evalCZZSigmoid(const double& xr, const double& xi, const long logp);
+	static CZZ evalCZZSigmoid(const double xr, const double xi, const long logp);
 
 	/**
 	 * evaluates Z[i] value sigmoid(xr + i * xi) << logp

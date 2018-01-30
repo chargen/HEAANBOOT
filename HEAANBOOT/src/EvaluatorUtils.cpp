@@ -55,7 +55,7 @@ void EvaluatorUtils::evalComplexArray(double* resx, double* resi, const CZZ* xar
 	}
 }
 
-ZZ EvaluatorUtils::evalZZ(const double& x, const long logp) {
+ZZ EvaluatorUtils::evalZZ(const double x, const long logp) {
 	return evalZZ(to_RR(x), logp);
 }
 
@@ -64,7 +64,7 @@ ZZ EvaluatorUtils::evalZZ(const RR& x, const long logp) {
 	return RoundToZZ(xp);
 }
 
-CZZ EvaluatorUtils::evalCZZ(const double& xr, const double& xi, const long logp) {
+CZZ EvaluatorUtils::evalCZZ(const double xr, const double xi, const long logp) {
 	return evalCZZ(to_RR(xr), to_RR(xi), logp);
 }
 
@@ -74,7 +74,7 @@ CZZ EvaluatorUtils::evalCZZ(const RR& xr, const RR& xi, const long logp) {
 	return CZZ(RoundToZZ(xrp), RoundToZZ(xip));
 }
 
-CZZ EvaluatorUtils::evalCZZ0(const double& xr, const long logp) {
+CZZ EvaluatorUtils::evalCZZ0(const double xr, const long logp) {
 	return evalCZZ0(to_RR(xr), logp);
 }
 
@@ -155,7 +155,7 @@ CZZ* EvaluatorUtils::evalRandCZZ0Array(const long size, const long logp) {
 	return res;
 }
 
-CZZ EvaluatorUtils::evalCZZPow(const double& xr, const double& xi, const long degree, const long logp) {
+CZZ EvaluatorUtils::evalCZZPow(const double xr, const double xi, const long degree, const long logp) {
 	long logDegree = log2(degree);
 	long po2Degree = 1 << logDegree;
 	CZZ res = evalCZZPow2(xr, xi, logDegree, logp);
@@ -181,7 +181,7 @@ CZZ EvaluatorUtils::evalCZZPow(const RR& xr, const RR& xi, const long degree, co
 	return res;
 }
 
-CZZ EvaluatorUtils::evalCZZPow2(const double& xr, const double& xi, const long logDegree, const long logp) {
+CZZ EvaluatorUtils::evalCZZPow2(const double xr, const double xi, const long logDegree, const long logp) {
 	return evalCZZPow2(to_RR(xr), to_RR(xi), logDegree, logp);
 }
 
@@ -194,7 +194,7 @@ CZZ EvaluatorUtils::evalCZZPow2(const RR& xr, const RR& xi, const long logDegree
 	return res;
 }
 
-CZZ* EvaluatorUtils::evalCZZPowArray(const double& xr, const double& xi, const long degree, const long logp) {
+CZZ* EvaluatorUtils::evalCZZPowArray(const double xr, const double xi, const long degree, const long logp) {
 	return  evalCZZPowArray(to_RR(xr), to_RR(xi), degree, logp);
 }
 
@@ -208,7 +208,7 @@ CZZ* EvaluatorUtils::evalCZZPowArray(const RR& xr, const RR& xi, const long degr
 	return res;
 }
 
-CZZ* EvaluatorUtils::evalCZZPow2Array(const double& xr, const double& xi, const long logDegree, const long logp) {
+CZZ* EvaluatorUtils::evalCZZPow2Array(const double xr, const double xi, const long logDegree, const long logp) {
 	return evalCZZPow2Array(to_RR(xr), to_RR(xi), logDegree, logp);
 }
 
@@ -222,7 +222,7 @@ CZZ* EvaluatorUtils::evalCZZPow2Array(const RR& xr, const RR& xi, const long log
 	return res;
 }
 
-CZZ EvaluatorUtils::evalCZZInv(const double& xr, const double& xi, const long logp) {
+CZZ EvaluatorUtils::evalCZZInv(const double xr, const double xi, const long logp) {
 	return evalCZZInv(to_RR(xr), to_RR(xi), logp);
 }
 
@@ -233,14 +233,14 @@ CZZ EvaluatorUtils::evalCZZInv(const RR& xr, const RR& xi, const long logp) {
 	return evalCZZ(xinvr, xinvi, logp);
 }
 
-CZZ EvaluatorUtils::evalCZZLog(const double& xr, const double& xi, const long logp) {
+CZZ EvaluatorUtils::evalCZZLog(const double xr, const double xi, const long logp) {
 	double xlogr = log(xr * xr + xi * xi) / 2;
 	double xlogi = atan(xi / xr);
 
 	return evalCZZ(xlogr, xlogi, logp);
 }
 
-CZZ EvaluatorUtils::evalCZZExp(const double& xr, const double& xi, const long logp) {
+CZZ EvaluatorUtils::evalCZZExp(const double xr, const double xi, const long logp) {
 	double xrexp = exp(xr);
 	double xexpr = xrexp * cos(xi);
 	double xexpi = xrexp * sin(xi);
@@ -256,7 +256,7 @@ CZZ EvaluatorUtils::evalCZZExp(const RR& xr, const RR& xi, const long logp) {
 	return evalCZZ(xexpr, xexpi, logp);
 }
 
-CZZ EvaluatorUtils::evalCZZSigmoid(const double& xr, const double& xi, const long logp) {
+CZZ EvaluatorUtils::evalCZZSigmoid(const double xr, const double xi, const long logp) {
 	double xrexp = exp(xr);
 	double xexpr = xrexp * cos(xi);
 	double xexpi = xrexp * sin(xi);
