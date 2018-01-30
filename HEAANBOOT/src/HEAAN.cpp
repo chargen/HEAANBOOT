@@ -156,7 +156,7 @@ int main() {
 	 * Suggested: 16, 41, 1240, 3, 10, 3
 	 * Suggested: 16, 54, 1240, 3, 15, 5
 	 */
-	TestScheme::testBootstrap(15, 29, 620, 3, 6, 2);
+//	TestScheme::testBootstrap(16, 54, 1240, 3, 15, 5);
 
 	/*
 	 * Params: logN, logq, logQ, nu, logT

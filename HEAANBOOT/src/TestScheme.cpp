@@ -1005,7 +1005,7 @@ void TestScheme::testBootstrapSingleReal(long logN, long logq, long logQ, long n
 	cipher.logq = logQ;
 	cipher.q = power2_ZZ(logQ);
 
-	timeutils.start("SubSum + CoeffToSlot");
+	timeutils.start("SubSum");
 	for (long i = 0; i < context.logNh; ++i) {
 		Ciphertext rot = scheme.leftRotateByPo2(cipher, i);
 		scheme.addAndEqual(cipher, rot);
@@ -1013,7 +1013,7 @@ void TestScheme::testBootstrapSingleReal(long logN, long logq, long logQ, long n
 	Ciphertext cconj = scheme.conjugate(cipher);
 	scheme.addAndEqual(cipher, cconj);
 	scheme.reScaleByAndEqual(cipher, context.logN);
-	timeutils.stop("SubSum + CoeffToSlot");
+	timeutils.stop("SubSum");
 
 	timeutils.start("EvalExp");
 	scheme.evalExpAndEqual(cipher, logT, logI);
