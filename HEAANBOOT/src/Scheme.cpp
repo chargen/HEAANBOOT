@@ -980,3 +980,176 @@ void Scheme::bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long lo
 		slotToCoeffAndEqual(cipher);
 	}
 }
+
+/********************************************
+Encode
+********************************************/
+
+Plaintext Scheme::encodeFromDouble(double& val, long pbits, long logq) {
+	ZZX mx;
+	mx.SetLength(context.N);
+	mx.rep[0] = conv<ZZ>(conv<RR>(val) * (1 << pbits));
+	ZZ q = power2_ZZ(logq);
+	return Plaintext(mx, q, logq, 1, false);
+}
+
+Plaintext Scheme::encodeFromDoubleArray(double* vals, long slots, long pbits, long logq) {
+	CZZ* mvec = EvaluatorUtils::evalCZZ0Array(vals, slots, pbits);
+	ZZX mx = context.encodeSmall(mvec, slots);
+	ZZ q = power2_ZZ(logq);
+	return Plaintext(mx, q, logq, slots, false);
+}
+
+Plaintext Scheme::encodeFromComplex(complex<double>& val, long pbits, long logq) {
+	ZZX mx;
+	ZZ power = conv<ZZ>(1) << pbits;
+	mx.SetLength(context.N);
+	mx.rep[0] = RoundToZZ(conv<RR>(val.real()) * conv<RR>(power));
+	mx.rep[context.logNh] = RoundToZZ(conv<RR>(val.imag()) * conv<RR>(power));
+	ZZ q = power2_ZZ(logq);
+	return Plaintext(mx, q, logq, 1, true);
+}
+
+Plaintext Scheme::encodeFromComplexArray(complex<double>* vals, long slots, long pbits, long logq) {
+	double* valsr = new double[slots];
+	double* valsi = new double[slots];
+	for(long i = 0; i < slots; i++) {
+		valsr[i] = vals[i].real();
+		valsi[i] = vals[i].imag();
+	}
+	CZZ* mvec = EvaluatorUtils::evalCZZArray(valsr, valsi, slots, pbits);
+	ZZX mx = context.encodeSmall(mvec, slots);
+	ZZ q = power2_ZZ(logq);
+	return Plaintext(mx, q, logq, slots, true);
+}
+
+/********************************************
+Decode
+********************************************/
+
+double Scheme::decodeToDouble(Plaintext& msg, long pbits) {
+	ZZ power = conv<ZZ>(1) << pbits;
+	ZZ tmp = msg.mx.rep[0] % msg.q;
+	if(NumBits(tmp) == msg.logq) tmp -= msg.q;
+	return to_double(conv<RR>(tmp) / conv<RR>(power));
+}
+
+double* Scheme::decodeToDoubleArray(Plaintext& msg, long pbits) {
+	long i, idx;
+	long slots = msg.slots;
+	long gap = context.Nh / slots;
+	CZZ* res = new CZZ[slots];
+
+	ZZ tmp;
+	for (i = 0, idx = 0; i < slots; ++i, idx += gap) {
+		rem(tmp, msg.mx[idx], msg.q);
+		if(NumBits(tmp) == msg.logq) tmp -= msg.q;
+		res[i].r = tmp;
+		rem(tmp, msg.mx[idx + context.Nh], msg.q);
+		if(NumBits(tmp) == msg.logq) tmp -= msg.q;
+		res[i].i = tmp;
+	}
+	context.fftSpecial(res, slots);
+
+	return EvaluatorUtils::evalRealArray(res, slots, pbits);
+}
+
+complex<double> Scheme::decodeToComplex(Plaintext& msg, long pbits) {
+	ZZ power = conv<ZZ>(1) << pbits;
+	ZZ tmp = msg.mx.rep[0] % msg.q;
+	if(NumBits(tmp) == msg.logq) tmp -= msg.q;
+	double d1 = to_double(conv<RR>(tmp) / conv<RR>(power));
+	tmp = msg.mx.rep[context.Nh] % msg.q;
+	if(NumBits(tmp) == msg.logq) tmp -= msg.q;
+	double d2 = to_double(conv<RR>(tmp) / conv<RR>(power));
+	return complex<double>(d1, d2);
+}
+
+complex<double>* Scheme::decodeToComplexArray(Plaintext& msg, long pbits) {
+	long i, idx;
+	long slots = msg.slots;
+	long gap = context.Nh / slots;
+	CZZ* res = new CZZ[slots];
+
+	ZZ tmp;
+	for (i = 0, idx = 0; i < slots; ++i, idx += gap) {
+		rem(tmp, msg.mx[idx], msg.q);
+		if(NumBits(tmp) == msg.logq) tmp -= msg.q;
+		res[i].r = tmp;
+		rem(tmp, msg.mx[idx + context.Nh], msg.q);
+		if(NumBits(tmp) == msg.logq) tmp -= msg.q;
+		res[i].i = tmp;
+	}
+	context.fftSpecial(res, slots);
+
+	double* resr = new double[slots];
+	double* resi = new double[slots];
+	EvaluatorUtils::evalComplexArray(resr, resi, res, slots, pbits);
+	complex<double>* result = new complex<double>[slots];
+	for(long i = 0; i < slots; i++) {
+		result[i] = complex<double>(resr[i], resi[i]);
+	}
+	return result;
+}
+
+/********************************************
+Encrypt
+********************************************/
+
+Ciphertext Scheme::encrypt(double& val, long pbits, long logq) {
+	ZZX mx;
+	mx.SetLength(context.N);
+	mx.rep[0] = conv<ZZ>(conv<RR>(val) * (1 << (pbits + context.logQ)));
+	ZZ q = power2_ZZ(logq);
+	return encryptPoly(mx, 1, logq);
+}
+
+Ciphertext Scheme::encrypt(double* vals, long slots, long pbits, long logq) {
+	CZZ* mvec = EvaluatorUtils::evalCZZ0Array(vals, slots, pbits);
+	ZZX mx = context.encodeLarge(mvec, slots);
+	return encryptPoly(mx, slots, logq);
+}
+
+Ciphertext Scheme::encrypt(complex<double>& val, long pbits, long logq) {
+	ZZX mx;
+	ZZ power = conv<ZZ>(1) << (pbits + context.logQ);
+	mx.SetLength(context.N);
+	mx.rep[0] = RoundToZZ(conv<RR>(val.real()) * conv<RR>(power));
+	mx.rep[context.logNh] = RoundToZZ(conv<RR>(val.imag()) * conv<RR>(power));
+	return encryptPoly(mx, 1, logq, true);
+}
+
+Ciphertext Scheme::encrypt(complex<double>* vals, long slots, long pbits, long logq) {
+	double* valsr = new double[slots];
+	double* valsi = new double[slots];
+	for(long i = 0; i < slots; i++) {
+		valsr[i] = vals[i].real();
+		valsi[i] = vals[i].imag();
+	}
+	CZZ* mvec = EvaluatorUtils::evalCZZArray(valsr, valsi, slots, pbits);
+	ZZX mx = context.encodeLarge(mvec, slots);
+	return encryptPoly(mx, slots, logq, true);
+}
+
+Ciphertext Scheme::encryptPoly(ZZX& mx, long slots, long logq, bool isComplex) {
+	ZZX ax, bx, vx, ex;
+	Key key = keyMap.at(ENCRYPTION);
+	ZZ q = conv<ZZ>(1) << logq;
+	ZZ qQ = q << context.logQ;
+
+	NumUtils::sampleZO(vx, context.N);
+	Ring2Utils::mult(ax, vx, key.ax, qQ, context.N);
+	NumUtils::sampleGauss(ex, context.N, context.sigma);
+	Ring2Utils::addAndEqual(ax, ex, qQ, context.N);
+
+	Ring2Utils::mult(bx, vx, key.bx, qQ, context.N);
+	NumUtils::sampleGauss(ex, context.N, context.sigma);
+	Ring2Utils::addAndEqual(bx, ex, qQ, context.N);
+
+	Ring2Utils::addAndEqual(bx, mx, qQ, context.N);
+
+	Ring2Utils::rightShiftAndEqual(ax, context.logQ, context.N);
+	Ring2Utils::rightShiftAndEqual(bx, context.logQ, context.N);
+
+	return Ciphertext(ax, bx, q, logq, slots, isComplex);
+}

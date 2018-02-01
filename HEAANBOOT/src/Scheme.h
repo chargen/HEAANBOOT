@@ -10,6 +10,8 @@
 #include "Plaintext.h"
 #include "SecretKey.h"
 
+#include <complex>
+
 using namespace std;
 using namespace NTL;
 
@@ -579,6 +581,118 @@ public:
 	 * @param[in] logI: for h = 64, logI by experiments is 4
 	 */
 	void bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long logT, long logI = 4);
+
+
+
+
+	/**
+	 * encodes an double value into a ZZX polynomial using special fft inverse
+	 * @param[in] vals: double value
+	 * @param[in] logq: log of ciphertext modulus
+	 * @return message
+	 */
+	Plaintext encodeFromDouble(double& val, long pbits, long logq);
+
+	/**
+	 * encodes an array of double values into a ZZX polynomial using special fft inverse
+	 * @param[in] vals: array of values
+	 * @param[in] slots: size of an array
+	 * @param[in] logq: log of ciphertext modulus
+	 * @return message
+	 */
+	Plaintext encodeFromDoubleArray(double* vals, long slots, long pbits, long logq);
+
+	/**
+	 * encodes an array of complex value into a ZZX polynomial using special fft inverse
+	 * @param[in] vals: complex value
+	 * @param[in] logq: log of ciphertext modulus
+	 * @return message
+	 */
+	Plaintext encodeFromComplex(complex<double>& val, long pbits, long logq);
+
+	/**
+	 * encodes an array of complex values into a ZZX polynomial using special fft inverse
+	 * @param[in] vals: array of values
+	 * @param[in] slots: size of an array
+	 * @param[in] logq: log of ciphertext modulus
+	 * @return message
+	 */
+	Plaintext encodeFromComplexArray(complex<double>* vals, long slots, long pbits, long logq);
+
+	/**
+	 * decodes a ZZX polynomial into a double value using special fft
+	 * @param[in] msg: message
+	 * @return a double value
+	 */
+	double decodeToDouble(Plaintext& msg, long pbits);
+
+	/**
+	 * decodes a ZZX polynomial into an array of double values using special fft
+	 * @param[in] msg: message
+	 * @return array of double values
+	 */
+	double* decodeToDoubleArray(Plaintext& msg, long pbits);
+	
+	/**
+	 * decodes a ZZX polynomial into a complex value using special fft
+	 * @param[in] msg: message
+	 * @return a complex value
+	 */
+	complex<double> decodeToComplex(Plaintext& msg, long pbits);
+	
+	/**
+	 * decodes a ZZX polynomial into an array of complex values using special fft
+	 * @param[in] msg: message
+	 * @return array of double values
+	 */
+	complex<double>* decodeToComplexArray(Plaintext& msg, long pbits);
+
+	//----------------------------------------------------------------------------------
+	//   ENCRYPTION
+	//----------------------------------------------------------------------------------
+	
+	/**
+	 * encrypts message into ciphertext using public key encyption
+	 * @param[in] val: double value
+	 * @param[in] pbits: how many bits we will shift to make it integer
+	 * @param[in] logq: bit size of ciphertext modulus
+	 * @return ciphertext
+	 */
+	Ciphertext encrypt(double& val, long pbits, long logq);
+
+	/**
+	 * encrypts message into ciphertext using public key encyption
+	 * @param[in] vals: double array values
+	 * @param[in] pbits: how many bits we will shift to make it integer
+	 * @param[in] logq: bit size of ciphertext modulus
+	 * @return ciphertext
+	 */
+	Ciphertext encrypt(double* vals, long slots, long pbits, long logq);
+
+	/**
+	 * encrypts message into ciphertext using public key encyption
+	 * @param[in] val: complex value
+	 * @param[in] pbits: how many bits we will shift to make it integer
+	 * @param[in] logq: bit size of ciphertext modulus
+	 * @return ciphertext
+	 */
+	Ciphertext encrypt(complex<double>& val, long pbits, long logq);
+
+	/**
+	 * encrypts message into ciphertext using public key encyption
+	 * @param[in] vals: complex array values
+	 * @param[in] pbits: how many bits we will shift to make it integer
+	 * @param[in] logq: bit size of ciphertext modulus
+	 * @return ciphertext
+	 */
+	Ciphertext encrypt(complex<double>* vals, long slots, long pbits, long logq);
+
+	/**
+	 * encrypts message into ciphertext using public key encyption
+	 * @param[in] msg: Palintext class value
+	 * @return ciphertext
+	 */
+	Ciphertext encryptPoly(ZZX& mx, long slots, long logq, bool isComplex = false);
 
 };
 
