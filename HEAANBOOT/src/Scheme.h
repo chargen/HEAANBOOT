@@ -117,6 +117,7 @@ public:
 	 */
 	complex<double> decodeSingle(Plaintext& msg);
 
+
 	//----------------------------------------------------------------------------------
 	//   ENCRYPTION & DECRYPTION
 	//----------------------------------------------------------------------------------
@@ -176,12 +177,23 @@ public:
 	 */
 	complex<double> decryptSingle(SecretKey& secretKey, Ciphertext& cipher);
 
+
 	//----------------------------------------------------------------------------------
 	//   HOMOMORPHIC OPERATIONS
 	//----------------------------------------------------------------------------------
 
+
+	/**
+	 * negate the ciphertext
+	 * @param[in] cipher: ciphertext(m)
+	 * @return ciphertext(-m)
+	 */
 	Ciphertext negate(Ciphertext& cipher);
 
+	/**
+	 * negate the ciphertext
+	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(-m)
+	 */
 	void negateAndEqual(Ciphertext& cipher);
 
 	/**
@@ -200,36 +212,53 @@ public:
 	void addAndEqual(Ciphertext& cipher1, Ciphertext& cipher2);
 
 	/**
-	 * constant addition
+	 * quantized constant addition
 	 * @param[in] cipher: ciphertext(m)
 	 * @param[in] cnst: constant
-	 * @return ciphertext(m + constant)
+	 * @param[in] logp: number of quantized bits. If logp < 0 used cipher.logp, else logp
+	 * @return ciphertext(m + cnst * 2^logp)
 	 */
 	Ciphertext addConst(Ciphertext& cipher, double cnst, long logp = -1);
 
+	/**
+	 * quantized constant addition
+	 * @param[in] cipher: ciphertext(m)
+	 * @param[in] cnst: constant
+	 * @param[in] logp: number of quantized bits. If logp < 0 used cipher.logp, else logp
+	 * @return ciphertext(m + cnst * 2^logp)
+	 */
 	Ciphertext addConst(Ciphertext& cipher, RR& cnst, long logp = -1);
 
 	/**
-	 * constant addition
+	 * quantized constant addition
 	 * @param[in] cipher: ciphertext(m)
 	 * @param[in] cnst: constant
-	 * @return ciphertext(m + constant)
+	 * @param[in] logp: number of quantized bits. If logp < 0 used cipher.logp, else logp
+	 * @return ciphertext(m + cnst * 2^logp)
 	 */
 	Ciphertext addConst(Ciphertext& cipher, complex<double> cnst, long logp = -1);
 
 	/**
-	 * constant addition
-	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m + constant)
+	 * quantized constant addition
+	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m + cnst * 2^logp)
 	 * @param[in] cnst: constant
+	 * @param[in] logp: number of quantized bits. If logp < 0 used cipher.logp, else logp
 	 */
 	void addConstAndEqual(Ciphertext& cipher, double cnst, long logp = -1);
 
+	/**
+	 * quantized constant addition
+	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m + cnst * 2^logp)
+	 * @param[in] cnst: constant
+	 * @param[in] logp: number of quantized bits. If logp < 0 used cipher.logp, else logp
+	 */
 	void addConstAndEqual(Ciphertext& cipher, RR& cnst, long logp = -1);
 
 	/**
-	 * constant addition
-	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m + constant)
+	 * quantized constant addition
+	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m + cnst * 2^logp)
 	 * @param[in] cnst: constant
+	 * @param[in] logp: number of quantized bits. If logp < 0 used cipher.logp, else logp
 	 */
 	void addConstAndEqual(Ciphertext& cipher, complex<double> cnst, long logp = -1);
 
@@ -314,51 +343,70 @@ public:
 	void squareAndEqual(Ciphertext& cipher);
 
 	/**
-	 * constant multiplication
-	 * @param[in] cipher: ciphertext(m)
+	 * quantized constant multiplication
+	 * @param[in, out] cipher: ciphertext(m)
 	 * @param[in] cnst: constant
-	 * @return ciphertext(m * constant)
+	 * @param[in] logp: number of quantized bits
+	 * @return ciphertext(m * (cnst * 2^logp))
 	 */
 	Ciphertext multByConst(Ciphertext& cipher, double cnst, long logp);
 
+	/**
+	 * quantized constant multiplication
+	 * @param[in, out] cipher: ciphertext(m)
+	 * @param[in] cnst: constant
+	 * @param[in] logp: number of quantized bits
+	 * @return ciphertext(m * (cnst * 2^logp))
+	 */
 	Ciphertext multByConst(Ciphertext& cipher, RR& cnst, long logp);
 
 	/**
-	 * constant multiplication
-	 * @param[in] cipher: ciphertext(m)
+	 * quantized constant multiplication
+	 * @param[in, out] cipher: ciphertext(m)
 	 * @param[in] cnst: constant
-	 * @return ciphertext(m * constant)
+	 * @param[in] logp: number of quantized bits
+	 * @return ciphertext(m * (cnst * 2^logp))
 	 */
 	Ciphertext multByConst(Ciphertext& cipher, complex<double> cnst, long logp);
 
 	/**
-	 * constant multiplication
-	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m * constant)
+	 * quantized constant multiplication
+	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m * (cnst * 2^logp))
 	 * @param[in] cnst: constant
+	 * @param[in] logp: number of quantized bits
 	 */
 	void multByConstAndEqual(Ciphertext& cipher, double cnst, long logp);
 
+	/**
+	 * quantized constant multiplication
+	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m * (cnst * 2^logp))
+	 * @param[in] cnst: constant
+	 * @param[in] logp: number of quantized bits
+	 */
 	void multByConstAndEqual(Ciphertext& cipher, RR& cnst, long logp);
 
 	/**
-	 * constant multiplication
-	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m * constant)
+	 * quantized constant multiplication
+	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m * (cnst * 2^logp))
 	 * @param[in] cnst: constant
+	 * @param[in] logp: number of quantized bits
 	 */
 	void multByConstAndEqual(Ciphertext& cipher, complex<double> cnst, long logp);
 
 	/**
 	 * polynomial multiplication
 	 * @param[in] cipher: ciphertext(m)
-	 * @param[in] poly: polynomial, encoding (constant)
-	 * @return ciphertext(m * constant)
+	 * @param[in] poly: polynomial - encoding(cnst)
+	 * @param[in] logp: number of quantized bits
+	 * @return ciphertext(m * cnst)
 	 */
 	Ciphertext multByPoly(Ciphertext& cipher, ZZX& poly, long logp);
 
 	/**
 	 * polynomial multiplication
-	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m * constant)
-	 * @param[in] poly: polynomial, encoding (constant)
+	 * @param[in] cipher: ciphertext(m) -> ciphertext(m * cnst)
+	 * @param[in] poly: polynomial - encoding(cnst)
+	 * @param[in] logp: number of quantized bits
 	 */
 	void multByPolyAndEqual(Ciphertext& cipher, ZZX& poly, long logp);
 
@@ -378,19 +426,19 @@ public:
 	void multByMonomialAndEqual(Ciphertext& cipher, const long degree);
 
 	/**
-	 * multiplication by 2^bits
+	 * multiplication by 2^degree
 	 * @param[in] cipher: ciphertext(m)
-	 * @param[in] bits: shift bits
-	 * @return ciphertext(m*2^bits)
+	 * @param[in] degree: power degree
+	 * @return ciphertext(m*2^degree)
 	 */
-	Ciphertext multByPo2(Ciphertext& cipher, long deg);
+	Ciphertext multByPo2(Ciphertext& cipher, long degree);
 
 	/**
-	 * multiplication by 2^bits
-	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m*2^bits)
-	 * @param[in] bits: shift bits
+	 * multiplication by 2^degree
+	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m*2^degree)
+	 * @param[in] degree: power degree
 	 */
-	void multByPo2AndEqual(Ciphertext& cipher, long deg);
+	void multByPo2AndEqual(Ciphertext& cipher, long degree);
 
 	/**
 	 * doubles
@@ -398,9 +446,21 @@ public:
 	 */
 	void multBy2AndEqual(Ciphertext& cipher);
 
-	Ciphertext divByPo2(Ciphertext& cipher, long deg);
+	/**
+	 * division by 2^degree
+	 * @param[in] cipher: ciphertext(m)
+	 * @param[in] degree: power degree
+	 * @return ciphertext(m / 2^degree)
+	 */
+	Ciphertext divByPo2(Ciphertext& cipher, long degree);
 
-	void divByPo2AndEqual(Ciphertext& cipher, long deg);
+	/**
+	 * division by 2^degree
+	 * @param[in] cipher: ciphertext(m) -> ciphertext(m / 2^degree)
+	 * @param[in] degree: power degree
+	 */
+	void divByPo2AndEqual(Ciphertext& cipher, long degree);
+
 
 	//----------------------------------------------------------------------------------
 	//   RESCALING & MODULUS DOWN
@@ -411,7 +471,7 @@ public:
 	 * rescaling procedure
 	 * @param[in] cipher: ciphertext(m)
 	 * @param[in] bitsDown: rescaling bits
-	 * @return ciphertext(m/2^bitsDown) with new modulus (q/2^bitsDown)
+	 * @return ciphertext(m / 2^bitsDown) with new modulus (q / 2^bitsDown)
 	 */
 	Ciphertext reScaleBy(Ciphertext& cipher, long bitsDown);
 
@@ -419,20 +479,20 @@ public:
 	 * rescaling procedure
 	 * @param[in] cipher: ciphertext(m)
 	 * @param[in] newlogq: log of new ciphertext modulus
-	 * @return ciphertext(m*2^newlogq/q) with new modulus (newlogq)
+	 * @return ciphertext(m / 2^(logq - newlogq)) with new modulus (2^newlogq)
 	 */
 	Ciphertext reScaleTo(Ciphertext& cipher, long newlogq);
 
 	/**
 	 * rescaling procedure
-	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m/2^bitsDown) with new modulus (q/2^bitsDown)
+	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m / 2^bitsDown) with new modulus (q / 2^bitsDown)
 	 * @param[in] bitsDown: rescaling bits
 	 */
 	void reScaleByAndEqual(Ciphertext& cipher, long bitsDown);
 
 	/**
 	 * rescaling procedure
-	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m*2^newlogq/q) with new modulus (newlogq)
+	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m / 2^(logq - newlogq)) with new modulus (2^newlogq)
 	 * @param[in] newlogq: log ofnew ciphertext modulus
 	 */
 	void reScaleToAndEqual(Ciphertext& cipher, long newlogq);

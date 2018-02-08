@@ -13,20 +13,45 @@ public:
 
 
 	//----------------------------------------------------------------------------------
-	//   ZZ & CZZ TO DOUBLE
+	//   RANDOM REAL AND COMPLEX NUMBERS
 	//----------------------------------------------------------------------------------
 
+
+	/**
+	 * generate random real value in range (0, bound).
+	 */
 	static double randomReal(double bound = 1.0);
 
+	/**
+	 * generate random complex value with both real and imaginary part in range (0, bound).
+	 */
 	static complex<double> randomComplex(double bound = 1.0);
 
+	/**
+	 * generate random complex value with norm 1 and angle bound in (0, anglebound) in radiant
+	 */
 	static complex<double> randomCircle(double anglebound = 1.0);
 
+	/**
+	 * generate array of random real values in range (0, bound)
+	 */
 	static double* randomRealArray(long size, double bound = 1.0);
 
+	/**
+	 * generate array of random complex values with both real and imaginary part in range (0, bound).
+	 */
 	static complex<double>* randomComplexArray(long size, double bound = 1.0);
 
-	static complex<double>* randomCircleArray(long size, double bound);
+	/**
+	 * generate array of random complex values with norm 1 and angle bound in (0, anglebound) in radiant
+	 */
+	static complex<double>* randomCircleArray(long size, double bound = 1.0);
+
+
+	//----------------------------------------------------------------------------------
+	//   DOUBLE & RR <-> ZZ
+	//----------------------------------------------------------------------------------
+
 
 	/**
 	 * evaluates double value (x >> logp)
@@ -35,19 +60,6 @@ public:
 	 * @return x >> logp
 	 */
 	static double evalReal(const ZZ& x, const long logp);
-
-	/**
-	 * evaluates double value (x >> logp)
-	 * @param[out] res: double value (x >> logp)
-	 * @param[in] x: ZZ scaled up value
-	 * @param[in] logp: log of precision
-	 */
-	static void evalReal(double& res, const ZZ& x, const long logp);
-
-	//----------------------------------------------------------------------------------
-	//   DOUBLE & RR TO ZZ & CZZ
-	//----------------------------------------------------------------------------------
-
 
 	/**
 	 * evaluates value x << logp
@@ -64,6 +76,7 @@ public:
 	 * @return x << logp
 	 */
 	static ZZ evalZZ(const RR& x, const long logp);
+
 
 	//----------------------------------------------------------------------------------
 	//   ROTATIONS

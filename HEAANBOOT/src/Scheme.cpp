@@ -17,13 +17,19 @@ Scheme::Scheme(SecretKey& secretKey, Context& context) : context(context) {
 	addMultKey(secretKey);
 };
 
+
+//----------------------------------------------------------------------------------
+//   KEYS GENERATION
+//----------------------------------------------------------------------------------
+
+
 void Scheme::addEncKey(SecretKey& secretKey) {
 	ZZX ex, ax, bx;
 
-	NumUtils::sampleUniform2(ax, context.N, context.logPQ);
+	NumUtils::sampleUniform2(ax, context.N, context.logQQ);
 	NumUtils::sampleGauss(ex, context.N, context.sigma);
-	Ring2Utils::mult(bx, secretKey.sx, ax, context.PQ, context.N);
-	Ring2Utils::sub(bx, ex, bx, context.PQ, context.N);
+	Ring2Utils::mult(bx, secretKey.sx, ax, context.QQ, context.N);
+	Ring2Utils::sub(bx, ex, bx, context.QQ, context.N);
 
 	keyMap.insert(pair<long, Key>(ENCRYPTION, Key(ax, bx)));
 }
@@ -32,12 +38,12 @@ void Scheme::addMultKey(SecretKey& secretKey) {
 	ZZX ex, ax, bx, sxsx;
 
 	Ring2Utils::mult(sxsx, secretKey.sx, secretKey.sx, context.Q, context.N);
-	Ring2Utils::leftShiftAndEqual(sxsx, context.logQ, context.PQ, context.N);
-	NumUtils::sampleUniform2(ax, context.N, context.logPQ);
+	Ring2Utils::leftShiftAndEqual(sxsx, context.logQ, context.QQ, context.N);
+	NumUtils::sampleUniform2(ax, context.N, context.logQQ);
 	NumUtils::sampleGauss(ex, context.N, context.sigma);
-	Ring2Utils::addAndEqual(ex, sxsx, context.PQ, context.N);
-	Ring2Utils::mult(bx, secretKey.sx, ax, context.PQ, context.N);
-	Ring2Utils::sub(bx, ex, bx, context.PQ, context.N);
+	Ring2Utils::addAndEqual(ex, sxsx, context.QQ, context.N);
+	Ring2Utils::mult(bx, secretKey.sx, ax, context.QQ, context.N);
+	Ring2Utils::sub(bx, ex, bx, context.QQ, context.N);
 
 	keyMap.insert(pair<long, Key>(MULTIPLICATION, Key(ax, bx)));
 }
@@ -46,12 +52,12 @@ void Scheme::addConjKey(SecretKey& secretKey) {
 	ZZX ex, ax, bx, sxconj;
 
 	Ring2Utils::conjugate(sxconj, secretKey.sx, context.N);
-	Ring2Utils::leftShiftAndEqual(sxconj, context.logQ, context.PQ, context.N);
-	NumUtils::sampleUniform2(ax, context.N, context.logPQ);
+	Ring2Utils::leftShiftAndEqual(sxconj, context.logQ, context.QQ, context.N);
+	NumUtils::sampleUniform2(ax, context.N, context.logQQ);
 	NumUtils::sampleGauss(ex, context.N, context.sigma);
-	Ring2Utils::addAndEqual(ex, sxconj, context.PQ, context.N);
-	Ring2Utils::mult(bx, secretKey.sx, ax, context.PQ, context.N);
-	Ring2Utils::sub(bx, ex, bx, context.PQ, context.N);
+	Ring2Utils::addAndEqual(ex, sxconj, context.QQ, context.N);
+	Ring2Utils::mult(bx, secretKey.sx, ax, context.QQ, context.N);
+	Ring2Utils::sub(bx, ex, bx, context.QQ, context.N);
 
 	keyMap.insert(pair<long, Key>(CONJUGATION, Key(ax, bx)));
 }
@@ -60,12 +66,12 @@ void Scheme::addLeftRotKey(SecretKey& secretKey, long rot) {
 	ZZX ex, ax, bx, sxrot;
 
 	Ring2Utils::inpower(sxrot, secretKey.sx, context.rotGroup[rot], context.Q, context.N);
-	Ring2Utils::leftShiftAndEqual(sxrot, context.logQ, context.PQ, context.N);
-	NumUtils::sampleUniform2(ax, context.N, context.logPQ);
+	Ring2Utils::leftShiftAndEqual(sxrot, context.logQ, context.QQ, context.N);
+	NumUtils::sampleUniform2(ax, context.N, context.logQQ);
 	NumUtils::sampleGauss(ex, context.N, context.sigma);
-	Ring2Utils::addAndEqual(ex, sxrot, context.PQ, context.N);
-	Ring2Utils::mult(bx, secretKey.sx, ax, context.PQ, context.N);
-	Ring2Utils::sub(bx, ex, bx, context.PQ, context.N);
+	Ring2Utils::addAndEqual(ex, sxrot, context.QQ, context.N);
+	Ring2Utils::mult(bx, secretKey.sx, ax, context.QQ, context.N);
+	Ring2Utils::sub(bx, ex, bx, context.QQ, context.N);
 
 	leftRotKeyMap.insert(pair<long, Key>(rot, Key(ax, bx)));
 }
@@ -188,6 +194,7 @@ complex<double> Scheme::decodeSingle(Plaintext& msg) {
 	return res;
 }
 
+
 //----------------------------------------------------------------------------------
 //   ENCRYPTION & DECRYPTION
 //----------------------------------------------------------------------------------
@@ -255,9 +262,11 @@ complex<double> Scheme::decryptSingle(SecretKey& secretKey, Ciphertext& cipher) 
 	return decodeSingle(msg);
 }
 
+
 //----------------------------------------------------------------------------------
 //   HOMOMORPHIC OPERATIONS
 //----------------------------------------------------------------------------------
+
 
 Ciphertext Scheme::negate(Ciphertext& cipher) {
 	return Ciphertext(-cipher.ax, -cipher.bx, cipher.logp, cipher.logq, cipher.slots, cipher.isComplex);
@@ -284,8 +293,6 @@ void Scheme::addAndEqual(Ciphertext& cipher1, Ciphertext& cipher2) {
 	Ring2Utils::addAndEqual(cipher1.ax, cipher2.ax, q, context.N);
 	Ring2Utils::addAndEqual(cipher1.bx, cipher2.bx, q, context.N);
 }
-
-//-----------------------------------------
 
 Ciphertext Scheme::addConst(Ciphertext& cipher, double cnst, long logp) {
 	ZZ q = context.qpowvec[cipher.logq];
@@ -456,8 +463,6 @@ void Scheme::multAndEqual(Ciphertext& cipher1, Ciphertext& cipher2) {
 	cipher1.logp += cipher2.logp;
 }
 
-//-----------------------------------------
-
 Ciphertext Scheme::square(Ciphertext& cipher) {
 	ZZ q = context.qpowvec[cipher.logq];
 	ZZ qQ = context.qpowvec[cipher.logq + context.logQ];
@@ -502,8 +507,6 @@ void Scheme::squareAndEqual(Ciphertext& cipher) {
 	Ring2Utils::addAndEqual(cipher.bx, bxbx, q, context.N);
 	cipher.logp *= 2;
 }
-
-//-----------------------------------------
 
 Ciphertext Scheme::multByConst(Ciphertext& cipher, double cnst, long logp) {
 	ZZ q = context.qpowvec[cipher.logq];
@@ -609,8 +612,6 @@ void Scheme::multByPolyAndEqual(Ciphertext& cipher, ZZX& poly, long logp) {
 	cipher.logp += logp;
 }
 
-//-----------------------------------------
-
 Ciphertext Scheme::multByMonomial(Ciphertext& cipher, const long degree) {
 	ZZX ax, bx;
 
@@ -624,8 +625,6 @@ void Scheme::multByMonomialAndEqual(Ciphertext& cipher, const long degree) {
 	Ring2Utils::multByMonomialAndEqual(cipher.ax, degree, context.N);
 	Ring2Utils::multByMonomialAndEqual(cipher.bx, degree, context.N);
 }
-
-//-----------------------------------------
 
 Ciphertext Scheme::multByPo2(Ciphertext& cipher, long deg) {
 	ZZ q = context.qpowvec[cipher.logq];
@@ -652,21 +651,22 @@ void Scheme::multBy2AndEqual(Ciphertext& cipher) {
 	Ring2Utils::doubleAndEqual(cipher.bx, q, context.N);
 }
 
-Ciphertext Scheme::divByPo2(Ciphertext& cipher, long deg) {
+Ciphertext Scheme::divByPo2(Ciphertext& cipher, long degree) {
 	ZZX ax, bx;
 
-	Ring2Utils::rightShift(ax, cipher.ax, deg, context.N);
-	Ring2Utils::rightShift(bx, cipher.bx, deg, context.N);
+	Ring2Utils::rightShift(ax, cipher.ax, degree, context.N);
+	Ring2Utils::rightShift(bx, cipher.bx, degree, context.N);
 
-	return Ciphertext(ax, bx, cipher.logp, cipher.logq - deg, cipher.slots, cipher.isComplex);
+	return Ciphertext(ax, bx, cipher.logp, cipher.logq - degree, cipher.slots, cipher.isComplex);
 }
 
-void Scheme::divByPo2AndEqual(Ciphertext& cipher, long deg) {
-	Ring2Utils::rightShiftAndEqual(cipher.ax, deg, context.N);
-	Ring2Utils::rightShiftAndEqual(cipher.bx, deg, context.N);
+void Scheme::divByPo2AndEqual(Ciphertext& cipher, long degree) {
+	Ring2Utils::rightShiftAndEqual(cipher.ax, degree, context.N);
+	Ring2Utils::rightShiftAndEqual(cipher.bx, degree, context.N);
 
-	cipher.logq -= deg;
+	cipher.logq -= degree;
 }
+
 
 //----------------------------------------------------------------------------------
 //   RESCALING & MODULUS DOWN

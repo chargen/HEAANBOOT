@@ -16,18 +16,19 @@ public:
 	ZZX ax; ///< Ciphertext is an RLWE instance (ax, bx = mx + ex - ax * sx) in ring Z_q[X] / (X^N + 1);
 	ZZX bx; ///< Ciphertext is an RLWE instance (ax, bx = mx + ex - ax * sx) in ring Z_q[X] / (X^N + 1);
 
-	long logp; ///< number of bits
+	long logp; ///< number of quantized bits
 	long logq; ///< number of bits in modulus
 	long slots; ///< number of slots in Ciphertext
 
 	bool isComplex; ///< option of Ciphertext with single real slot
+
 	//-----------------------------------------
 
 	/**
 	 * Ciphertext = (ax, bx = mx + ex - ax * sx) for secret key sx and error ex
 	 * @param[in] ax: ZZX polynomial
 	 * @param[in] bx: ZZX polynomial
-	 * @param[in] q: ciphertext modulus
+	 * @param[in] logp: number of quantized bits
 	 * @param[in] logq: number of bits in modulus
 	 * @param[in] slots: number of slots in a ciphertext
 	 * @param[in] isComplex: option of Ciphertext with single real slot

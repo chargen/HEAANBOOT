@@ -1,6 +1,11 @@
 #include "StringUtils.h"
 
 
+//----------------------------------------------------------------------------------
+//   SHOW ARRAY
+//----------------------------------------------------------------------------------
+
+
 void StringUtils::show(long* vals, long size) {
 	cout << "[";
 	for (long i = 0; i < size; ++i) {
@@ -17,6 +22,14 @@ void StringUtils::show(double* vals, long size) {
 	cout << "]" << endl;
 }
 
+void StringUtils::show(complex<double>* vals, long size) {
+	cout << "[";
+	for (long i = 0; i < size; ++i) {
+		cout << vals[i] << ", ";
+	}
+	cout << "]" << endl;
+}
+
 void StringUtils::show(ZZ* vals, long size) {
 	cout << "[";
 	for (long i = 0; i < size; ++i) {
@@ -25,7 +38,11 @@ void StringUtils::show(ZZ* vals, long size) {
 	cout << "]" << endl;
 }
 
-//-----------------------------------------
+
+//----------------------------------------------------------------------------------
+//   SHOW & COMPARE ARRAY
+//----------------------------------------------------------------------------------
+
 
 void StringUtils::showcompare(double val1, double val2, string prefix) {
 	cout << "---------------------" << endl;

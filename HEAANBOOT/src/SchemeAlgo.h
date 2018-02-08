@@ -32,6 +32,12 @@ public:
 	 */
 	Ciphertext* encryptSingleArray(complex<double>* vals, long size, long logp);
 
+	/**
+	 * encrypting array of values, each to one ciphertext
+	 * @param[in] vals: [m_1, m_2,...,m_size]
+	 * @param[in] size: array size
+	 * @return [ciphertext(m_1), ciphertext(m_2),...,ciphertext(m_size)]
+	 */
 	Ciphertext* encryptSingleArray(double* vals, long size, long logp);
 
 	/**

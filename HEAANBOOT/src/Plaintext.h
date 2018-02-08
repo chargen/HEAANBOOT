@@ -12,20 +12,20 @@ public:
 
 	ZZX mx; ///< message mod X^N + 1
 
-	long logp; ///< number of bits
+	long logp; ///< number of quantized bits
 	long logq; ///< number of bits in modulus
-	long slots; ///< number of slots in ciphertext
+	long slots; ///< number of slots in message
 
-	bool isComplex; ///< option of Ciphertext with single real slot
+	bool isComplex; ///< option of Message with single real slot
 	//-----------------------------------------
 
 	/**
 	 * Plaintext: mx
 	 * @param[in] mx: ZZX polynomial
-	 * @param[in] q: ciphertext modulus
+	 * @param[in] logp: number of quantized bits
 	 * @param[in] logq: number of bits in modulus
 	 * @param[in] slots: number of slots in message
-	 * @param[in] isComplex: option of Ciphertext with single real slot
+	 * @param[in] isComplex: option of Message with single real slot
 	 */
 	Plaintext(ZZX mx = ZZX::zero(), long logp = 0, long logq = 0, long slots = 1, bool isComplex = true) : mx(mx), logp(logp), logq(logq), slots(slots), isComplex(isComplex) {}
 

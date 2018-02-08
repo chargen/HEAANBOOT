@@ -1,6 +1,11 @@
 #include "Ring2Utils.h"
 
 
+//----------------------------------------------------------------------------------
+//   MODULUS
+//----------------------------------------------------------------------------------
+
+
 void Ring2Utils::mod(ZZX& res, ZZX& p, ZZ& mod, const long degree) {
 	res.SetLength(degree);
 	for (long i = 0; i < degree; ++i) {
@@ -13,6 +18,12 @@ void Ring2Utils::modAndEqual(ZZX& p, ZZ& mod, const long degree) {
 		rem(p.rep[i], p.rep[i], mod);
 	}
 }
+
+
+//----------------------------------------------------------------------------------
+//   ADDITION & SUBSTRACTION
+//----------------------------------------------------------------------------------
+
 
 void Ring2Utils::add(ZZX& res, ZZX& p1, ZZX& p2, ZZ& mod, const long degree) {
 	res.SetLength(degree);
@@ -57,6 +68,12 @@ void Ring2Utils::subAndEqual2(ZZX& p1, ZZX& p2, ZZ& mod, const long degree) {
 		AddMod(p2.rep[i], p1.rep[i], -p2.rep[i], mod);
 	}
 }
+
+
+//----------------------------------------------------------------------------------
+//   MULTIPLICATION & SQUARING
+//----------------------------------------------------------------------------------
+
 
 void Ring2Utils::mult(ZZX& res, ZZX& p1, ZZX& p2, ZZ& mod, const long degree) {
 	res.SetLength(degree);
@@ -218,6 +235,12 @@ void Ring2Utils::rightShiftAndEqual(ZZX& p, const long bits, const long degree) 
 		RightShift(p.rep[i], p.rep[i], bits);
 	}
 }
+
+
+//----------------------------------------------------------------------------------
+//   CONJUGATION ROTATION AND OTHER
+//----------------------------------------------------------------------------------
+
 
 void Ring2Utils::conjugate(ZZX& res, ZZX& p, const long degree) {
 	res.SetLength(degree);

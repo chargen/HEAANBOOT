@@ -1,6 +1,11 @@
 #include "SchemeAlgo.h"
 
 
+//----------------------------------------------------------------------------------
+//   ARRAY ENCRYPTION & DECRYPTION
+//----------------------------------------------------------------------------------
+
+
 Ciphertext* SchemeAlgo::encryptSingleArray(complex<double>* vals, long size, long logp) {
 	Ciphertext* res = new Ciphertext[size];
 	for (long i = 0; i < size; ++i) {
@@ -25,6 +30,12 @@ complex<double>* SchemeAlgo::decryptSingleArray(SecretKey& secretKey, Ciphertext
 	return res;
 }
 
+
+//----------------------------------------------------------------------------------
+//   POWERS & PRODUCTS
+//----------------------------------------------------------------------------------
+
+
 Ciphertext SchemeAlgo::powerOf2(Ciphertext& cipher, const long logp, const long logDegree) {
 	Ciphertext res = cipher;
 	for (long i = 0; i < logDegree; ++i) {
@@ -43,8 +54,6 @@ Ciphertext* SchemeAlgo::powerOf2Extended(Ciphertext& cipher, const long logp, co
 	}
 	return res;
 }
-
-//-----------------------------------------
 
 Ciphertext SchemeAlgo::power(Ciphertext& cipher, const long logp, const long degree) {
 	long logDegree = log2((double)degree);
@@ -84,8 +93,6 @@ Ciphertext* SchemeAlgo::powerExtended(Ciphertext& cipher, const long logp, const
 	}
 	return res;
 }
-
-//-----------------------------------------
 
 Ciphertext SchemeAlgo::prodOfPo2(Ciphertext* ciphers, const long logp, const long logDegree) {
 	Ciphertext* res = ciphers;
@@ -130,6 +137,12 @@ Ciphertext SchemeAlgo::prod(Ciphertext* ciphers, const long logp, const long deg
 	}
 	return res;
 }
+
+
+//----------------------------------------------------------------------------------
+//   METHODS ON ARRAYS OF CIPHERTEXTS
+//----------------------------------------------------------------------------------
+
 
 Ciphertext SchemeAlgo::sum(Ciphertext* ciphers, const long size) {
 	Ciphertext res = ciphers[0];
@@ -216,7 +229,11 @@ void SchemeAlgo::partialSlotsSumAndEqual(Ciphertext& cipher, const long slots) {
 	}
 }
 
-//-----------------------------------------
+
+//----------------------------------------------------------------------------------
+//   FUNCTIONS
+//----------------------------------------------------------------------------------
+
 
 Ciphertext SchemeAlgo::inverse(Ciphertext& cipher, const long logp, const long steps) {
 	Ciphertext cbar = scheme.negate(cipher);
@@ -256,8 +273,6 @@ Ciphertext* SchemeAlgo::inverseExtended(Ciphertext& cipher, const long logp, con
 	}
 	return res;
 }
-
-//-----------------------------------------
 
 Ciphertext SchemeAlgo::function(Ciphertext& cipher, string& funcName, const long logp, const long degree) {
 	Ciphertext* cpows = powerExtended(cipher, logp, degree);
@@ -325,6 +340,12 @@ Ciphertext* SchemeAlgo::functionExtended(Ciphertext& cipher, string& funcName, c
 	NTL_EXEC_RANGE_END;
 	return res;
 }
+
+
+//----------------------------------------------------------------------------------
+//   FFT & FFT INVERSE
+//----------------------------------------------------------------------------------
+
 
 void SchemeAlgo::bitReverse(Ciphertext* ciphers, const long size) {
 	for (long i = 1, j = 0; i < size; ++i) {

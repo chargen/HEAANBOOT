@@ -5,7 +5,6 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/BootContext.cpp \
-../src/CZZ.cpp \
 ../src/Ciphertext.cpp \
 ../src/Context.cpp \
 ../src/EvaluatorUtils.cpp \
@@ -24,7 +23,6 @@ CPP_SRCS += \
 
 OBJS += \
 ./src/BootContext.o \
-./src/CZZ.o \
 ./src/Ciphertext.o \
 ./src/Context.o \
 ./src/EvaluatorUtils.o \
@@ -43,7 +41,6 @@ OBJS += \
 
 CPP_DEPS += \
 ./src/BootContext.d \
-./src/CZZ.d \
 ./src/Ciphertext.d \
 ./src/Context.d \
 ./src/EvaluatorUtils.d \

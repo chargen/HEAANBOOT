@@ -4,9 +4,14 @@
 #include <complex>
 #include <cstdlib>
 
+
+//----------------------------------------------------------------------------------
+//   RANDOM REAL AND COMPLEX NUMBERS
+//----------------------------------------------------------------------------------
+
+
 double EvaluatorUtils::randomReal(double bound)  {
-	double r = (double) rand()/(RAND_MAX);
-	return r * bound;
+	return (double) rand()/(RAND_MAX) * bound;
 }
 
 complex<double> EvaluatorUtils::randomComplex(double bound) {
@@ -48,6 +53,12 @@ complex<double>* EvaluatorUtils::randomCircleArray(long size, double bound) {
 	return res;
 }
 
+
+//----------------------------------------------------------------------------------
+//   DOUBLE & RR <-> ZZ
+//----------------------------------------------------------------------------------
+
+
 double EvaluatorUtils::evalReal(const ZZ& x, const long logp) {
 	RR xp = to_RR(x);
 	xp.e -= logp;
@@ -62,6 +73,12 @@ ZZ EvaluatorUtils::evalZZ(const RR& x, const long logp) {
 	RR xp = MakeRR(x.x, x.e + logp);
 	return RoundToZZ(xp);
 }
+
+
+//----------------------------------------------------------------------------------
+//   ROTATIONS
+//----------------------------------------------------------------------------------
+
 
 void EvaluatorUtils::leftRotateAndEqual(complex<double>* vals, const long size, const long rotSize) {
 	long remrotSize = rotSize % size;

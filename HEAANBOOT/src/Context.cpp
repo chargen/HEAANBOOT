@@ -10,9 +10,9 @@ Context::Context(Params& params) :
 	Nh = N >> 1;
 	logNh = logN - 1;
 	M = N << 1;
-	logPQ = logQ << 1;
+	logQQ = logQ << 1;
 	Q = power2_ZZ(logQ);
-	PQ = power2_ZZ(logPQ);
+	QQ = power2_ZZ(logQQ);
 
 	rotGroup = new long[Nh];
 	long fivePows = 1;
@@ -33,10 +33,9 @@ Context::Context(Params& params) :
 	ksiPowsr[M] = ksiPowsr[0];
 	ksiPowsi[M] = ksiPowsi[0];
 
-	qpowvec = new ZZ[logPQ + 1];
-
+	qpowvec = new ZZ[logQQ + 1];
 	qpowvec[0] = ZZ(1);
-	for (long i = 1; i < logPQ + 1; ++i) {
+	for (long i = 1; i < logQQ + 1; ++i) {
 		qpowvec[i] = qpowvec[i - 1] << 1;
 	}
 
@@ -44,6 +43,18 @@ Context::Context(Params& params) :
 	taylorCoeffsMap.insert(pair<string, double*>(EXPONENT, new double[11]{1,1,0.5,1./6,1./24,1./120,1./720,1./5040, 1./40320,1./362880,1./3628800}));
 	taylorCoeffsMap.insert(pair<string, double*>(SIGMOID, new double[11]{1./2,1./4,0,-1./48,0,1./480,0,-17./80640,0,31./1451520,0}));
 }
+
+Context::~Context() {
+	delete[] rotGroup;
+	delete[] ksiPowsr;
+	delete[] ksiPowsi;
+}
+
+
+//----------------------------------------------------------------------------------
+//   ENCODINGS & BOOTSTRAPPING
+//----------------------------------------------------------------------------------
+
 
 ZZX Context::encode(complex<double>* vals, long slots, long logp) {
 	complex<double>* uvals = new complex<double>[slots];
@@ -204,6 +215,12 @@ void Context::addBootContext(long logSlots, long logp) {
 	}
 }
 
+
+//----------------------------------------------------------------------------------
+//   FFT & FFT INVERSE
+//----------------------------------------------------------------------------------
+
+
 void Context::bitReverse(complex<double>* vals, const long size) {
 	for (long i = 1, j = 0; i < size; ++i) {
 		long bit = size >> 1;
@@ -318,10 +335,3 @@ void Context::fftSpecialInv(complex<double>* vals, const long size) {
 		vals[i] /= size;
 	}
 }
-
-Context::~Context() {
-	delete[] rotGroup;
-	delete[] ksiPowsr;
-	delete[] ksiPowsi;
-}
-
