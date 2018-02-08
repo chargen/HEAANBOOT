@@ -55,7 +55,7 @@ int main() {
 	 * Suggested: 15, 618, 56, 10, 3
 	 */
 
-//	TestScheme::testPowerOf2Batch(15, 618, 56, 10, 14);
+//	TestScheme::testPowerOf2Batch(13, 155, 30, 4, 3);
 
 	//-----------------------------------------
 
@@ -65,7 +65,7 @@ int main() {
 	 * Suggested: 15, 618, 56, 903, 3
 	 */
 
-//	TestScheme::testPowerBatch(15, 618, 56, 903, 3);
+//	TestScheme::testPowerBatch(13, 155, 30, 13, 3);
 
 	//-----------------------------------------
 
@@ -93,7 +93,7 @@ int main() {
 	 * Suggested: 15, 325, 32, 8, 3
 	 */
 
-//	TestScheme::testInverseBatch(14, 285, 25, 8, 3);
+//	TestScheme::testInverseBatch(14, 255, 25, 8, 3);
 
 	//-----------------------------------------
 
@@ -156,7 +156,7 @@ int main() {
 	 * Suggested: 16, 41, 1240, 3, 10, 3
 	 * Suggested: 16, 54, 1240, 3, 15, 5
 	 */
-//	TestScheme::testBootstrap(16, 54, 1240, 3, 15, 5);
+//	TestScheme::testBootstrap(15, 29, 620, 3, 6, 2);
 
 	/*
 	 * Params: logN, logq, logQ, nu, logT

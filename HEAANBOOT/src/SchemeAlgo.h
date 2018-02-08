@@ -5,7 +5,6 @@
 #include <NTL/ZZ.h>
 
 #include "Common.h"
-#include "CZZ.h"
 #include "EvaluatorUtils.h"
 #include "Params.h"
 #include "Plaintext.h"
@@ -31,7 +30,9 @@ public:
 	 * @param[in] size: array size
 	 * @return [ciphertext(m_1), ciphertext(m_2),...,ciphertext(m_size)]
 	 */
-	Ciphertext* encryptSingleArray(CZZ* vals, long size);
+	Ciphertext* encryptSingleArray(complex<double>* vals, long size, long logp);
+
+	Ciphertext* encryptSingleArray(double* vals, long size, long logp);
 
 	/**
 	 * decrypting array of ciphertexts with single value encrypted in each
@@ -40,7 +41,7 @@ public:
 	 * @param[in] size: array size
 	 * @return [m_1, m_2,...,m_size]
 	 */
-	CZZ* decryptSingleArray(SecretKey& secretKey, Ciphertext* ciphers, long size);
+	complex<double>* decryptSingleArray(SecretKey& secretKey, Ciphertext* ciphers, long size);
 
 
 	//----------------------------------------------------------------------------------

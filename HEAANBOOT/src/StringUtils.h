@@ -1,8 +1,13 @@
 #ifndef HEAAN_STRINGUTILS_H_
 #define HEAAN_STRINGUTILS_H_
 
+#include <NTL/ZZ.h>
+
 #include "Common.h"
-#include "CZZ.h"
+#include <complex>
+
+using namespace NTL;
+using namespace std;
 
 class StringUtils {
 public:
@@ -29,19 +34,13 @@ public:
 	static void show(ZZ* vals, long size);
 
 	/**
-	 * prints in console array
-	 * @param[in] vals: CZZ array
-	 * @param[in] size: array size
-	 */
-	static void show(CZZ* vals, long size);
-
-	/**
 	 * prints in console val1, val2 and (val1-val2)
 	 * @param[in] val1: CZZ value
 	 * @param[in] val2: CZZ value
 	 * @param[in] prefix: string prefix
 	 */
-	static void showcompare(CZZ& val1, CZZ& val2, string prefix);
+	static void showcompare(double val1, double val2, string prefix);
+	static void showcompare(complex<double> val1, complex<double> val2, string prefix);
 
 	/**
 	 * prints in console pairwise val1[i], val2[i] and (val1[i]-val2[i])
@@ -50,7 +49,8 @@ public:
 	 * @param[in] size: array size
 	 * @param[in] prefix: string prefix
 	 */
-	static void showcompare(CZZ* vals1, CZZ* vals2, long size, string prefix);
+	static void showcompare(double* vals1, double* vals2, long size, string prefix);
+	static void showcompare(complex<double>* vals1, complex<double>* vals2, long size, string prefix);
 
 	/**
 	 * prints in console pairwise val1[i], val2 and (val1[i]-val2)
@@ -59,7 +59,8 @@ public:
 	 * @param[in] size: array size
 	 * @param[in] prefix: string prefix
 	 */
-	static void showcompare(CZZ* vals1, CZZ& val2, long size, string prefix);
+	static void showcompare(double* vals1, double val2, long size, string prefix);
+	static void showcompare(complex<double>* vals1, complex<double> val2, long size, string prefix);
 
 	/**
 	 * prints in console pairwise val1, val2[i] and (val1-val2[i])
@@ -68,7 +69,8 @@ public:
 	 * @param[in] size: array size
 	 * @param[in] prefix: string prefix
 	 */
-	static void showcompare(CZZ& val1, CZZ* vals2, long size, string prefix);
+	static void showcompare(double val1, double* vals2, long size, string prefix);
+	static void showcompare(complex<double> val1, complex<double>* vals2, long size, string prefix);
 
 };
 

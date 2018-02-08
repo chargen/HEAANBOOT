@@ -3,8 +3,8 @@
 
 #include <NTL/ZZ.h>
 #include <NTL/RR.h>
+#include <complex>
 
-#include "CZZ.h"
 #include "Common.h"
 #include "Params.h"
 #include "BootContext.h"
@@ -39,6 +39,8 @@ public:
 	RR* ksiPowsr; ///< storing ksi pows for fft calculation
 	RR* ksiPowsi; ///< storing ksi pows for fft calculation
 
+	ZZ* qpowvec;
+
 	map<string, double*> taylorCoeffsMap; ///< storing taylor coefficients for function calculation
 	map<long, BootContext> bootContextMap; ///< storing bootstrapping information, if generated
 
@@ -56,63 +58,65 @@ public:
 	 * @param[in] vals: array of values
 	 * @param[in] slots: size of array
 	 */
-	ZZX encodeLarge(CZZ* vals, long slots);
+	ZZX encode(complex<double>* vals, long slots, long logp);
+	ZZX encode(double* vals, long slots, long logp);
+
 
 	/**
 	 * encoding of values to polynomial
 	 * @param[in] vals: array of values
 	 * @param[in] slots: size of array
 	 */
-	ZZX encodeSmall(CZZ* vals, long slots);
+	ZZX encodeSmall(complex<double>* vals, long slots, long logp);
 
 	/**
 	 * reverse bits for fft calculations
 	 * @param[in, out] vals: array of values
 	 * @param[in] size: array size
 	 */
-	void bitReverse(CZZ* vals, const long size);
+	void bitReverse(complex<double>* vals, const long size);
 
 	/**
 	 * calculates fft in Z_q[X] / (X^N + 1)
 	 * @param[in, out] vals: array of values
 	 * @param[in] size: array size
 	 */
-	void fft(CZZ* vals, const long size);
+	void fft(complex<double>* vals, const long size);
 
 	/**
 	 * calculates fft inverse lazy in Z_q[X] / (X^N + 1)
 	 * @param[in, out] vals: array of values
 	 * @param[in] size: array size
 	 */
-	void fftInvLazy(CZZ* vals, const long size);
+	void fftInvLazy(complex<double>* vals, const long size);
 
 	/**
 	 * calculates fft inverse in Z_q[X] / (X^N + 1)
 	 * @param[in, out] vals: array of values
 	 * @param[in] size: array size
 	 */
-	void fftInv(CZZ* vals, const long size);
+	void fftInv(complex<double>* vals, const long size);
 
 	/**
 	 * calculates special fft in Z_q[X] / (X^N + 1) for encoding/decoding
 	 * @param[in, out] vals: array of values
 	 * @param[in] size: array size
 	 */
-	void fftSpecial(CZZ* vals, const long size);
+	void fftSpecial(complex<double>* vals, const long size);
 
 	/**
 	 * calculates special fft inverse lazy in Z_q[X] / (X^N + 1) for encoding/decoding
 	 * @param[in, out] vals: array of values
 	 * @param[in] size: array size
 	 */
-	void fftSpecialInvLazy(CZZ* vals, const long size);
+	void fftSpecialInvLazy(complex<double>* vals, const long size);
 
 	/**
 	 * calculates special fft inverse in Z_q[X] / (X^N + 1) for encoding/decoding
 	 * @param[in, out] vals: array of values
 	 * @param[in] size: array size
 	 */
-	void fftSpecialInv(CZZ* vals, const long size);
+	void fftSpecialInv(complex<double>* vals, const long size);
 
 	virtual ~Context();
 };

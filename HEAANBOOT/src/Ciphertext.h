@@ -16,7 +16,7 @@ public:
 	ZZX ax; ///< Ciphertext is an RLWE instance (ax, bx = mx + ex - ax * sx) in ring Z_q[X] / (X^N + 1);
 	ZZX bx; ///< Ciphertext is an RLWE instance (ax, bx = mx + ex - ax * sx) in ring Z_q[X] / (X^N + 1);
 
-	ZZ q; ///< Ciphertext modulus
+	long logp; ///< number of bits
 	long logq; ///< number of bits in modulus
 	long slots; ///< number of slots in Ciphertext
 
@@ -32,12 +32,12 @@ public:
 	 * @param[in] slots: number of slots in a ciphertext
 	 * @param[in] isComplex: option of Ciphertext with single real slot
 	 */
-	Ciphertext(ZZX ax = ZZX::zero(), ZZX bx = ZZX::zero(), ZZ q = ZZ::zero(), long logq = 0, long slots = 1, bool isComplex = true) : ax(ax), bx(bx), q(q), logq(logq), slots(slots), isComplex(isComplex) {}
+	Ciphertext(ZZX ax = ZZX::zero(), ZZX bx = ZZX::zero(), long logp = 0, long logq = 0, long slots = 1, bool isComplex = true) : ax(ax), bx(bx), logp(logp), logq(logq), slots(slots), isComplex(isComplex) {}
 
 	/**
 	 * Copy Constructor
 	 */
-	Ciphertext(const Ciphertext& o) : ax(o.ax), bx(o.bx), q(o.q), logq(o.logq), slots(o.slots), isComplex(o.isComplex) {}
+	Ciphertext(const Ciphertext& o) : ax(o.ax), bx(o.bx), logp(o.logp), logq(o.logq), slots(o.slots), isComplex(o.isComplex) {}
 
 	/**
 	 * Writing Ciphertext to the file by ID

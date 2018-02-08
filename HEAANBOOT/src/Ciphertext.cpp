@@ -10,6 +10,7 @@ void Ciphertext::Write(long ciphertextID) {
 	myfile << "CiphertextID = " << ciphertextID << endl;
 	myfile << deg(ax) << endl;
 	myfile << deg(bx) << endl;
+	myfile << logp << endl;
 	myfile << logq << endl;
 	myfile << slots << endl;
 	myfile << isComplex << endl;
@@ -45,17 +46,19 @@ void Ciphertext::Read(long ciphertextID) {
 		temp = atol(line.c_str());
 		bx.SetLength(temp + 1);
 
-		// read 5th line and get q
+		// read 5th line and get p
+		getline(myfile, line);
+		logp = atol(line.c_str());
+
+		// read 6th line and get q
 		getline(myfile, line);
 		logq = atol(line.c_str());
 
-		q = power2_ZZ(logq);
-
-		// read 6th line and get slots
+		// read 7th line and get slots
 		getline(myfile, line);
 		slots = atol(line.c_str());
 
-		// read 7th line and get isComplex
+		// read 8th line and get isComplex
 		getline(myfile, line);
 		isComplex = atoi(line.c_str());
 

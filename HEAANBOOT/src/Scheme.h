@@ -5,7 +5,6 @@
 #include "Common.h"
 #include "Ciphertext.h"
 #include "Context.h"
-#include "CZZ.h"
 #include "Key.h"
 #include "Plaintext.h"
 #include "SecretKey.h"
@@ -89,14 +88,16 @@ public:
 	 * @param[in] isComplex: there is an option for encryption single real value
 	 * @return message
 	 */
-	Plaintext encode(CZZ* vals, long slots, long logq, bool isComplex = true);
+	Plaintext encode(complex<double>* vals, long slots, long logp, long logq);
+
+	Plaintext encode(double* vals, long slots, long logp, long logq);
 
 	/**
 	 * decodes a ZZX polynomial into an array of CZZ values using special fft
 	 * @param[in] msg: message
 	 * @return array of CZZ values
 	 */
-	CZZ* decode(Plaintext& msg);
+	complex<double>* decode(Plaintext& msg);
 
 	/**
 	 * encodes a single CZZ value into a ZZX polynomial using special fft inverse
@@ -105,15 +106,16 @@ public:
 	 * @param[in] isComplex: there is an option for encryption single real value
 	 * @return message
 	 */
-	Plaintext encodeSingle(CZZ& val, long logq, bool isComplex = true);
+	Plaintext encodeSingle(double val, long logp, long logq);
+
+	Plaintext encodeSingle(complex<double> val, long logp, long logq);
 
 	/**
 	 * decodes a ZZX polynomial into a single CZZ value using special fft
 	 * @param[in] msg: message
 	 * @return CZZ value
 	 */
-	CZZ decodeSingle(Plaintext& msg);
-
+	complex<double> decodeSingle(Plaintext& msg);
 
 	//----------------------------------------------------------------------------------
 	//   ENCRYPTION & DECRYPTION
@@ -143,7 +145,9 @@ public:
 	 * @param[in] isComplex: there is an option for encryption single real value
 	 * @return ciphertext
 	 */
-	Ciphertext encrypt(CZZ* vals, long slots, long logq, bool isComplex = true);
+	Ciphertext encrypt(complex<double>* vals, long slots, long logp, long logq);
+
+	Ciphertext encrypt(double* vals, long slots, long logp, long logq);
 
 	/**
 	 * decrypts ciphertext into message and then decodes it into array of CZZ values
@@ -151,7 +155,7 @@ public:
 	 * @param[in] cipher: ciphertext
 	 * @return array of CZZ values
 	 */
-	CZZ* decrypt(SecretKey& secretKey, Ciphertext& cipher);
+	complex<double>* decrypt(SecretKey& secretKey, Ciphertext& cipher);
 
 	/**
 	 * encodes single CZZ value into a message and then encrypts it into a ciphertext using public key encyption
@@ -160,7 +164,9 @@ public:
 	 * @param[in] isComplex: there is an option for encryption single real value
 	 * @return ciphertext
 	 */
-	Ciphertext encryptSingle(CZZ& val, long logq, bool isComplex = true);
+	Ciphertext encryptSingle(complex<double> val, long logp, long logq);
+
+	Ciphertext encryptSingle(double val, long logp, long logq);
 
 	/**
 	 * decrypts ciphertext into message and then decodes it into a single CZZ value
@@ -168,13 +174,15 @@ public:
 	 * @param[in] cipher: ciphertext
 	 * @return CZZ value
 	 */
-	CZZ decryptSingle(SecretKey& secretKey, Ciphertext& cipher);
-
+	complex<double> decryptSingle(SecretKey& secretKey, Ciphertext& cipher);
 
 	//----------------------------------------------------------------------------------
 	//   HOMOMORPHIC OPERATIONS
 	//----------------------------------------------------------------------------------
 
+	Ciphertext negate(Ciphertext& cipher);
+
+	void negateAndEqual(Ciphertext& cipher);
 
 	/**
 	 * addition of ciphertexts
@@ -197,7 +205,9 @@ public:
 	 * @param[in] cnst: constant
 	 * @return ciphertext(m + constant)
 	 */
-	Ciphertext addConst(Ciphertext& cipher, ZZ& cnst);
+	Ciphertext addConst(Ciphertext& cipher, double cnst, long logp = -1);
+
+	Ciphertext addConst(Ciphertext& cipher, RR& cnst, long logp = -1);
 
 	/**
 	 * constant addition
@@ -205,21 +215,23 @@ public:
 	 * @param[in] cnst: constant
 	 * @return ciphertext(m + constant)
 	 */
-	Ciphertext addConst(Ciphertext& cipher, CZZ& cnst);
+	Ciphertext addConst(Ciphertext& cipher, complex<double> cnst, long logp = -1);
 
 	/**
 	 * constant addition
 	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m + constant)
 	 * @param[in] cnst: constant
 	 */
-	void addConstAndEqual(Ciphertext& cipher, ZZ& cnst);
+	void addConstAndEqual(Ciphertext& cipher, double cnst, long logp = -1);
+
+	void addConstAndEqual(Ciphertext& cipher, RR& cnst, long logp = -1);
 
 	/**
 	 * constant addition
 	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m + constant)
 	 * @param[in] cnst: constant
 	 */
-	void addConstAndEqual(Ciphertext& cipher, CZZ& cnst);
+	void addConstAndEqual(Ciphertext& cipher, complex<double> cnst, long logp = -1);
 
 	/**
 	 * substraction of ciphertexts
@@ -307,7 +319,9 @@ public:
 	 * @param[in] cnst: constant
 	 * @return ciphertext(m * constant)
 	 */
-	Ciphertext multByConst(Ciphertext& cipher, ZZ& cnst);
+	Ciphertext multByConst(Ciphertext& cipher, double cnst, long logp);
+
+	Ciphertext multByConst(Ciphertext& cipher, RR& cnst, long logp);
 
 	/**
 	 * constant multiplication
@@ -315,21 +329,23 @@ public:
 	 * @param[in] cnst: constant
 	 * @return ciphertext(m * constant)
 	 */
-	Ciphertext multByConst(Ciphertext& cipher, CZZ& cnst);
+	Ciphertext multByConst(Ciphertext& cipher, complex<double> cnst, long logp);
 
 	/**
 	 * constant multiplication
 	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m * constant)
 	 * @param[in] cnst: constant
 	 */
-	void multByConstAndEqual(Ciphertext& cipher, ZZ& cnst);
+	void multByConstAndEqual(Ciphertext& cipher, double cnst, long logp);
+
+	void multByConstAndEqual(Ciphertext& cipher, RR& cnst, long logp);
 
 	/**
 	 * constant multiplication
 	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m * constant)
 	 * @param[in] cnst: constant
 	 */
-	void multByConstAndEqual(Ciphertext& cipher, CZZ& cnst);
+	void multByConstAndEqual(Ciphertext& cipher, complex<double> cnst, long logp);
 
 	/**
 	 * polynomial multiplication
@@ -337,14 +353,14 @@ public:
 	 * @param[in] poly: polynomial, encoding (constant)
 	 * @return ciphertext(m * constant)
 	 */
-	Ciphertext multByPoly(Ciphertext& cipher, ZZX& poly);
+	Ciphertext multByPoly(Ciphertext& cipher, ZZX& poly, long logp);
 
 	/**
 	 * polynomial multiplication
 	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m * constant)
 	 * @param[in] poly: polynomial, encoding (constant)
 	 */
-	void multByPolyAndEqual(Ciphertext& cipher, ZZX& poly);
+	void multByPolyAndEqual(Ciphertext& cipher, ZZX& poly, long logp);
 
 	/**
 	 * multiplication by monomial X^degree
@@ -367,20 +383,29 @@ public:
 	 * @param[in] bits: shift bits
 	 * @return ciphertext(m*2^bits)
 	 */
-	Ciphertext leftShift(Ciphertext& cipher, long bits);
+	Ciphertext multByPo2(Ciphertext& cipher, long deg);
 
 	/**
 	 * multiplication by 2^bits
 	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(m*2^bits)
 	 * @param[in] bits: shift bits
 	 */
-	void leftShiftAndEqual(Ciphertext& cipher, long bits);
+	void multByPo2AndEqual(Ciphertext& cipher, long deg);
 
 	/**
 	 * doubles
 	 * @param[in, out] cipher: ciphertext(m) -> ciphertext(2m)
 	 */
-	void doubleAndEqual(Ciphertext& cipher);
+	void multBy2AndEqual(Ciphertext& cipher);
+
+	Ciphertext divByPo2(Ciphertext& cipher, long deg);
+
+	void divByPo2AndEqual(Ciphertext& cipher, long deg);
+
+	//----------------------------------------------------------------------------------
+	//   RESCALING & MODULUS DOWN
+	//----------------------------------------------------------------------------------
+
 
 	/**
 	 * rescaling procedure
@@ -581,118 +606,6 @@ public:
 	 * @param[in] logI: for h = 64, logI by experiments is 4
 	 */
 	void bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long logT, long logI = 4);
-
-
-
-
-	/**
-	 * encodes an double value into a ZZX polynomial using special fft inverse
-	 * @param[in] vals: double value
-	 * @param[in] logq: log of ciphertext modulus
-	 * @return message
-	 */
-	Plaintext encodeFromDouble(double& val, long pbits, long logq);
-
-	/**
-	 * encodes an array of double values into a ZZX polynomial using special fft inverse
-	 * @param[in] vals: array of values
-	 * @param[in] slots: size of an array
-	 * @param[in] logq: log of ciphertext modulus
-	 * @return message
-	 */
-	Plaintext encodeFromDoubleArray(double* vals, long slots, long pbits, long logq);
-
-	/**
-	 * encodes an array of complex value into a ZZX polynomial using special fft inverse
-	 * @param[in] vals: complex value
-	 * @param[in] logq: log of ciphertext modulus
-	 * @return message
-	 */
-	Plaintext encodeFromComplex(complex<double>& val, long pbits, long logq);
-
-	/**
-	 * encodes an array of complex values into a ZZX polynomial using special fft inverse
-	 * @param[in] vals: array of values
-	 * @param[in] slots: size of an array
-	 * @param[in] logq: log of ciphertext modulus
-	 * @return message
-	 */
-	Plaintext encodeFromComplexArray(complex<double>* vals, long slots, long pbits, long logq);
-
-	/**
-	 * decodes a ZZX polynomial into a double value using special fft
-	 * @param[in] msg: message
-	 * @return a double value
-	 */
-	double decodeToDouble(Plaintext& msg, long pbits);
-
-	/**
-	 * decodes a ZZX polynomial into an array of double values using special fft
-	 * @param[in] msg: message
-	 * @return array of double values
-	 */
-	double* decodeToDoubleArray(Plaintext& msg, long pbits);
-	
-	/**
-	 * decodes a ZZX polynomial into a complex value using special fft
-	 * @param[in] msg: message
-	 * @return a complex value
-	 */
-	complex<double> decodeToComplex(Plaintext& msg, long pbits);
-	
-	/**
-	 * decodes a ZZX polynomial into an array of complex values using special fft
-	 * @param[in] msg: message
-	 * @return array of double values
-	 */
-	complex<double>* decodeToComplexArray(Plaintext& msg, long pbits);
-
-	//----------------------------------------------------------------------------------
-	//   ENCRYPTION
-	//----------------------------------------------------------------------------------
-	
-	/**
-	 * encrypts message into ciphertext using public key encyption
-	 * @param[in] val: double value
-	 * @param[in] pbits: how many bits we will shift to make it integer
-	 * @param[in] logq: bit size of ciphertext modulus
-	 * @return ciphertext
-	 */
-	Ciphertext encrypt(double& val, long pbits, long logq);
-
-	/**
-	 * encrypts message into ciphertext using public key encyption
-	 * @param[in] vals: double array values
-	 * @param[in] pbits: how many bits we will shift to make it integer
-	 * @param[in] logq: bit size of ciphertext modulus
-	 * @return ciphertext
-	 */
-	Ciphertext encrypt(double* vals, long slots, long pbits, long logq);
-
-	/**
-	 * encrypts message into ciphertext using public key encyption
-	 * @param[in] val: complex value
-	 * @param[in] pbits: how many bits we will shift to make it integer
-	 * @param[in] logq: bit size of ciphertext modulus
-	 * @return ciphertext
-	 */
-	Ciphertext encrypt(complex<double>& val, long pbits, long logq);
-
-	/**
-	 * encrypts message into ciphertext using public key encyption
-	 * @param[in] vals: complex array values
-	 * @param[in] pbits: how many bits we will shift to make it integer
-	 * @param[in] logq: bit size of ciphertext modulus
-	 * @return ciphertext
-	 */
-	Ciphertext encrypt(complex<double>* vals, long slots, long pbits, long logq);
-
-	/**
-	 * encrypts message into ciphertext using public key encyption
-	 * @param[in] msg: Palintext class value
-	 * @return ciphertext
-	 */
-	Ciphertext encryptPoly(ZZX& mx, long slots, long logq, bool isComplex = false);
 
 };
 

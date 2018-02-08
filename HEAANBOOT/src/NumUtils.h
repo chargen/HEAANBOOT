@@ -4,7 +4,6 @@
 #include <NTL/ZZX.h>
 #include <NTL/RR.h>
 #include <NTL/ZZ.h>
-#include "CZZ.h"
 
 #include "Common.h"
 using namespace NTL;

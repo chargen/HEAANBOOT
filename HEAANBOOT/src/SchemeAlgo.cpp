@@ -1,17 +1,25 @@
 #include "SchemeAlgo.h"
 
 
-Ciphertext* SchemeAlgo::encryptSingleArray(CZZ* vals, long size) {
+Ciphertext* SchemeAlgo::encryptSingleArray(complex<double>* vals, long size, long logp) {
 	Ciphertext* res = new Ciphertext[size];
 	for (long i = 0; i < size; ++i) {
-		res[i] = scheme.encryptSingle(vals[i], scheme.context.logQ);
+		res[i] = scheme.encryptSingle(vals[i], logp, scheme.context.logQ);
 	}
 	return res;
 }
 
-CZZ* SchemeAlgo::decryptSingleArray(SecretKey& secretKey, Ciphertext* ciphers, long size) {
-	CZZ* res = new CZZ[size];
-	for (int i = 0; i < size; ++i) {
+Ciphertext* SchemeAlgo::encryptSingleArray(double* vals, long size, long logp) {
+	Ciphertext* res = new Ciphertext[size];
+	for (long i = 0; i < size; ++i) {
+		res[i] = scheme.encryptSingle(vals[i], logp, scheme.context.logQ);
+	}
+	return res;
+}
+
+complex<double>* SchemeAlgo::decryptSingleArray(SecretKey& secretKey, Ciphertext* ciphers, long size) {
+	complex<double>* res = new complex<double>[size];
+	for (long i = 0; i < size; ++i) {
 		res[i] = scheme.decryptSingle(secretKey, ciphers[i]);
 	}
 	return res;
@@ -46,8 +54,7 @@ Ciphertext SchemeAlgo::power(Ciphertext& cipher, const long logp, const long deg
 	long remDegree = degree - po2Degree;
 	if(remDegree > 0) {
 		Ciphertext tmp = power(cipher, logp, remDegree);
-		long bitsDown = tmp.logq - res.logq;
-		scheme.modDownByAndEqual(tmp, bitsDown);
+		scheme.modDownToAndEqual(tmp, res.logq);
 		scheme.multAndEqual(res, tmp);
 		scheme.reScaleByAndEqual(res, logp);
 	}
@@ -63,8 +70,7 @@ Ciphertext* SchemeAlgo::powerExtended(Ciphertext& cipher, const long logp, const
 		long powi = (1 << i);
 		res[idx++] = cpows[i];
 		for (int j = 0; j < powi-1; ++j) {
-			long bitsDown = res[j].logq - cpows[i].logq;
-			res[idx] = scheme.modDownBy(res[j], bitsDown);
+			res[idx] = scheme.modDownTo(res[j], cpows[i].logq);
 			scheme.multAndEqual(res[idx], cpows[i]);
 			scheme.reScaleByAndEqual(res[idx++], logp);
 		}
@@ -72,8 +78,7 @@ Ciphertext* SchemeAlgo::powerExtended(Ciphertext& cipher, const long logp, const
 	res[idx++] = cpows[logDegree];
 	long degree2 = (1 << logDegree);
 	for (int i = 0; i < (degree - degree2); ++i) {
-		long bitsDown = res[i].logq - cpows[logDegree].logq;
-		res[idx] = scheme.modDownBy(res[i], bitsDown);
+		res[idx] = scheme.modDownTo(res[i], cpows[logDegree].logq);
 		scheme.multAndEqual(res[idx], cpows[logDegree]);
 		scheme.reScaleByAndEqual(res[idx++], logp);
 	}
@@ -214,9 +219,10 @@ void SchemeAlgo::partialSlotsSumAndEqual(Ciphertext& cipher, const long slots) {
 //-----------------------------------------
 
 Ciphertext SchemeAlgo::inverse(Ciphertext& cipher, const long logp, const long steps) {
-	ZZ precision = power2_ZZ(logp);
-	Ciphertext cpow = cipher;
-	Ciphertext tmp = scheme.addConst(cipher, precision);
+	Ciphertext cbar = scheme.negate(cipher);
+	scheme.addConstAndEqual(cbar, 1.0, logp);
+	Ciphertext cpow = cbar;
+	Ciphertext tmp = scheme.addConst(cbar, 1.0, logp);
 	scheme.modDownByAndEqual(tmp, logp);
 	Ciphertext res = tmp;
 
@@ -224,7 +230,7 @@ Ciphertext SchemeAlgo::inverse(Ciphertext& cipher, const long logp, const long s
 		scheme.squareAndEqual(cpow);
 		scheme.reScaleByAndEqual(cpow, logp);
 		tmp = cpow;
-		scheme.addConstAndEqual(tmp, precision);
+		scheme.addConstAndEqual(tmp, 1.0, logp);
 		scheme.multAndEqual(tmp, res);
 		scheme.reScaleByAndEqual(tmp, logp);
 		res = tmp;
@@ -233,11 +239,9 @@ Ciphertext SchemeAlgo::inverse(Ciphertext& cipher, const long logp, const long s
 }
 
 Ciphertext* SchemeAlgo::inverseExtended(Ciphertext& cipher, const long logp, const long steps) {
-	ZZ precision = power2_ZZ(logp);
-
 	Ciphertext* res = new Ciphertext[steps];
 	Ciphertext cpow = cipher;
-	Ciphertext tmp = scheme.addConst(cipher, precision);
+	Ciphertext tmp = scheme.addConst(cipher, 1.0, logp);
 	scheme.modDownByAndEqual(tmp, logp);
 	res[0] = tmp;
 
@@ -245,7 +249,7 @@ Ciphertext* SchemeAlgo::inverseExtended(Ciphertext& cipher, const long logp, con
 		scheme.squareAndEqual(cpow);
 		scheme.reScaleByAndEqual(cpow, logp);
 		tmp = cpow;
-		scheme.addConstAndEqual(tmp, precision);
+		scheme.addConstAndEqual(tmp, 1.0, logp);
 		scheme.multAndEqual(tmp, res[i - 1]);
 		scheme.reScaleByAndEqual(tmp, logp);
 		res[i] = tmp;
@@ -262,18 +266,13 @@ Ciphertext SchemeAlgo::function(Ciphertext& cipher, string& funcName, const long
 
 	double* coeffs = scheme.context.taylorCoeffsMap.at(funcName);
 
-	ZZ tmp = EvaluatorUtils::evalZZ(coeffs[1], logp);
-	Ciphertext res = scheme.multByConst(cpows[0], tmp);
-
-	tmp = EvaluatorUtils::evalZZ(coeffs[0], dlogp);
-	scheme.addConstAndEqual(res, tmp);
+	Ciphertext res = scheme.multByConst(cpows[0], coeffs[1], logp);
+	scheme.addConstAndEqual(res, coeffs[0], dlogp);
 
 	for (int i = 1; i < degree; ++i) {
 		if(abs(coeffs[i + 1]) > 1e-27) {
-			tmp = EvaluatorUtils::evalZZ(coeffs[i + 1], logp);
-			Ciphertext aixi = scheme.multByConst(cpows[i], tmp);
-			long bitsDown = res.logq - aixi.logq;
-			scheme.modDownByAndEqual(res, bitsDown);
+			Ciphertext aixi = scheme.multByConst(cpows[i], coeffs[i + 1], logp);
+			scheme.modDownToAndEqual(res, aixi.logq);
 			scheme.addAndEqual(res, aixi);
 		}
 	}
@@ -283,23 +282,14 @@ Ciphertext SchemeAlgo::function(Ciphertext& cipher, string& funcName, const long
 
 Ciphertext SchemeAlgo::functionLazy(Ciphertext& cipher, string& funcName, const long logp, const long degree) {
 	Ciphertext* cpows = powerExtended(cipher, logp, degree);
-
 	long dlogp = 2 * logp;
-
 	double* coeffs = scheme.context.taylorCoeffsMap.at(funcName);
-
-	ZZ tmp = EvaluatorUtils::evalZZ(coeffs[1], logp);
-	Ciphertext res = scheme.multByConst(cpows[0], tmp);
-
-	tmp = EvaluatorUtils::evalZZ(coeffs[0], dlogp);
-	scheme.addConstAndEqual(res, tmp);
-
+	Ciphertext res = scheme.multByConst(cpows[0], coeffs[1], logp);
+	scheme.addConstAndEqual(res, coeffs[0], dlogp);
 	for (int i = 1; i < degree; ++i) {
 		if(abs(coeffs[i + 1]) > 1e-27) {
-			tmp = EvaluatorUtils::evalZZ(coeffs[i + 1], logp);
-			Ciphertext aixi = scheme.multByConst(cpows[i], tmp);
-			long bitsDown = res.logq - aixi.logq;
-			scheme.modDownByAndEqual(res, bitsDown);
+			Ciphertext aixi = scheme.multByConst(cpows[i], coeffs[i + 1], logp);
+			scheme.modDownToAndEqual(res, aixi.logq);
 			scheme.addAndEqual(res, aixi);
 		}
 	}
@@ -312,20 +302,16 @@ Ciphertext* SchemeAlgo::functionExtended(Ciphertext& cipher, string& funcName, c
 	long dlogp = 2 * logp;
 	double* coeffs = scheme.context.taylorCoeffsMap.at(funcName);
 
-	ZZ tmp = EvaluatorUtils::evalZZ(coeffs[1], logp);
-	Ciphertext aixi = scheme.multByConst(cpows[0], tmp);
+	Ciphertext aixi = scheme.multByConst(cpows[0], coeffs[1], logp);
 
-	tmp = EvaluatorUtils::evalZZ(coeffs[0], dlogp);
-	scheme.addConstAndEqual(aixi, tmp);
+	scheme.addConstAndEqual(aixi, coeffs[0], dlogp);
 
 	Ciphertext* res = new Ciphertext[degree];
 	res[0] = aixi;
 	for (long i = 1; i < degree; ++i) {
 		if(abs(coeffs[i + 1]) > 1e-27) {
-			tmp = EvaluatorUtils::evalZZ(coeffs[i + 1], logp);
-			aixi = scheme.multByConst(cpows[i], tmp);
-			long bitsDown = res[i - 1].logq - aixi.logq;
-			Ciphertext ctmp = scheme.modDownBy(res[i - 1], bitsDown);
+			aixi = scheme.multByConst(cpows[i], coeffs[i + 1], logp);
+			Ciphertext ctmp = scheme.modDownTo(res[i - 1], aixi.logq);
 			scheme.addAndEqual(aixi, ctmp);
 			res[i] = aixi;
 		} else {
@@ -393,7 +379,7 @@ void SchemeAlgo::fftInv(Ciphertext* ciphers, const long size) {
 	long logsize = log2((double)size);
 	NTL_EXEC_RANGE(size, first, last);
 	for (long i = first; i < last; ++i) {
-		scheme.reScaleByAndEqual(ciphers[i], logsize);
+		scheme.divByPo2AndEqual(ciphers[i], logsize);
 	}
 	NTL_EXEC_RANGE_END;
 }

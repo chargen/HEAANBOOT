@@ -12,7 +12,7 @@ public:
 
 	ZZX mx; ///< message mod X^N + 1
 
-	ZZ q; ///< ciphertext modulus
+	long logp; ///< number of bits
 	long logq; ///< number of bits in modulus
 	long slots; ///< number of slots in ciphertext
 
@@ -27,12 +27,12 @@ public:
 	 * @param[in] slots: number of slots in message
 	 * @param[in] isComplex: option of Ciphertext with single real slot
 	 */
-	Plaintext(ZZX mx = ZZX::zero(), ZZ q = ZZ::zero(), long logq = 0, long slots = 1, bool isComplex = true) : mx(mx), q(q), logq(logq), slots(slots), isComplex(isComplex) {}
+	Plaintext(ZZX mx = ZZX::zero(), long logp = 0, long logq = 0, long slots = 1, bool isComplex = true) : mx(mx), logp(logp), logq(logq), slots(slots), isComplex(isComplex) {}
 
 	/**
 	 * Copy Constructor
 	 */
-	Plaintext(const Plaintext& o) : mx(o.mx), q(o.q), logq(o.logq), slots(o.slots), isComplex(o.isComplex) {}
+	Plaintext(const Plaintext& o) : mx(o.mx), logp(o.logp), logq(o.logq), slots(o.slots), isComplex(o.isComplex) {}
 };
 
 #endif
