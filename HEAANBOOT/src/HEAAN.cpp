@@ -1,6 +1,49 @@
 #include "TestScheme.h"
 
+#include <iostream>
+
+using namespace std;
+
 int main() {
+
+	long logN;
+	long logQ;
+	long pBits;
+	long logSlots;
+	long testNum = 1;
+
+	cout << "logN: ";
+	cin >> logN;
+
+	cout << "logQ: ";
+	cin >> logQ;
+
+	cout << "pBits: ";
+	cin >> pBits;
+
+	cout << "logSlots: ";
+	cin >> logSlots;
+
+	while(testNum != 0) {
+
+		cout << "Lists of test" << endl;
+		cout << "0. EXIT" << endl;
+		cout << "1. testEncodeBatch" << endl;
+		cout << "2. testBasic" << endl;
+
+		cout << "\nTest Num: ";
+		cin >> testNum;
+
+		switch(testNum) {
+			case 0:
+				break;
+			case 1:
+				TestScheme::testEncodeBatch(logN, logQ, pBits, logSlots);
+			case 2:
+				TestScheme::testBasic(logN, logQ, pBits, logSlots);
+		}
+
+	}
 
 	//-----------------------------------------
 

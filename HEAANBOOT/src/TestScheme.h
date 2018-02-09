@@ -10,6 +10,16 @@ public:
 	//----------------------------------------------------------------------------------
 
 	/**
+	 * Testing encoding, decoding, add, and mult timing of the ciphertext
+	 * c(m_1, ..., m_slots)
+	 * @param[in] logN: input parameter for Params class
+	 * @param[in] logQ: input parameter for Params class
+	 * @param[in] logp: log of precision
+	 * @param[in] logSlots: log of number of slots
+	 */
+	static void testBasic(long logN, long logQ, long logp, long logSlot);
+	
+	/**
 	 * Testing encoding and decoding timing of the ciphertext
 	 * c(m_1, ..., m_slots)
 	 * number of modulus bits down: 0

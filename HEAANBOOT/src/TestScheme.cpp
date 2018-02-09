@@ -24,6 +24,50 @@ using namespace NTL;
 //   STANDARD TESTS
 //----------------------------------------------------------------------------------
 
+void TestScheme::testBasic(long logN, long logQ, long logp, long logSlots) {
+	cout << "!!! START TEST BASIC !!!" << endl;
+	//-----------------------------------------
+	TimeUtils timeutils;
+	Params params(logN, logQ);
+	Context context(params);
+	SecretKey secretKey(params);
+	Scheme scheme(secretKey, context);
+	SchemeAlgo algo(scheme);
+	//-----------------------------------------
+	srand(time(NULL));
+	//-----------------------------------------
+	long slots = (1 << logSlots);
+	complex<double>* mvec1 = EvaluatorUtils::randomComplexArray(slots);
+	complex<double>* mvec2 = EvaluatorUtils::randomComplexArray(slots);
+	complex<double>* mvecAdd = new complex<double>[slots];
+	complex<double>* mvecMult = new complex<double>[slots];
+	for(long i = 0; i < slots; i++) {
+		mvecAdd[i] = mvec1[i] + mvec2[i];
+		mvecMult[i] = mvec1[i] * mvec2[i];
+	}
+
+	timeutils.start("Encrypt two batch");
+	Ciphertext cipher1 = scheme.encrypt(mvec1, slots, logp, logQ);
+	Ciphertext cipher2 = scheme.encrypt(mvec2, slots, logp, logQ);
+	timeutils.stop("Encrypt two batch");
+
+	timeutils.start("Homomorphic Addition");
+	Ciphertext addCipher = scheme.add(cipher1, cipher2);
+	timeutils.stop("Homomorphic Addition");
+
+	timeutils.start("Homomorphic Multiplication");
+	Ciphertext multCipher = scheme.mult(cipher1, cipher2);
+	timeutils.stop("Homomorphic Multiplication");
+
+	timeutils.start("Decrypt batch");
+	complex<double>* dvecAdd = scheme.decrypt(secretKey, addCipher);
+	complex<double>* dvecMult = scheme.decrypt(secretKey, multCipher);
+	timeutils.stop("Decrypt batch");
+
+	StringUtils::showcompare(mvecAdd, dvecAdd, slots, "add");
+	StringUtils::showcompare(mvecMult, dvecMult, slots, "mult");
+
+}
 
 void TestScheme::testEncodeBatch(long logN, long logQ, long logp, long logSlots) {
 	cout << "!!! START TEST ENCODE BATCH !!!" << endl;
