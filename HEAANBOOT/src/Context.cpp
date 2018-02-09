@@ -66,8 +66,8 @@ ZZX Context::encode(complex<double>* vals, long slots, long logp) {
 	long gap = Nh / slots;
 	fftSpecialInv(uvals, slots);
 	for (i = 0, jdx = Nh, idx = 0; i < slots; ++i, jdx += gap, idx += gap) {
-		mx.rep[idx] = EvaluatorUtils::evalZZ(uvals[i].real(), logp);
-		mx.rep[jdx] = EvaluatorUtils::evalZZ(uvals[i].imag(), logp);
+		mx.rep[idx] = EvaluatorUtils::scaleUpToZZ(uvals[i].real(), logp);
+		mx.rep[jdx] = EvaluatorUtils::scaleUpToZZ(uvals[i].imag(), logp);
 	}
 	delete[] uvals;
 	return mx;
@@ -88,8 +88,8 @@ ZZX Context::encode(double* vals, long slots, long logp) {
 	fftSpecialInv(uvals, slots);
 
 	for (i = 0, jdx = Nh, idx = 0; i < slots; ++i, jdx += gap, idx += gap) {
-		mx.rep[idx] = EvaluatorUtils::evalZZ(uvals[i].real(), logp);
-		mx.rep[jdx] = EvaluatorUtils::evalZZ(uvals[i].imag(), logp);
+		mx.rep[idx] = EvaluatorUtils::scaleUpToZZ(uvals[i].real(), logp);
+		mx.rep[jdx] = EvaluatorUtils::scaleUpToZZ(uvals[i].imag(), logp);
 	}
 	delete[] uvals;
 	return mx;
@@ -135,8 +135,8 @@ void Context::addBootContext(long logSlots, long logp) {
 					fftSpecialInv(pvals, dslots);
 					pvec[pos].SetLength(N);
 					for (i = 0, jdx = Nh, idx = 0; i < dslots; ++i, jdx += dgap, idx += dgap) {
-						pvec[pos].rep[idx] = EvaluatorUtils::evalZZ(pvals[i].real(), logp);
-						pvec[pos].rep[jdx] = EvaluatorUtils::evalZZ(pvals[i].imag(), logp);
+						pvec[pos].rep[idx] = EvaluatorUtils::scaleUpToZZ(pvals[i].real(), logp);
+						pvec[pos].rep[jdx] = EvaluatorUtils::scaleUpToZZ(pvals[i].imag(), logp);
 					}
 				}
 			}
@@ -148,8 +148,8 @@ void Context::addBootContext(long logSlots, long logp) {
 			p1.SetLength(N);
 			fftSpecialInv(pvals, dslots);
 			for (i = 0, jdx = Nh, idx = 0; i < dslots; ++i, jdx += dgap, idx += dgap) {
-				p1.rep[idx] = EvaluatorUtils::evalZZ(pvals[i].real(), logp);
-				p1.rep[jdx] = EvaluatorUtils::evalZZ(pvals[i].imag(), logp);
+				p1.rep[idx] = EvaluatorUtils::scaleUpToZZ(pvals[i].real(), logp);
+				p1.rep[jdx] = EvaluatorUtils::scaleUpToZZ(pvals[i].imag(), logp);
 			}
 
 			for (i = 0; i < slots; ++i) {
@@ -160,8 +160,8 @@ void Context::addBootContext(long logSlots, long logp) {
 			p2.SetLength(N);
 			fftSpecialInv(pvals, dslots);
 			for (i = 0, jdx = Nh, idx = 0; i < dslots; ++i, jdx += dgap, idx += dgap) {
-				p2.rep[idx] = EvaluatorUtils::evalZZ(pvals[i].real(), logp);
-				p2.rep[jdx] = EvaluatorUtils::evalZZ(pvals[i].imag(), logp);
+				p2.rep[idx] = EvaluatorUtils::scaleUpToZZ(pvals[i].real(), logp);
+				p2.rep[jdx] = EvaluatorUtils::scaleUpToZZ(pvals[i].imag(), logp);
 			}
 		} else {
 			for (ki = 0; ki < slots; ki += k) {
@@ -180,8 +180,8 @@ void Context::addBootContext(long logSlots, long logp) {
 					fftSpecialInv(pvals, slots);
 					pvec[pos].SetLength(N);
 					for (i = 0, jdx = Nh, idx = 0; i < slots; ++i, jdx += gap, idx += gap) {
-						pvec[pos].rep[idx] = EvaluatorUtils::evalZZ(pvals[i].real(), logp);
-						pvec[pos].rep[jdx] = EvaluatorUtils::evalZZ(pvals[i].imag(), logp);
+						pvec[pos].rep[idx] = EvaluatorUtils::scaleUpToZZ(pvals[i].real(), logp);
+						pvec[pos].rep[jdx] = EvaluatorUtils::scaleUpToZZ(pvals[i].imag(), logp);
 					}
 				}
 			}
@@ -204,8 +204,8 @@ void Context::addBootContext(long logSlots, long logp) {
 				fftSpecialInv(pvals, slots);
 				pvecInv[pos].SetLength(N);
 				for (i = 0, jdx = Nh, idx = 0; i < slots; ++i, jdx += gap, idx += gap) {
-					pvecInv[pos].rep[idx] = EvaluatorUtils::evalZZ(pvals[i].real(), logp);
-					pvecInv[pos].rep[jdx] = EvaluatorUtils::evalZZ(pvals[i].imag(), logp);
+					pvecInv[pos].rep[idx] = EvaluatorUtils::scaleUpToZZ(pvals[i].real(), logp);
+					pvecInv[pos].rep[jdx] = EvaluatorUtils::scaleUpToZZ(pvals[i].imag(), logp);
 				}
 			}
 		}
