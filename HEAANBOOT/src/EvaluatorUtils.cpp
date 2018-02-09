@@ -59,17 +59,17 @@ complex<double>* EvaluatorUtils::randomCircleArray(long size, double bound) {
 //----------------------------------------------------------------------------------
 
 
-double EvaluatorUtils::evalReal(const ZZ& x, const long logp) {
+double EvaluatorUtils::scaleDownToReal(const ZZ& x, const long logp) {
 	RR xp = to_RR(x);
 	xp.e -= logp;
 	return to_double(xp);
 }
 
-ZZ EvaluatorUtils::evalZZ(const double x, const long logp) {
-	return evalZZ(to_RR(x), logp);
+ZZ EvaluatorUtils::scaleUpToZZ(const double x, const long logp) {
+	return scaleUpToZZ(to_RR(x), logp);
 }
 
-ZZ EvaluatorUtils::evalZZ(const RR& x, const long logp) {
+ZZ EvaluatorUtils::scaleUpToZZ(const RR& x, const long logp) {
 	RR xp = MakeRR(x.x, x.e + logp);
 	return RoundToZZ(xp);
 }

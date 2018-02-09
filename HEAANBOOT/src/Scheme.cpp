@@ -152,11 +152,11 @@ complex<double>* Scheme::decode(Plaintext& msg) {
 	for (long i = 0, idx = 0; i < slots; ++i, idx += gap) {
 		rem(tmp, msg.mx[idx], q);
 		if(NumBits(tmp) == msg.logq) tmp -= q;
-		res[i].real(EvaluatorUtils::evalReal(tmp, msg.logp));
+		res[i].real(EvaluatorUtils::scaleDownToReal(tmp, msg.logp));
 
 		rem(tmp, msg.mx[idx + context.Nh], q);
 		if(NumBits(tmp) == msg.logq) tmp -= q;
-		res[i].imag(EvaluatorUtils::evalReal(tmp, msg.logp));
+		res[i].imag(EvaluatorUtils::scaleDownToReal(tmp, msg.logp));
 	}
 	context.fftSpecial(res, slots);
 	return res;
@@ -165,15 +165,15 @@ complex<double>* Scheme::decode(Plaintext& msg) {
 Plaintext Scheme::encodeSingle(complex<double> val, long logp, long logq) {
 	ZZX mx;
 	mx.SetLength(context.N);
-	mx.rep[0] = EvaluatorUtils::evalZZ(val.real(), logp + context.logQ);
-	mx.rep[context.Nh] = EvaluatorUtils::evalZZ(val.imag(), logp + context.logQ);
+	mx.rep[0] = EvaluatorUtils::scaleUpToZZ(val.real(), logp + context.logQ);
+	mx.rep[context.Nh] = EvaluatorUtils::scaleUpToZZ(val.imag(), logp + context.logQ);
 	return Plaintext(mx, logp, logq, 1, true);
 }
 
 Plaintext Scheme::encodeSingle(double val, long logp, long logq) {
 	ZZX mx;
 	mx.SetLength(context.N);
-	mx.rep[0] = EvaluatorUtils::evalZZ(val, logp + context.logQ);
+	mx.rep[0] = EvaluatorUtils::scaleUpToZZ(val, logp + context.logQ);
 	return Plaintext(mx, logp, logq, 1, false);
 }
 
@@ -183,12 +183,12 @@ complex<double> Scheme::decodeSingle(Plaintext& msg) {
 	complex<double> res;
 	ZZ tmp = msg.mx.rep[0] % q;
 	if(NumBits(tmp) == msg.logq) tmp -= q;
-	res.real(EvaluatorUtils::evalReal(tmp, msg.logp));
+	res.real(EvaluatorUtils::scaleDownToReal(tmp, msg.logp));
 
 	if(msg.isComplex) {
 		tmp = msg.mx.rep[context.Nh] % q;
 		if(NumBits(tmp) == msg.logq) tmp -= q;
-		res.imag(EvaluatorUtils::evalReal(tmp, msg.logp));
+		res.imag(EvaluatorUtils::scaleDownToReal(tmp, msg.logp));
 	}
 
 	return res;
@@ -300,7 +300,7 @@ Ciphertext Scheme::addConst(Ciphertext& cipher, double cnst, long logp) {
 	ZZX ax = cipher.ax;
 	ZZX bx = cipher.bx;
 
-	ZZ cnstZZ = logp < 0 ? EvaluatorUtils::evalZZ(cnst, cipher.logp) : EvaluatorUtils::evalZZ(cnst, logp);
+	ZZ cnstZZ = logp < 0 ? EvaluatorUtils::scaleUpToZZ(cnst, cipher.logp) : EvaluatorUtils::scaleUpToZZ(cnst, logp);
 
 	AddMod(bx.rep[0], cipher.bx.rep[0], cnstZZ, q);
 	return Ciphertext(ax, bx, cipher.logp, cipher.logq, cipher.slots, cipher.isComplex);
@@ -312,7 +312,7 @@ Ciphertext Scheme::addConst(Ciphertext& cipher, RR& cnst, long logp) {
 	ZZX ax = cipher.ax;
 	ZZX bx = cipher.bx;
 
-	ZZ cnstZZ = logp < 0 ? EvaluatorUtils::evalZZ(cnst, cipher.logp) : EvaluatorUtils::evalZZ(cnst, logp);
+	ZZ cnstZZ = logp < 0 ? EvaluatorUtils::scaleUpToZZ(cnst, cipher.logp) : EvaluatorUtils::scaleUpToZZ(cnst, logp);
 
 	AddMod(bx.rep[0], cipher.bx.rep[0], cnstZZ, q);
 	return Ciphertext(ax, bx, cipher.logp, cipher.logq, cipher.slots, cipher.isComplex);
@@ -323,8 +323,8 @@ Ciphertext Scheme::addConst(Ciphertext& cipher, complex<double> cnst, long logp)
 	ZZX ax = cipher.ax;
 	ZZX bx = cipher.bx;
 
-	ZZ cnstrZZ = logp < 0 ? EvaluatorUtils::evalZZ(cnst.real(), cipher.logp) : EvaluatorUtils::evalZZ(cnst.real(), logp);
-	ZZ cnstiZZ = logp < 0 ? EvaluatorUtils::evalZZ(cnst.imag(), cipher.logp) : EvaluatorUtils::evalZZ(cnst.imag(), logp);
+	ZZ cnstrZZ = logp < 0 ? EvaluatorUtils::scaleUpToZZ(cnst.real(), cipher.logp) : EvaluatorUtils::scaleUpToZZ(cnst.real(), logp);
+	ZZ cnstiZZ = logp < 0 ? EvaluatorUtils::scaleUpToZZ(cnst.imag(), cipher.logp) : EvaluatorUtils::scaleUpToZZ(cnst.imag(), logp);
 
 	AddMod(bx.rep[0], cipher.bx.rep[0], cnstrZZ, q);
 	AddMod(bx.rep[context.Nh], cipher.bx.rep[context.Nh], cnstiZZ, q);
@@ -334,21 +334,21 @@ Ciphertext Scheme::addConst(Ciphertext& cipher, complex<double> cnst, long logp)
 
 void Scheme::addConstAndEqual(Ciphertext& cipher, double cnst, long logp) {
 	ZZ q = context.qpowvec[cipher.logq];
-	ZZ cnstZZ = logp < 0 ? EvaluatorUtils::evalZZ(cnst, cipher.logp) : EvaluatorUtils::evalZZ(cnst, logp);
+	ZZ cnstZZ = logp < 0 ? EvaluatorUtils::scaleUpToZZ(cnst, cipher.logp) : EvaluatorUtils::scaleUpToZZ(cnst, logp);
 	AddMod(cipher.bx.rep[0], cipher.bx.rep[0], cnstZZ, q);
 }
 
 void Scheme::addConstAndEqual(Ciphertext& cipher, RR& cnst, long logp) {
 	ZZ q = context.qpowvec[cipher.logq];
-	ZZ cnstZZ = logp < 0 ? EvaluatorUtils::evalZZ(cnst, cipher.logp) : EvaluatorUtils::evalZZ(cnst, logp);
+	ZZ cnstZZ = logp < 0 ? EvaluatorUtils::scaleUpToZZ(cnst, cipher.logp) : EvaluatorUtils::scaleUpToZZ(cnst, logp);
 	AddMod(cipher.bx.rep[0], cipher.bx.rep[0], cnstZZ, q);
 }
 
 void Scheme::addConstAndEqual(Ciphertext& cipher, complex<double> cnst, long logp) {
 	ZZ q = context.qpowvec[cipher.logq];
 
-	ZZ cnstrZZ = logp < 0 ? EvaluatorUtils::evalZZ(cnst.real(), cipher.logp) : EvaluatorUtils::evalZZ(cnst.real(), logp);
-	ZZ cnstiZZ = logp < 0 ? EvaluatorUtils::evalZZ(cnst.imag(), cipher.logp) : EvaluatorUtils::evalZZ(cnst.imag(), logp);
+	ZZ cnstrZZ = logp < 0 ? EvaluatorUtils::scaleUpToZZ(cnst.real(), cipher.logp) : EvaluatorUtils::scaleUpToZZ(cnst.real(), logp);
+	ZZ cnstiZZ = logp < 0 ? EvaluatorUtils::scaleUpToZZ(cnst.imag(), cipher.logp) : EvaluatorUtils::scaleUpToZZ(cnst.imag(), logp);
 
 	AddMod(cipher.bx.rep[0], cipher.bx.rep[0], cnstrZZ, q);
 	AddMod(cipher.bx.rep[context.Nh], cipher.bx.rep[context.Nh], cnstiZZ, q);
@@ -512,7 +512,7 @@ Ciphertext Scheme::multByConst(Ciphertext& cipher, double cnst, long logp) {
 	ZZ q = context.qpowvec[cipher.logq];
 	ZZX ax, bx;
 
-	ZZ cnstZZ = EvaluatorUtils::evalZZ(cnst, logp);
+	ZZ cnstZZ = EvaluatorUtils::scaleUpToZZ(cnst, logp);
 
 	Ring2Utils::multByConst(ax, cipher.ax, cnstZZ, q, context.N);
 	Ring2Utils::multByConst(bx, cipher.bx, cnstZZ, q, context.N);
@@ -524,7 +524,7 @@ Ciphertext Scheme::multByConst(Ciphertext& cipher, RR& cnst, long logp) {
 	ZZ q = context.qpowvec[cipher.logq];
 	ZZX ax, bx;
 
-	ZZ cnstZZ = EvaluatorUtils::evalZZ(cnst, logp);
+	ZZ cnstZZ = EvaluatorUtils::scaleUpToZZ(cnst, logp);
 
 	Ring2Utils::multByConst(ax, cipher.ax, cnstZZ, q, context.N);
 	Ring2Utils::multByConst(bx, cipher.bx, cnstZZ, q, context.N);
@@ -537,8 +537,8 @@ Ciphertext Scheme::multByConst(Ciphertext& cipher, complex<double> cnst, long lo
 
 	ZZX axr, bxr, axi, bxi;
 
-	ZZ cnstrZZ = EvaluatorUtils::evalZZ(cnst.real(), logp);
-	ZZ cnstiZZ = EvaluatorUtils::evalZZ(cnst.imag(), logp);
+	ZZ cnstrZZ = EvaluatorUtils::scaleUpToZZ(cnst.real(), logp);
+	ZZ cnstiZZ = EvaluatorUtils::scaleUpToZZ(cnst.imag(), logp);
 
 	Ring2Utils::multByMonomial(axi, cipher.ax, context.Nh, context.N);
 	Ring2Utils::multByMonomial(bxi, cipher.bx, context.Nh, context.N);
@@ -557,7 +557,7 @@ Ciphertext Scheme::multByConst(Ciphertext& cipher, complex<double> cnst, long lo
 
 void Scheme::multByConstAndEqual(Ciphertext& cipher, double cnst, long logp) {
 	ZZ q = context.qpowvec[cipher.logq];
-	ZZ cnstZZ = EvaluatorUtils::evalZZ(cnst, logp);
+	ZZ cnstZZ = EvaluatorUtils::scaleUpToZZ(cnst, logp);
 
 	Ring2Utils::multByConstAndEqual(cipher.ax, cnstZZ, q, context.N);
 	Ring2Utils::multByConstAndEqual(cipher.bx, cnstZZ, q, context.N);
@@ -566,7 +566,7 @@ void Scheme::multByConstAndEqual(Ciphertext& cipher, double cnst, long logp) {
 
 void Scheme::multByConstAndEqual(Ciphertext& cipher, RR& cnst, long logp) {
 	ZZ q = context.qpowvec[cipher.logq];
-	ZZ cnstZZ = EvaluatorUtils::evalZZ(cnst, logp);
+	ZZ cnstZZ = EvaluatorUtils::scaleUpToZZ(cnst, logp);
 
 	Ring2Utils::multByConstAndEqual(cipher.ax, cnstZZ, q, context.N);
 	Ring2Utils::multByConstAndEqual(cipher.bx, cnstZZ, q, context.N);
@@ -577,8 +577,8 @@ void Scheme::multByConstAndEqual(Ciphertext& cipher, complex<double> cnst, long 
 	ZZ q = context.qpowvec[cipher.logq];
 	ZZX axi, bxi;
 
-	ZZ cnstrZZ = EvaluatorUtils::evalZZ(cnst.real(), logp);
-	ZZ cnstiZZ = EvaluatorUtils::evalZZ(cnst.imag(), logp);
+	ZZ cnstrZZ = EvaluatorUtils::scaleUpToZZ(cnst.real(), logp);
+	ZZ cnstiZZ = EvaluatorUtils::scaleUpToZZ(cnst.imag(), logp);
 
 	Ring2Utils::multByMonomial(axi, cipher.ax, context.Nh, context.N);
 	Ring2Utils::multByMonomial(bxi, cipher.bx, context.Nh, context.N);
@@ -1048,7 +1048,6 @@ void Scheme::exp2piAndEqual(Ciphertext& cipher, long logp) {
 }
 
 void Scheme::evalExpAndEqual(Ciphertext& cipher, long logT, long logI) {
-	long logp = cipher.logp;
 	long slots = cipher.slots;
 	long logSlots = log2(slots);
 	BootContext bootContext = context.bootContextMap.at(logSlots);
@@ -1069,7 +1068,7 @@ void Scheme::evalExpAndEqual(Ciphertext& cipher, long logT, long logI) {
 	} else if(logSlots < context.logNh) {
 		Ciphertext tmp = conjugate(cipher);
 		subAndEqual(cipher, tmp);
-		reScaleByAndEqual(cipher, logT + 1); // bitDown: logT + 1
+		divByPo2AndEqual(cipher, logT + 1); // bitDown: logT + 1
 		exp2piAndEqual(cipher, bootContext.logp); // bitDown: logT + 1 + 3(logq + logI)
 		for (long i = 0; i < logI + logT; ++i) {
 			squareAndEqual(cipher);
@@ -1091,7 +1090,7 @@ void Scheme::evalExpAndEqual(Ciphertext& cipher, long logT, long logI) {
 		Ciphertext c2 = sub(cipher, tmp);
 		addAndEqual(cipher, tmp);
 		imultAndEqual(cipher);
-		reScaleByAndEqual(cipher, logT + 1); // cipher bitDown: logT + 1
+		divByPo2AndEqual(cipher, logT + 1); // cipher bitDown: logT + 1
 		reScaleByAndEqual(c2, logT + 1); // c2 bitDown: logT + 1
 		exp2piAndEqual(cipher, bootContext.logp); // cipher bitDown: logT + 1 + 3(logq + logI)
 		exp2piAndEqual(c2, bootContext.logp); // c2 bitDown: logT + 1 + 3(logq + logI)
@@ -1112,19 +1111,19 @@ void Scheme::evalExpAndEqual(Ciphertext& cipher, long logT, long logI) {
 		// bitDown: logT + 1 + 3(logq + logI) + (logI + logT)(logq + logI)
 	}
 	reScaleByAndEqual(cipher, bootContext.logp + logI);
-	cipher.logp = logp;
 	// if (logSlots == 0 && !cipher.isComplex) bitDown: logT + 3(logq + logI) + (logI + logT)(logq + logI) + logq + 2logI
 	// else bitDown: logT + 1 + 3(logq + logI) + (logI + logT)(logq + logI) + logq + 2logI
 }
 
 void Scheme::bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long logT, long logI) {
 	long logSlots = log2(cipher.slots);
+	long logp = cipher.logp;
 
 	modDownToAndEqual(cipher, logq);
 	normalizeAndEqual(cipher);
 
 	cipher.logq = logQ;
-
+	cipher.logp = logq + 4;
 	for (long i = logSlots; i < context.logNh; ++i) {
 		Ciphertext rot = leftRotateByPo2(cipher, i);
 		addAndEqual(cipher, rot);
@@ -1141,4 +1140,5 @@ void Scheme::bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long lo
 		evalExpAndEqual(cipher, logT, logI); // bitDown: context.logNh + (logI + logT + 5) * logq + (logI + logT + 6) * logI + logT + 1
 		slotToCoeffAndEqual(cipher);
 	}
+	cipher.logp = logp;
 }

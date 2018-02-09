@@ -969,6 +969,7 @@ void TestScheme::testBootstrap(long logN, long logq, long logQ, long logSlots, l
 	scheme.modDownToAndEqual(cipher, logq);
 	scheme.normalizeAndEqual(cipher);
 	cipher.logq = logQ;
+	cipher.logp = logq + 4;
 
 	timeutils.start("SubSum");
 	for (long i = logSlots; i < context.logNh; ++i) {
@@ -990,6 +991,7 @@ void TestScheme::testBootstrap(long logN, long logq, long logQ, long logSlots, l
 	scheme.slotToCoeffAndEqual(cipher);
 	timeutils.stop("SlotToCoeff");
 
+	cipher.logp = logp;
 	cout << "cipher logq after: " << cipher.logq << endl;
 
 	complex<double>* dvec = scheme.decrypt(secretKey, cipher);

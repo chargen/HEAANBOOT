@@ -59,7 +59,7 @@ public:
 	 * @param[in] logp: log of precision
 	 * @return x >> logp
 	 */
-	static double evalReal(const ZZ& x, const long logp);
+	static double scaleDownToReal(const ZZ& x, const long logp);
 
 	/**
 	 * evaluates value x << logp
@@ -67,7 +67,7 @@ public:
 	 * @param[in] logp: log of precision
 	 * @return x << logp
 	 */
-	static ZZ evalZZ(const double x, const long logp);
+	static ZZ scaleUpToZZ(const double x, const long logp);
 
 	/**
 	 * evaluates value x << logp
@@ -75,7 +75,7 @@ public:
 	 * @param[in] logp: log of precision
 	 * @return x << logp
 	 */
-	static ZZ evalZZ(const RR& x, const long logp);
+	static ZZ scaleUpToZZ(const RR& x, const long logp);
 
 
 	//----------------------------------------------------------------------------------
