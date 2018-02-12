@@ -237,6 +237,13 @@ Ciphertext Scheme::encrypt(double* vals, long slots, long logp, long logq) {
 	return encryptMsg(msg);
 }
 
+Ciphertext Scheme::encryptZeros(long slots, long logp, long logq) {
+	Ciphertext czeros = encryptSingle(0.0, logp, logq);
+	czeros.isComplex = true;
+	czeros.slots = slots;
+	return czeros;
+}
+
 Ciphertext Scheme::encrypt(complex<double>* vals, long slots, long logp, long logq) {
 	Plaintext msg = encode(vals, slots, logp, logq);
 	return encryptMsg(msg);

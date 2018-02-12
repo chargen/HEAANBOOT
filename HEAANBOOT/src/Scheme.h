@@ -150,6 +150,8 @@ public:
 
 	Ciphertext encrypt(double* vals, long slots, long logp, long logq);
 
+	Ciphertext encryptZeros(long slots, long logp, long logq);
+
 	/**
 	 * decrypts ciphertext into message and then decodes it into array of CZZ values
 	 * @param[in] secretKey: secret key
