@@ -985,7 +985,7 @@ void TestScheme::testCiphertextWriteAndRead(long logN, long logQ, long logp, lon
 	cout << "!!! END TEST WRITE AND READ !!!" << endl;
 }
 
-void TestScheme::testBootstrap(long logN, long logq, long logQ, long logSlots, long nu, long logT) {
+void TestScheme::testBootstrap(long logN, long logp, long logq, long logQ, long logSlots, long logT) {
 	cout << "!!! START TEST BOOTSTRAP !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
@@ -1002,7 +1002,6 @@ void TestScheme::testBootstrap(long logN, long logq, long logQ, long logSlots, l
 	//-----------------------------------------
 	srand(time(NULL));
 	//-----------------------------------------
-	long logp = logq - nu;
 	long slots = (1 << logSlots);
 	complex<double>* mvec = EvaluatorUtils::randomComplexArray(slots);
 
@@ -1045,7 +1044,7 @@ void TestScheme::testBootstrap(long logN, long logq, long logQ, long logSlots, l
 	cout << "!!! END TEST BOOTSRTAP !!!" << endl;
 }
 
-void TestScheme::testBootstrapSingleReal(long logN, long logq, long logQ, long nu, long logT) {
+void TestScheme::testBootstrapSingleReal(long logN, long logp, long logq, long logQ, long logT) {
 	cout << "!!! START TEST BOOTSTRAP SINGLE REAL !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
@@ -1062,7 +1061,6 @@ void TestScheme::testBootstrapSingleReal(long logN, long logq, long logQ, long n
 	//-----------------------------------------
 	srand(time(NULL));
 	//-----------------------------------------
-	long logp = logq - nu;
 	double mval = EvaluatorUtils::randomReal();
 
 	Ciphertext cipher = scheme.encryptSingle(mval, logp, logq);

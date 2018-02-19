@@ -79,41 +79,55 @@ public:
 	//   ENCODING & DECODING
 	//----------------------------------------------------------------------------------
 
+	/**
+	 * encodes an array of double values into a ZZX polynomial using special fft inverse
+	 * @param[in] vals: array double of values
+	 * @param[in] slots: size of an array
+	 * @param[in] logp: log of message quantize value
+	 * @param[in] logq: log of ciphertext modulus
+	 * @return message
+	 */
+	Plaintext encode(double* vals, long slots, long logp, long logq);
 
 	/**
-	 * encodes an array of CZZ values into a ZZX polynomial using special fft inverse
-	 * @param[in] vals: array of values
+	 * encodes an array of complex values into a ZZX polynomial using special fft inverse
+	 * @param[in] vals: array complex of values
 	 * @param[in] slots: size of an array
+	 * @param[in] logp: log of message quantize value
 	 * @param[in] logq: log of ciphertext modulus
-	 * @param[in] isComplex: there is an option for encryption single real value
 	 * @return message
 	 */
 	Plaintext encode(complex<double>* vals, long slots, long logp, long logq);
 
-	Plaintext encode(double* vals, long slots, long logp, long logq);
-
 	/**
-	 * decodes a ZZX polynomial into an array of CZZ values using special fft
+	 * decodes a ZZX polynomial into an array of complex values using special fft
 	 * @param[in] msg: message
-	 * @return array of CZZ values
+	 * @return decoded array of complex values
 	 */
 	complex<double>* decode(Plaintext& msg);
 
 	/**
-	 * encodes a single CZZ value into a ZZX polynomial using special fft inverse
-	 * @param[in] val: CZZ value
+	 * encodes a single double value into a ZZX polynomial using special fft inverse
+	 * @param[in] val: double value
+	 * @param[in] logp: log of message quantize bits
 	 * @param[in] logq: log of ciphertext modulus
-	 * @param[in] isComplex: there is an option for encryption single real value
 	 * @return message
 	 */
 	Plaintext encodeSingle(double val, long logp, long logq);
 
+	/**
+	 * encodes a single complex value into a ZZX polynomial using special fft inverse
+	 * @param[in] val: complex value
+	 * @param[in] logp: log of message quantize value
+	 * @param[in] logq: log of ciphertext modulus
+	 * @return message
+	 */
 	Plaintext encodeSingle(complex<double> val, long logp, long logq);
 
 	/**
-	 * decodes a ZZX polynomial into a single CZZ value using special fft
+	 * decodes a ZZX polynomial into a single complex value using special fft
 	 * @param[in] msg: message
-	 * @return CZZ value
+	 * @return decoded complex value
 	 */
 	complex<double> decodeSingle(Plaintext& msg);
 
@@ -139,43 +153,65 @@ public:
 	Plaintext decryptMsg(SecretKey& secretKey, Ciphertext& cipher);
 
 	/**
-	 * encodes array of CZZ into message and then encrypts it into ciphertext using public key encyption
-	 * @param[in] vals: array of CZZ values
+	 * encodes an array of double values into message and then encrypts it into ciphertext using public key encyption
+	 * @param[in] vals: array of double values
 	 * @param[in] slots: array size
+	 * @param[in] logp: log of message quantize value
 	 * @param[in] logq: log of ciphertext modulus
-	 * @param[in] isComplex: there is an option for encryption single real value
+	 * @return ciphertext
+	 */
+	Ciphertext encrypt(double* vals, long slots, long logp, long logq);
+
+	/**
+	 * encodes an array of complex values into message and then encrypts it into ciphertext using public key encyption
+	 * @param[in] vals: array of complex values
+	 * @param[in] slots: array size
+	 * @param[in] logp: log of message quantize value
+	 * @param[in] logq: log of ciphertext modulus
 	 * @return ciphertext
 	 */
 	Ciphertext encrypt(complex<double>* vals, long slots, long logp, long logq);
 
-	Ciphertext encrypt(double* vals, long slots, long logp, long logq);
-
+	/**
+	 * encodes an array of zeros into message and then encrypts it into ciphertext using public key encyption
+	 * @param[in] slots: array size
+	 * @param[in] logp: log of message quantize value
+	 * @param[in] logq: log of ciphertext modulus
+	 * @return ciphertext
+	 */
 	Ciphertext encryptZeros(long slots, long logp, long logq);
 
 	/**
-	 * decrypts ciphertext into message and then decodes it into array of CZZ values
+	 * decrypts ciphertext into message and then decodes it into array of complex values
 	 * @param[in] secretKey: secret key
 	 * @param[in] cipher: ciphertext
-	 * @return array of CZZ values
+	 * @return decrypted array of complex values
 	 */
 	complex<double>* decrypt(SecretKey& secretKey, Ciphertext& cipher);
 
 	/**
-	 * encodes single CZZ value into a message and then encrypts it into a ciphertext using public key encyption
-	 * @param[in] val: CZZ value
+	 * encodes single double value into a message and then encrypts it into a ciphertext using public key encyption
+	 * @param[in] val: double value
+	 * @param[in] logq: log of message quntize value
 	 * @param[in] logq: log of ciphertext modulus
-	 * @param[in] isComplex: there is an option for encryption single real value
+	 * @return ciphertext
+	 */
+	Ciphertext encryptSingle(double val, long logp, long logq);
+
+	/**
+	 * encodes a single complex value into a message and then encrypts it into a ciphertext using public key encyption
+	 * @param[in] val: complex value
+	 * @param[in] logq: log of message quntize value
+	 * @param[in] logq: log of ciphertext modulus
 	 * @return ciphertext
 	 */
 	Ciphertext encryptSingle(complex<double> val, long logp, long logq);
 
-	Ciphertext encryptSingle(double val, long logp, long logq);
-
 	/**
-	 * decrypts ciphertext into message and then decodes it into a single CZZ value
+	 * decrypts ciphertext into message and then decodes it into a single complex value
 	 * @param[in] secretKey: secret key
 	 * @param[in] cipher: ciphertext
-	 * @return CZZ value
+	 * @return decrypted complex value
 	 */
 	complex<double> decryptSingle(SecretKey& secretKey, Ciphertext& cipher);
 

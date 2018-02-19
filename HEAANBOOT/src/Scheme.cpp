@@ -132,14 +132,14 @@ void Scheme::addSortKeys(SecretKey& secretKey, long size) {
 //----------------------------------------------------------------------------------
 
 
-Plaintext Scheme::encode(complex<double>* vals, long slots, long logp, long logq) {
-	ZZX mx = context.encode(vals, slots, logp + context.logQ);
-	return Plaintext(mx, logp, logq, slots, true);
-}
-
 Plaintext Scheme::encode(double* vals, long slots, long logp, long logq) {
 	ZZX mx = context.encode(vals, slots, logp + context.logQ);
 	return Plaintext(mx, logp, logq, slots, false);
+}
+
+Plaintext Scheme::encode(complex<double>* vals, long slots, long logp, long logq) {
+	ZZX mx = context.encode(vals, slots, logp + context.logQ);
+	return Plaintext(mx, logp, logq, slots, true);
 }
 
 complex<double>* Scheme::decode(Plaintext& msg) {
@@ -237,29 +237,28 @@ Ciphertext Scheme::encrypt(double* vals, long slots, long logp, long logq) {
 	return encryptMsg(msg);
 }
 
+Ciphertext Scheme::encrypt(complex<double>* vals, long slots, long logp, long logq) {
+	Plaintext msg = encode(vals, slots, logp, logq);
+	return encryptMsg(msg);
+}
+
 Ciphertext Scheme::encryptZeros(long slots, long logp, long logq) {
 	Ciphertext czeros = encryptSingle(0.0, logp, logq);
 	czeros.isComplex = true;
 	czeros.slots = slots;
 	return czeros;
 }
-
-Ciphertext Scheme::encrypt(complex<double>* vals, long slots, long logp, long logq) {
-	Plaintext msg = encode(vals, slots, logp, logq);
-	return encryptMsg(msg);
-}
-
 complex<double>* Scheme::decrypt(SecretKey& secretKey, Ciphertext& cipher) {
 	Plaintext msg = decryptMsg(secretKey, cipher);
 	return decode(msg);
 }
 
-Ciphertext Scheme::encryptSingle(complex<double> val, long logp, long logq) {
+Ciphertext Scheme::encryptSingle(double val, long logp, long logq) {
 	Plaintext msg = encodeSingle(val, logp,  logq);
 	return encryptMsg(msg);
 }
 
-Ciphertext Scheme::encryptSingle(double val, long logp, long logq) {
+Ciphertext Scheme::encryptSingle(complex<double> val, long logp, long logq) {
 	Plaintext msg = encodeSingle(val, logp,  logq);
 	return encryptMsg(msg);
 }

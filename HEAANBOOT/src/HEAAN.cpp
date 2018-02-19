@@ -6,45 +6,6 @@ using namespace std;
 
 int main() {
 
-	long logN;
-	long logQ;
-	long pBits;
-	long logSlots;
-	long testNum = 1;
-
-	cout << "logN: ";
-	cin >> logN;
-
-	cout << "logQ: ";
-	cin >> logQ;
-
-	cout << "pBits: ";
-	cin >> pBits;
-
-	cout << "logSlots: ";
-	cin >> logSlots;
-
-	while(testNum != 0) {
-
-		cout << "Lists of test" << endl;
-		cout << "0. EXIT" << endl;
-		cout << "1. testEncodeBatch" << endl;
-		cout << "2. testBasic" << endl;
-
-		cout << "\nTest Num: ";
-		cin >> testNum;
-
-		switch(testNum) {
-			case 0:
-				break;
-			case 1:
-				TestScheme::testEncodeBatch(logN, logQ, pBits, logSlots);
-			case 2:
-				TestScheme::testBasic(logN, logQ, pBits, logSlots);
-		}
-
-	}
-
 	//-----------------------------------------
 
 	/*
@@ -193,22 +154,22 @@ int main() {
 	//-----------------------------------------
 
 	/*
-	 * Params: logN, logq, logQ, logSlots, nu, logT
-	 * Suggested: 15, 29, 620, 3, 6, 2
-	 * Suggested: 15, 37, 620, 3, 10, 3
-	 * Suggested: 16, 41, 1240, 3, 10, 3
-	 * Suggested: 16, 54, 1240, 3, 15, 5
+	 * Params: logN, logp, logq, logQ, logSlots, logT
+	 * Suggested: 15, 23, 29, 620, 3, 2
+	 * Suggested: 15, 27, 37, 620, 3, 3
+	 * Suggested: 16, 31, 41, 1240, 3, 3
+	 * Suggested: 16, 39, 54, 1240, 3, 5
 	 */
-	TestScheme::testBootstrap(15, 29, 620, 3, 6, 2);
+//	TestScheme::testBootstrap(15, 23, 29, 620, 3, 2);
 
 	/*
-	 * Params: logN, logq, logQ, nu, logT
-	 * Suggested: 15, 29, 620, 6, 2
-	 * Suggested: 15, 37, 620, 10, 3
-	 * Suggested: 16, 41, 1240, 10, 3
-	 * Suggested: 16, 54, 1240, 15, 5
+	 * Params: logN, logp, logq, logQ, logT
+	 * Suggested: 15, 23, 29, 620, 2
+	 * Suggested: 15, 27, 37, 620, 3
+	 * Suggested: 16, 31, 41, 1240, 3
+	 * Suggested: 16, 39, 54, 1240, 5
 	 */
-//	TestScheme::testBootstrapSingleReal(15, 29, 620, 6, 2);
+//	TestScheme::testBootstrapSingleReal(15, 23, 29, 620, 2);
 
 //	TestScheme::test();
 
