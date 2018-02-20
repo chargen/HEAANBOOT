@@ -8,13 +8,13 @@
 #include "Ciphertext.h"
 #include "EvaluatorUtils.h"
 #include "NumUtils.h"
-#include "Params.h"
 #include "Scheme.h"
 #include "SchemeAlgo.h"
 #include "SecretKey.h"
 #include "StringUtils.h"
 #include "TimeUtils.h"
 #include "Context.h"
+#include "SerializationUtils.h"
 
 using namespace std;
 using namespace NTL;
@@ -24,15 +24,65 @@ using namespace NTL;
 //   STANDARD TESTS
 //----------------------------------------------------------------------------------
 
+
+void TestScheme::testEncodeBatch(long logN, long logQ, long logp, long logSlots) {
+	cout << "!!! START TEST ENCODE BATCH !!!" << endl;
+	//-----------------------------------------
+	TimeUtils timeutils;
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
+	Scheme scheme(secretKey, context);
+	//-----------------------------------------
+	srand(time(NULL));
+	//-----------------------------------------
+	long slots = (1 << logSlots);
+	complex<double>* mvec = EvaluatorUtils::randomComplexArray(slots);
+
+	timeutils.start("Encrypt batch");
+	Ciphertext cipher = scheme.encrypt(mvec, slots, logp, logQ);
+	timeutils.stop("Encrypt batch");
+
+	timeutils.start("Decrypt batch");
+	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
+	timeutils.stop("Decrypt batch");
+
+	StringUtils::showcompare(mvec, dvec, slots, "val");
+
+	cout << "!!! END TEST ENCODE BATCH !!!" << endl;
+}
+
+void TestScheme::testEncodeSingle(long logN, long logQ, long logp, bool isComplex) {
+	cout << "!!! START TEST ENCODE SINGLE !!!" << endl;
+	//-----------------------------------------
+	TimeUtils timeutils;
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
+	Scheme scheme(secretKey, context);
+	//-----------------------------------------
+	srand(time(NULL));
+	//-----------------------------------------
+	complex<double> mval = EvaluatorUtils::randomComplex();
+
+	timeutils.start("Encrypt Single");
+	Ciphertext cipher = scheme.encryptSingle(mval, logp, logQ);
+	timeutils.stop("Encrypt Single");
+
+	timeutils.start("Decrypt Single");
+	complex<double> dval = scheme.decryptSingle(secretKey, cipher);
+	timeutils.stop("Decrypt Single");
+
+	StringUtils::showcompare(mval, dval, "val");
+
+	cout << "!!! END TEST ENCODE SINGLE !!!" << endl;
+}
+
 void TestScheme::testBasic(long logN, long logQ, long logp, long logSlots) {
 	cout << "!!! START TEST BASIC !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
-	SchemeAlgo algo(scheme);
 	//-----------------------------------------
 	srand(time(NULL));
 	//-----------------------------------------
@@ -66,61 +116,6 @@ void TestScheme::testBasic(long logN, long logQ, long logp, long logSlots) {
 
 	StringUtils::showcompare(mvecAdd, dvecAdd, slots, "add");
 	StringUtils::showcompare(mvecMult, dvecMult, slots, "mult");
-
-}
-
-void TestScheme::testEncodeBatch(long logN, long logQ, long logp, long logSlots) {
-	cout << "!!! START TEST ENCODE BATCH !!!" << endl;
-	//-----------------------------------------
-	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
-	Scheme scheme(secretKey, context);
-	SchemeAlgo algo(scheme);
-	//-----------------------------------------
-	srand(time(NULL));
-	//-----------------------------------------
-	long slots = (1 << logSlots);
-	complex<double>* mvec = EvaluatorUtils::randomComplexArray(slots);
-
-	timeutils.start("Encrypt batch");
-	Ciphertext cipher = scheme.encrypt(mvec, slots, logp, logQ);
-	timeutils.stop("Encrypt batch");
-
-	timeutils.start("Decrypt batch");
-	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
-	timeutils.stop("Decrypt batch");
-
-	StringUtils::showcompare(mvec, dvec, slots, "val");
-
-	cout << "!!! END TEST ENCODE BATCH !!!" << endl;
-}
-
-void TestScheme::testEncodeSingle(long logN, long logQ, long logp, bool isComplex) {
-	cout << "!!! START TEST ENCODE SINGLE !!!" << endl;
-	//-----------------------------------------
-	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
-	Scheme scheme(secretKey, context);
-	//-----------------------------------------
-	srand(time(NULL));
-	//-----------------------------------------
-	complex<double> mval = EvaluatorUtils::randomComplex();
-
-	timeutils.start("Encrypt Single");
-	Ciphertext cipher = scheme.encryptSingle(mval, logp, logQ);
-	timeutils.stop("Encrypt Single");
-
-	timeutils.start("Decrypt Single");
-	complex<double> dval = scheme.decryptSingle(secretKey, cipher);
-	timeutils.stop("Decrypt Single");
-
-	StringUtils::showcompare(mval, dval, "val");
-
-	cout << "!!! END TEST ENCODE SINGLE !!!" << endl;
 }
 
 //-----------------------------------------
@@ -128,9 +123,8 @@ void TestScheme::testEncodeSingle(long logN, long logQ, long logp, bool isComple
 void TestScheme::testConjugateBatch(long logN, long logQ, long logp, long logSlots) {
 	cout << "!!! START TEST CONJUGATE BATCH !!!" << endl;
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	scheme.addConjKey(secretKey);
 	//-----------------------------------------
@@ -159,9 +153,8 @@ void TestScheme::testConjugateBatch(long logN, long logQ, long logp, long logSlo
 void TestScheme::testimultBatch(long logN, long logQ, long logp, long logSlots) {
 	cout << "!!! START TEST i MULTIPLICATION BATCH !!!" << endl;
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	//-----------------------------------------
 	srand(time(NULL));
@@ -191,9 +184,8 @@ void TestScheme::testRotateByPo2Batch(long logN, long logQ, long logp, long logR
 	cout << "!!! START TEST ROTATE BY POWER OF 2 BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	scheme.addLeftRotKeys(secretKey);
 	//-----------------------------------------
@@ -231,9 +223,8 @@ void TestScheme::testRotateBatch(long logN, long logQ, long logp, long rotSlots,
 	cout << "!!! START TEST ROTATE BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	scheme.addLeftRotKeys(secretKey);
 	scheme.addRightRotKeys(secretKey);
@@ -271,9 +262,8 @@ void TestScheme::testSlotsSum(long logN, long logQ, long logp, long logSlots) {
 	cout << "!!! START TEST SLOTS SUM !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	scheme.addLeftRotKeys(secretKey);
@@ -310,9 +300,8 @@ void TestScheme::testPowerOf2Batch(long logN, long logQ, long logp, long logDegr
 	cout << "!!! START TEST POWER OF 2 BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
@@ -347,9 +336,8 @@ void TestScheme::testPowerBatch(long logN, long logQ, long logp, long degree, lo
 	cout << "!!! START TEST POWER BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
@@ -381,9 +369,8 @@ void TestScheme::testProdOfPo2Batch(long logN, long logQ, long logp, long logDeg
 	cout << "!!! START TEST PROD OF POWER OF 2 BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
@@ -427,9 +414,8 @@ void TestScheme::testProdBatch(long logN, long logQ, long logp, long degree, lon
 	cout << "!!! START TEST PROD BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
@@ -477,9 +463,8 @@ void TestScheme::testInverseBatch(long logN, long logQ, long logp, long invSteps
 	cout << "!!! START TEST INVERSE BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
@@ -509,9 +494,8 @@ void TestScheme::testLogarithmBatch(long logN, long logQ, long logp, long degree
 	cout << "!!! START TEST LOGARITHM BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
@@ -541,9 +525,8 @@ void TestScheme::testExponentBatch(long logN, long logQ, long logp, long degree,
 	cout << "!!! START TEST EXPONENT BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
@@ -573,9 +556,8 @@ void TestScheme::testExponentBatchLazy(long logN, long logQ, long logp, long deg
 	cout << "!!! START TEST EXPONENT LAZY !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
@@ -606,9 +588,8 @@ void TestScheme::testSigmoidBatch(long logN, long logQ, long logp, long degree, 
 	cout << "!!! START TEST SIGMOID BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
@@ -639,9 +620,8 @@ void TestScheme::testSigmoidBatchLazy(long logN, long logQ, long logp, long degr
 	cout << "!!! START TEST SIGMOID LAZY !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
@@ -677,9 +657,8 @@ void TestScheme::testFFTBatch(long logN, long logQ, long logp, long logSlots, lo
 	cout << "!!! START TEST FFT BATCH !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
@@ -756,9 +735,8 @@ void TestScheme::testFFTBatchLazy(long logN, long logQ, long logp, long logSlots
 	cout << "!!! START TEST FFT BATCH LAZY !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
@@ -835,9 +813,8 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logQ, long log
 	cout << "!!! START TEST FFT BATCH LAZY MULTIPLE HADAMARD !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
@@ -926,13 +903,12 @@ void TestScheme::testFFTBatchLazyMultipleHadamard(long logN, long logQ, long log
 	cout << "!!! END TEST FFT BATCH LAZY MULTIPLE HADAMARD !!!" << endl;
 }
 
-void TestScheme::testCiphertextWriteAndRead(long logN, long logQ, long logp, long logSlots) {
+void TestScheme::testWriteAndRead(long logN, long logQ, long logp, long logSlots) {
 	cout << "!!! START TEST WRITE AND READ !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	SchemeAlgo algo(scheme);
 	//-----------------------------------------
@@ -943,14 +919,13 @@ void TestScheme::testCiphertextWriteAndRead(long logN, long logQ, long logp, lon
 
 	Ciphertext cipher = scheme.encrypt(mvec, slots, logp, logQ);
 
-	int CiphertextID = rand();
+	string cipherPath = "testCiphertext.txt";
 	timeutils.start("Write Ciphertext");
-	cipher.Write(CiphertextID);
+	SerializationUtils::writeCiphertext(cipher, cipherPath);
 	timeutils.stop("Write Ciphertext");
 
 	timeutils.start("Read Ciphertext");
-	Ciphertext newcipher;
-	newcipher.Read(CiphertextID);
+	Ciphertext newcipher = SerializationUtils::readCiphertext(cipherPath);
 	timeutils.stop("Read Ciphertext");
 
 	if(newcipher.ax != cipher.ax || newcipher.bx != cipher.bx || newcipher.logq != cipher.logq || newcipher.slots != cipher.slots || newcipher.logp != cipher.logp) {
@@ -961,37 +936,58 @@ void TestScheme::testCiphertextWriteAndRead(long logN, long logQ, long logp, lon
 		cout << "Write and Read for ciphertext works well" << endl;
 	}
 
-	int secretKeyID = rand();
+	string secretKeyPath = "testSecretKey.txt";
 	timeutils.start("Write SecretKey");
-	secretKey.Write(secretKeyID);
+	SerializationUtils::writeSecretKey(secretKey, secretKeyPath);
 	timeutils.stop("Write SecretKey");
 
-	SecretKey newsecretKey(params);
 	timeutils.start("Read SecretKey");
-	newsecretKey.Read(secretKeyID);
+	SecretKey newsecretKey = SerializationUtils::readSecretKey(secretKeyPath);
 	timeutils.stop("Read SecretKey");
-
 	if(secretKey.sx != newsecretKey.sx) {
 		cout << "Write and Read for sk does not work" << endl;
 	} else {
 		cout << "Write and Read for sk works well" << endl;
 	}
 
-	complex<double>* dvec1 = scheme.decrypt(newsecretKey, cipher);
-	complex<double>* dvec2 = scheme.decrypt(newsecretKey, newcipher);
+//	scheme.addLeftRotKeys(secretKey);
+	scheme.addConjKey(secretKey);
 
-	StringUtils::showcompare(dvec1, dvec2, slots, "r&w");
+	string schemeKeysPath = "testSchemeKeys.txt";
+	timeutils.start("Write Scheme");
+	SerializationUtils::writeSchemeKeys(scheme, schemeKeysPath);
+	timeutils.stop("Write Scheme");
+
+	string contextPath = "testContext.txt";
+	timeutils.start("Write Context");
+	SerializationUtils::writeContext(context, contextPath);
+	timeutils.stop("Write Context");
+
+	timeutils.start("Read Context");
+	Context newcontext = SerializationUtils::readContext(contextPath);
+	timeutils.stop("Read Context");
+
+	Scheme newscheme(newcontext);
+
+	timeutils.start("Read Scheme");
+	SerializationUtils::readSchemeKeys(newscheme, schemeKeysPath);
+	timeutils.stop("Read Scheme");
+
+	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
+	complex<double>* newdvec = newscheme.decrypt(newsecretKey, newcipher);
+
+	StringUtils::showcompare(dvec, newdvec, slots, "r&w");
 
 	cout << "!!! END TEST WRITE AND READ !!!" << endl;
 }
+
 
 void TestScheme::testBootstrap(long logN, long logp, long logq, long logQ, long logSlots, long logT) {
 	cout << "!!! START TEST BOOTSTRAP !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	//-----------------------------------------
 	timeutils.start("Key generating");
@@ -1048,9 +1044,8 @@ void TestScheme::testBootstrapSingleReal(long logN, long logp, long logq, long l
 	cout << "!!! START TEST BOOTSTRAP SINGLE REAL !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
-	Params params(logN, logQ);
-	Context context(params);
-	SecretKey secretKey(params);
+	Context context(logN, logQ);
+	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	//-----------------------------------------
 	timeutils.start("Key generating");
@@ -1086,6 +1081,7 @@ void TestScheme::testBootstrapSingleReal(long logN, long logp, long logq, long l
 
 	cout << "cipher logq after: " << cipher.logq << endl;
 
+	cipher.logp = logp;
 	complex<double> dval = scheme.decryptSingle(secretKey, cipher);
 
 	StringUtils::showcompare(mval, dval.real(), "boot");
@@ -1093,5 +1089,3 @@ void TestScheme::testBootstrapSingleReal(long logN, long logp, long logq, long l
 	cout << "!!! END TEST BOOTSRTAP SINGLE REAL !!!" << endl;
 }
 
-void TestScheme::test() {
-}

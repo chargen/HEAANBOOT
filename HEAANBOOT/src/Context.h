@@ -5,9 +5,8 @@
 #include <NTL/RR.h>
 #include <complex>
 
-#include "Common.h"
-#include "Params.h"
 #include "BootContext.h"
+#include "Common.h"
 
 using namespace std;
 using namespace NTL;
@@ -41,9 +40,14 @@ public:
 	ZZ* qpowvec; ///< precomputed powers of 2
 
 	map<string, double*> taylorCoeffsMap; ///< precomputed taylor coefficients
+
 	map<long, BootContext> bootContextMap; ///< precomputed bootstrapping auxiliary information
 
-	Context(Params& params);
+	Context(long logN, long logQ, double sigma = 3.2, long h = 64);
+
+	Context(const Context& o);
+
+	void init(long logN, long logQ, double sigma, long h);
 
 	virtual ~Context();
 

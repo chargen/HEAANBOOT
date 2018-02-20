@@ -40,16 +40,6 @@ public:
 	 */
 	Ciphertext(const Ciphertext& o) : ax(o.ax), bx(o.bx), logp(o.logp), logq(o.logq), slots(o.slots), isComplex(o.isComplex) {}
 
-	/**
-	 * Writing Ciphertext to the file by ID
-	 */
-	void Write(long ciphertextID);
-
-	/**
-	 * Reading Ciphertext from the file by ID
-	 */
-	void Read(long ciphertextID);
-
 };
 
 #endif

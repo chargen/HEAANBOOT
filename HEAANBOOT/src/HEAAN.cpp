@@ -21,6 +21,12 @@ int main() {
 //	TestScheme::testEncodeSingle(13, 150, 30, false);
 
 	/*
+	 * Params: logN, logQ, logp, isComplex
+	 * Suggested: 13, 65, 30, 3
+	 */
+//	TestScheme::testBasic(13, 150, 30, false);
+
+	/*
 	 * Params: logN, logQ, logp, logSlots
 	 * Suggested: 13, 65, 30, 3
 	 */
@@ -149,7 +155,8 @@ int main() {
 	 * Suggested: 13, 65, 30, 3
 	 */
 
-//	TestScheme::testCiphertextWriteAndRead(15, 620, 30, 3);
+//	TestScheme::testWriteAndRead(15, 620, 30, 3);
+
 
 	//-----------------------------------------
 
@@ -170,8 +177,6 @@ int main() {
 	 * Suggested: 16, 39, 54, 1240, 5
 	 */
 //	TestScheme::testBootstrapSingleReal(15, 23, 29, 620, 2);
-
-//	TestScheme::test();
 
 	return 0;
 }

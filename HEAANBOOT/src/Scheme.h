@@ -1,7 +1,6 @@
 #ifndef HEAAN_SCHEME_H_
 #define HEAAN_SCHEME_H_
 
-#include "BootContext.h"
 #include "Common.h"
 #include "Ciphertext.h"
 #include "Context.h"
@@ -26,8 +25,9 @@ public:
 	map<long, Key> keyMap; ///< contain Encryption, Multiplication and Conjugation keys, if generated
 	map<long, Key> leftRotKeyMap; ///< contain left rotation keys, if generated
 
-	Scheme(SecretKey& secretKey, Context& context);
+	Scheme(Context& context);
 
+	Scheme(SecretKey& secretKey, Context& context);
 
 	//----------------------------------------------------------------------------------
 	//   KEYS GENERATION

@@ -6,7 +6,6 @@
 
 #include "Common.h"
 #include "EvaluatorUtils.h"
-#include "Params.h"
 #include "Plaintext.h"
 #include "SecretKey.h"
 #include "Ciphertext.h"

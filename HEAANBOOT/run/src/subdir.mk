@@ -11,12 +11,12 @@ CPP_SRCS += \
 ../src/HEAAN.cpp \
 ../src/Key.cpp \
 ../src/NumUtils.cpp \
-../src/Params.cpp \
 ../src/Plaintext.cpp \
 ../src/Ring2Utils.cpp \
 ../src/Scheme.cpp \
 ../src/SchemeAlgo.cpp \
 ../src/SecretKey.cpp \
+../src/SerializationUtils.cpp \
 ../src/StringUtils.cpp \
 ../src/TestScheme.cpp \
 ../src/TimeUtils.cpp 
@@ -29,12 +29,12 @@ OBJS += \
 ./src/HEAAN.o \
 ./src/Key.o \
 ./src/NumUtils.o \
-./src/Params.o \
 ./src/Plaintext.o \
 ./src/Ring2Utils.o \
 ./src/Scheme.o \
 ./src/SchemeAlgo.o \
 ./src/SecretKey.o \
+./src/SerializationUtils.o \
 ./src/StringUtils.o \
 ./src/TestScheme.o \
 ./src/TimeUtils.o 
@@ -47,12 +47,12 @@ CPP_DEPS += \
 ./src/HEAAN.d \
 ./src/Key.d \
 ./src/NumUtils.d \
-./src/Params.d \
 ./src/Plaintext.d \
 ./src/Ring2Utils.d \
 ./src/Scheme.d \
 ./src/SchemeAlgo.d \
 ./src/SecretKey.d \
+./src/SerializationUtils.d \
 ./src/StringUtils.d \
 ./src/TestScheme.d \
 ./src/TimeUtils.d 

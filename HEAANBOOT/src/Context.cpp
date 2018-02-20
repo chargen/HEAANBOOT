@@ -4,9 +4,16 @@
 
 #include "StringUtils.h"
 
-Context::Context(Params& params) :
-	logN(params.logN), logQ(params.logQ), sigma(params.sigma), h(params.h), N(params.N) {
+Context::Context(long logN, long logQ, double sigma, long h) : logN(logN), logQ(logQ), sigma(sigma), h(h) {
+	init(logN, logQ, sigma, h);
+}
 
+Context::Context(const Context& o) : logN(o.logN), logQ(o.logQ), sigma(o.sigma), h(o.h) {
+	init(logN, logQ, sigma, h);
+}
+
+void Context::init(long logN, long logQ, double sigma, long h) {
+	N = 1 << logN;
 	Nh = N >> 1;
 	logNh = logN - 1;
 	M = N << 1;
@@ -214,7 +221,6 @@ void Context::addBootContext(long logSlots, long logp) {
 		bootContextMap.insert(pair<long, BootContext>(logSlots, BootContext(pvec, pvecInv, p1, p2, logp)));
 	}
 }
-
 
 //----------------------------------------------------------------------------------
 //   FFT & FFT INVERSE

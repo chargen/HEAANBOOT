@@ -12,11 +12,13 @@
 
 //-----------------------------------------
 
+Scheme::Scheme(Context& context) : context(context) {
+}
+
 Scheme::Scheme(SecretKey& secretKey, Context& context) : context(context) {
 	addEncKey(secretKey);
 	addMultKey(secretKey);
 };
-
 
 //----------------------------------------------------------------------------------
 //   KEYS GENERATION

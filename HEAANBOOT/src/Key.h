@@ -19,16 +19,6 @@ public:
 
 	Key(ZZX ax = ZZX::zero(), ZZX bx = ZZX::zero()) : ax(ax), bx(bx) {}
 
-	/**
-	 * Writing Key to the file by ID
-	 */
-	void Write(long keyID);
-
-	/**
-	 * Reading Key from the file by ID
-	 */
-	void Read(long keyID);
-
 };
 
 #endif

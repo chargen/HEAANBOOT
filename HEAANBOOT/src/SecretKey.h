@@ -3,9 +3,6 @@
 
 #include <NTL/ZZX.h>
 
-#include <fstream>
-
-#include "Params.h"
 #include "NumUtils.h"
 
 using namespace std;
@@ -17,11 +14,11 @@ public:
 
 	ZZX sx; ///< secret key
 
-	SecretKey(Params& params);
+	SecretKey(long logN, long h = 64);
 
-	void Write(long secretKeyID);
+	SecretKey(ZZX sx = ZZX::zero()) : sx(sx) {};
+	SecretKey(const SecretKey& o) : sx(o.sx) {};
 
-	void Read(long secretKeyID);
 };
 
 #endif

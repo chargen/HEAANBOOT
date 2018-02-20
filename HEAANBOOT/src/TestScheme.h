@@ -8,16 +8,6 @@ public:
 	//----------------------------------------------------------------------------------
 	//   STANDARD TESTS
 	//----------------------------------------------------------------------------------
-
-	/**
-	 * Testing encoding, decoding, add, and mult timing of the ciphertext
-	 * c(m_1, ..., m_slots)
-	 * @param[in] logN: input parameter for Params class
-	 * @param[in] logQ: input parameter for Params class
-	 * @param[in] logp: log of precision
-	 * @param[in] logSlots: log of number of slots
-	 */
-	static void testBasic(long logN, long logQ, long logp, long logSlot);
 	
 	/**
 	 * Testing encoding and decoding timing of the ciphertext
@@ -40,6 +30,16 @@ public:
 	 * @param[in] isComplex: is value real or complex
 	 */
 	static void testEncodeSingle(long logN, long logQ, long logp, bool isComplex);
+
+	/**
+	 * Testing encoding, decoding, add, and mult timing of the ciphertext
+	 * c(m_1, ..., m_slots)
+	 * @param[in] logN: input parameter for Params class
+	 * @param[in] logQ: input parameter for Params class
+	 * @param[in] logp: log of precision
+	 * @param[in] logSlots: log of number of slots
+	 */
+	static void testBasic(long logN, long logQ, long logp, long logSlot);
 
 	/**
 	 * Testing conjugation timing of the ciphertext
@@ -282,11 +282,13 @@ public:
 	 * @param[in] logp: log of precision
 	 * @param[in] logSlots: log of number of slots
 	 */
-	static void testCiphertextWriteAndRead(long logN, long logQ, long logp, long logSlots);
+	static void testWriteAndRead(long logN, long logQ, long logp, long logSlots);
+
 
 	//----------------------------------------------------------------------------------
 	//   BOOTSTRAPPING TESTS
 	//----------------------------------------------------------------------------------
+
 
 	/**
 	 * Testing bootstrapping procedure
@@ -310,8 +312,6 @@ public:
 	 * @param[in] logT: auxiliary parameter, corresponds to number of iterations in removeIpart (num of iterations is logI + logT)
 	 */
 	static void testBootstrapSingleReal(long logN, long logq, long logQ, long nu, long logT);
-
-	static void test();
 
 };
 
