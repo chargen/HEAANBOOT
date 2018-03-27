@@ -19,7 +19,7 @@ int main() {
 	 * Params: logN, logQ, logp, logSlots
 	 * Suggested: 13, 65, 30, 3
 	 */
-//	TestScheme::testEncodeBatch(13, 150, 30, 3);
+//	TestScheme::testEncodeBatch(15, 611, 55, 14);
 
 	/*
 	 * Params: logN, logQ, logp, isComplex
@@ -28,10 +28,10 @@ int main() {
 //	TestScheme::testEncodeSingle(13, 150, 30, false);
 
 	/*
-	 * Params: logN, logQ, logp, isComplex
+	 * Params: logN, logQ, logp, logSlots
 	 * Suggested: 13, 65, 30, 3
 	 */
-//	TestScheme::testBasic(13, 150, 30, false);
+//	TestScheme::testBasic(15, 611, 55, 14);
 
 	/*
 	 * Params: logN, logQ, logp, logSlots
