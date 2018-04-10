@@ -58,7 +58,7 @@ void TestScheme::testEncodeBatch(long logN, long logQ, long logp, long logSlots)
 	cout << "!!! END TEST ENCODE BATCH !!!" << endl;
 }
 
-void TestScheme::testEncodeSingle(long logN, long logQ, long logp, bool isComplex) {
+void TestScheme::testEncodeSingle(long logN, long logQ, long logp) {
 	cout << "!!! START TEST ENCODE SINGLE !!!" << endl;
 	//-----------------------------------------
 	TimeUtils timeutils;
@@ -91,16 +91,22 @@ void TestScheme::testBasic(long logN, long logQ, long logp, long logSlots) {
 	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, context);
 	//-----------------------------------------
+	SetNumThreads(1);
+	//-----------------------------------------
 	srand(time(NULL));
 	//-----------------------------------------
 	long slots = (1 << logSlots);
 	complex<double>* mvec1 = EvaluatorUtils::randomComplexArray(slots);
 	complex<double>* mvec2 = EvaluatorUtils::randomComplexArray(slots);
+	complex<double>* cvec = EvaluatorUtils::randomComplexArray(slots);
+
 	complex<double>* mvecAdd = new complex<double>[slots];
 	complex<double>* mvecMult = new complex<double>[slots];
+	complex<double>* mvecCMult = new complex<double>[slots];
 	for(long i = 0; i < slots; i++) {
 		mvecAdd[i] = mvec1[i] + mvec2[i];
 		mvecMult[i] = mvec1[i] * mvec2[i];
+		mvecCMult[i] = mvec1[i] * cvec[i];
 	}
 
 	timeutils.start("Encrypt two batch");
@@ -114,15 +120,23 @@ void TestScheme::testBasic(long logN, long logQ, long logp, long logSlots) {
 
 	timeutils.start("Homomorphic Multiplication");
 	Ciphertext multCipher = scheme.mult(cipher1, cipher2);
+	scheme.reScaleByAndEqual(multCipher, logp);
+	timeutils.stop("Homomorphic Multiplication");
+
+	timeutils.start("Homomorphic Multiplication");
+	Ciphertext cmultCipher = scheme.multByConstVec(cipher1, cvec, slots, logp);
+	scheme.reScaleByAndEqual(cmultCipher, logp);
 	timeutils.stop("Homomorphic Multiplication");
 
 	timeutils.start("Decrypt batch");
 	complex<double>* dvecAdd = scheme.decrypt(secretKey, addCipher);
 	complex<double>* dvecMult = scheme.decrypt(secretKey, multCipher);
+	complex<double>* dvecCMult = scheme.decrypt(secretKey, cmultCipher);
 	timeutils.stop("Decrypt batch");
 
 	StringUtils::showcompare(mvecAdd, dvecAdd, slots, "add");
 	StringUtils::showcompare(mvecMult, dvecMult, slots, "mult");
+	StringUtils::showcompare(mvecCMult, dvecCMult, slots, "mult");
 }
 
 //-----------------------------------------

@@ -570,6 +570,16 @@ Ciphertext Scheme::multByConst(Ciphertext& cipher, complex<double> cnst, long lo
 	return Ciphertext(axr, bxr, cipher.logp + logp, cipher.logq, cipher.slots, cipher.isComplex);
 }
 
+Ciphertext Scheme::multByConstVec(Ciphertext& cipher, complex<double>* cnstVec, long slots, long logp) {
+	ZZX cmx = context.encode(cnstVec, slots, logp);
+	return multByPoly(cipher, cmx, logp);
+}
+
+Ciphertext Scheme::multByConstVec(Ciphertext& cipher, double* cnstVec, long slots, long logp) {
+	ZZX cmx = context.encode(cnstVec, slots, logp);
+	return multByPoly(cipher, cmx, logp);
+}
+
 void Scheme::multByConstAndEqual(Ciphertext& cipher, double cnst, long logp) {
 	ZZ q = context.qpowvec[cipher.logq];
 	ZZ cnstZZ = EvaluatorUtils::scaleUpToZZ(cnst, logp);
@@ -607,6 +617,16 @@ void Scheme::multByConstAndEqual(Ciphertext& cipher, complex<double> cnst, long 
 	Ring2Utils::addAndEqual(cipher.ax, axi, q, context.N);
 	Ring2Utils::addAndEqual(cipher.bx, bxi, q, context.N);
 	cipher.logp += logp;
+}
+
+void Scheme::multByConstVecAndEqual(Ciphertext& cipher, complex<double>* cnstVec, long slots, long logp) {
+	ZZX cmx = context.encode(cnstVec, slots, logp);
+	multByPolyAndEqual(cipher, cmx, logp);
+}
+
+void Scheme::multByConstVecAndEqual(Ciphertext& cipher, double* cnstVec, long slots, long logp) {
+	ZZX cmx = context.encode(cnstVec, slots, logp);
+	multByPolyAndEqual(cipher, cmx, logp);
 }
 
 Ciphertext Scheme::multByPoly(Ciphertext& cipher, ZZX& poly, long logp) {
